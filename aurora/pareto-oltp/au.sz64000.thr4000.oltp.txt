@@ -1,0 +1,76 @@
+sysbench 0.5:  multi-threaded system evaluation benchmark
+
+Running the test with following options:
+Number of threads: 4000
+Report intermediate results every 10 second(s)
+Initializing random number generator from timer.
+
+Random number generator seed is 0 and will be ignored
+
+
+Threads started!
+
+[  10s] threads: 4000, tps: 1775.05, reads: 32207.08, writes: 7945.57, response time: 3338.15ms (95%), errors: 258.29, reconnects:  0.00
+[  20s] threads: 4000, tps: 1919.10, reads: 31147.40, writes: 8017.00, response time: 3804.66ms (95%), errors: 272.20, reconnects:  0.00
+[  30s] threads: 4000, tps: 1813.10, reads: 27812.32, writes: 7127.51, response time: 4152.18ms (95%), errors: 246.90, reconnects:  0.00
+[  40s] threads: 4000, tps: 1661.60, reads: 26926.82, writes: 6835.91, response time: 4440.14ms (95%), errors: 222.10, reconnects:  0.00
+[  50s] threads: 4000, tps: 1252.50, reads: 19684.20, writes: 5144.50, response time: 5320.07ms (95%), errors: 165.70, reconnects:  0.00
+[  60s] threads: 4000, tps: 228.00, reads: 3487.70, writes: 926.80, response time: 11166.84ms (95%), errors: 31.00, reconnects:  0.00
+[  70s] threads: 4000, tps: 47.00, reads: 945.60, writes: 215.50, response time: 21496.78ms (95%), errors: 6.00, reconnects:  0.00
+[  80s] threads: 4000, tps: 54.40, reads: 780.50, writes: 203.20, response time: 32095.57ms (95%), errors: 6.30, reconnects:  0.00
+[  90s] threads: 4000, tps: 44.50, reads: 814.90, writes: 254.30, response time: 40186.12ms (95%), errors: 10.50, reconnects:  0.00
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET c='43663972302-98348435191-94179178906-34522595311-20373598146-97427762624-52958051987-07413299145-97784005534-96297919866' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET c='64666620406-16176835848-40481358851-51899470358-58711594316-56509660545-45559607906-24779947767-66635160654-05416815475' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET c='86585415080-18882589881-30938625067-29001300098-17095669967-81333281549-04500823176-16104239427-75556645586-88992530537' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest35 WHERE id=1'
+(last message repeated 1 times)
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET c='22339592065-42564280680-42718833198-75637889899-17001001556-98204736763-81247558623-77613958786-45868171813-89778486746' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET c='37514931874-96926095791-27773235792-41213562552-80022997165-58780755234-42606694081-07052010573-88484109690-27167411659' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest32 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest32 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest35 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest32 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest32 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest32 SET c='52396260517-62971808622-35358041895-73889690847-17623877697-57923158512-44848444331-06868636626-62060699226-60008984849' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest23 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest20 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest32 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest23 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest28 SET c='18566412835-43633664256-19236530265-06371320191-43481771772-97740051168-42978226704-74687137361-42802836266-03851226810' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest28 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest3 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest23 SET c='61912851859-29446965527-76888574261-66967756042-01486627917-91092683013-34792795972-50665058293-90649678352-95740341745' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest28 SET c='46297832897-95698393740-52353568968-85128786012-53286418967-63946413187-32239585200-63520539555-29609997417-70514299851' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest28 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest20 SET c='32412018343-19126842475-25343108374-99987184776-83079615305-27226218333-70558757285-67966939409-04300893217-64077731552' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest3 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest28 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest32 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest20 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest23 SET c='68600303876-22661429660-87402403531-32128775995-28188387390-44275693326-55867576081-45430585087-60451782370-74085996836' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest28 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest32 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest61 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest48 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest11 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest34 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest34 SET c='64642823458-25756745239-99833330440-07313644020-04150910029-10023156811-53602854378-69667336492-64707354512-93235860794' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest3 WHERE id=3'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest23 SET c='23988524468-37567292178-53262239379-05955672651-51191130744-39680449421-54585173888-01908037458-53033978950-85181073157' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET c='63115750300-36375836674-75960451406-16109216188-91083467555-50659366841-36020668942-81970505937-90110518814-01539044389' WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest52 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest35 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest61 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest35 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest52 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest35 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest61 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest53 SET k=k+1 WHERE id=1'
+(last message repeated 1 times)
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'UPDATE sbtest3 SET k=k+1 WHERE id=1'
+ALERT: mysql_drv_query() returned error 1205 (Lock wait timeout exceeded; try restarting transaction) for query 'DELETE FROM sbtest28 WHERE id=1'
