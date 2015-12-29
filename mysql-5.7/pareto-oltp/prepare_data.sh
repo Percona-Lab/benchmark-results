@@ -1,0 +1,1 @@
+./sysbench --test=tests/db/parallel_prepare.lua --oltp_tables_count=64 --mysql-user=root --mysql_table_engine=InnoDB --num-threads=32 --oltp-table-size=250000000 --rand-type=pareto --rand-init=on --report-interval=10 --mysql-host=10.0.0.157 --mysql-user=mu --mysql-password=percona00 --mysql-db=sb --max-time=7200 --max-requests=0 run
