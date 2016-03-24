@@ -22,7 +22,8 @@ tm<-theme(legend.position="bottom",
 
 guides(colour = guide_legend(override.aes = list(size=4)))
 
-data = read.table("201603-mysql55-56-57-RO/local-PK/summary.csv",sep=",",header=F)
+#data = read.table("201603-mysql55-56-57-RO/local-PK/summary.csv",sep=",",header=F)
+data = read.table("../summary.csv",sep=",",header=F)
 data1=subset(data,V1>100)
 attach(data1)
 aggdata <-aggregate(data1, by=list(V4,V5),FUN=mean, na.rm=TRUE)
