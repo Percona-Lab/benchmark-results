@@ -7,7 +7,9 @@ Setup
 -   Client (sysbench) and server are on different servers, connected via 10Gb network.
 -   CPU for both: 56 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2683 v3 @ 2.00GHz
 
-![](remote-PK_files/figure-markdown_github/versions-1.png)
+![](remote-PK_files/figure-markdown_github/versions-1.png) \#\# MySQL 5.6 with thread\_concurrency
+
+-   MySQL 5.6 started with `--innodb-thread-concurrency=64` ![](remote-PK_files/figure-markdown_github/itc-1.png)
 
 Tabular format
 --------------

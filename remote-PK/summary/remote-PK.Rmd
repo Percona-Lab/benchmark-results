@@ -56,6 +56,18 @@ m <- ggplot(ss,
             aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
 m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,OPS",title="sysbench PK lookup")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 490000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
 ```
+## MySQL 5.6 with thread_concurrency
+
+* MySQL 5.6 started with `--innodb-thread-concurrency=64`
+```{r itc, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql56.itc64","mysql56.tiRC.full","mysql57.tiRC.full") ))
+#ss=subset(aggdata)
+
+m <- ggplot(ss, 
+            aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,OPS",title="sysbench PK lookup")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 490000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+
 
 ## Tabular format
 
