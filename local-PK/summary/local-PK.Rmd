@@ -100,12 +100,12 @@ m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysb
 * mysql57.ibpi32.imON - MySQL 5.7 with `INNODB_METRICS` enabled (all) (`innodb_monitor_enable = '%'`)
 
 ```{r innodbmetrics, echo=FALSE, fig.height=8, fig.width=10, warning=FALSE}
-ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql57.bpi32","mysql57.ibpi32.imON") ))
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql57.short","mysql57.imON") ))
 #ss=subset(aggdata)
 
 m <- ggplot(ss, 
             aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
-m+geom_line()+labs(x="Threads",y="Throughput,tps",title="sysbench read-only, Performance Schema overhead in 5.7")+scale_color_tableau(name="Version")+scale_y_continuous(labels = scales::comma)
+m+geom_line()+labs(x="Threads",y="Throughput,tps",title="sysbench read-only, INNODB_METRICS overhead in 5.7")+scale_color_tableau(name="Version")+scale_y_continuous(labels = scales::comma)
 ```
 
 ## Tabular format
