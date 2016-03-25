@@ -1,0 +1,73 @@
+---
+title: "remote PK"
+author: "VadimTK"
+date: "March 17, 2016"
+--output: html_document
+output:
+  md_document:
+    variant: markdown_github
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+
+tm<-theme(legend.position="bottom",
+          text=element_text(family="Georgia"),
+          strip.background = element_rect(colour="red", fill="#CCCCFF"))
+
+guides(colour = guide_legend(override.aes = list(size=4)))
+
+data = read.table("../summary.csv",sep=",",header=F)
+data1=subset(data,V1>100)
+attach(data1)
+aggdata <-aggregate(data1, by=list(V4,V5),FUN=mean, na.rm=TRUE)
+```
+# MySQL 5.5 / 5.6 / 5.7 - sysbench PK lookup queries in memory
+
+## Setup
+
+* Client (sysbench) and server are on different servers, connected via 10Gb network. 
+* CPU for both: 56 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2683 v3 @ 2.00GHz
+
+```{r test, eval=FALSE, fig.height=8, fig.width=10, warning=FALSE, include=FALSE}
+ss=subset(aggdata)
+
+m <- ggplot(ss, aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysbench read-only")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 480000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+```{r test2, eval=FALSE, fig.height=8, fig.width=10, warning=FALSE, include=FALSE}
+ss=subset(aggdata)
+
+m <- ggplot(ss, aes(x=as.factor(Group.2),y=as.numeric(V3),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysbench read-only")+scale_color_tableau(name="Version")+scale_y_log10(breaks=c(.001,.01,0.05,.1,.5,1,10,100,250,500,1000),limits = c(.01,1000))
+#+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+
+```{r versions, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql55.tiRC.full","mysql56.tiRC.full","mysql57.tiRC.full") ))
+#ss=subset(aggdata)
+
+m <- ggplot(ss, 
+            aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,OPS",title="sysbench PK lookup")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 450000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+
+## Tabular format
+
+```{r table, echo=FALSE, warning=FALSE,message=FALSE,error=FALSE, fig.width=10, fig.height=8}
+
+Res<-data.frame(aggdata$Group.1, aggdata$Group.2, aggdata$V2)
+
+wide_format <- dcast(subset(Res, is.element(aggdata.Group.1,c("mysql55.tiRC.full","mysql56.tiRC.full","mysql57.tiRC.full") )), aggdata.Group.2 ~ aggdata.Group.1)
+
+names(wide_format)<-c("Threads","MySQL 5.5","MySQL 5.6","MySQL 5.7")
+#wide_format$`MySQL 5.5 / MySQL 5.6` = wide_format$`MySQL 5.5`/wide_format$`MySQL 5.6`
+#wide_format$`MySQL 5.5 / MySQL 5.7` = wide_format$`MySQL 5.5`/wide_format$`MySQL 5.7`
+#wide_format$`MySQL 5.6 / MySQL 5.7` = wide_format$`MySQL 5.6`/wide_format$`MySQL 5.7`
+kable(wide_format, digits=2)
+```
