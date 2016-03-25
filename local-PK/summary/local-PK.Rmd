@@ -22,7 +22,6 @@ tm<-theme(legend.position="bottom",
 
 guides(colour = guide_legend(override.aes = list(size=4)))
 
-#data = read.table("201603-mysql55-56-57-RO/local-PK/summary.csv",sep=",",header=F)
 data = read.table("../summary.csv",sep=",",header=F)
 data1=subset(data,V1>100)
 attach(data1)
@@ -34,15 +33,23 @@ aggdata <-aggregate(data1, by=list(V4,V5),FUN=mean, na.rm=TRUE)
 
 * Client (sysbench) and server are on the same server 
 * CPU: 56 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2683 v3 @ 2.00GHz
+* sysbench 100 tables x 1mln rows, uniform distribution
 
 ```{r test, eval=FALSE, fig.height=8, fig.width=10, warning=FALSE, include=FALSE}
 ss=subset(aggdata)
 
 m <- ggplot(ss, aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
-m+geom_line()+labs(x="Threads",y="Throughput,tps",title="sysbench read-only")+scale_color_tableau(name="Version")
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysbench read-only")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 480000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+```{r test2, eval=FALSE, fig.height=8, fig.width=10, warning=FALSE, include=FALSE}
+ss=subset(aggdata)
+
+m <- ggplot(ss, aes(x=as.factor(Group.2),y=as.numeric(V3),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysbench read-only")+scale_color_tableau(name="Version")+scale_y_log10(breaks=c(.001,.01,0.05,.1,.5,1,10,100,250,500,1000),limits = c(.01,1000))
+#+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
 ```
 
-```{r, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
+```{r versions, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
 ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql55","mysql56.bpi32","mysql57.bpi32") ))
 #ss=subset(aggdata)
 
@@ -50,48 +57,55 @@ m <- ggplot(ss,
             aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
 m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,OPS",title="sysbench PK lookup")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 450000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
 ```
+```{r, eval=FALSE, fig.height=8, fig.width=10, warning=FALSE, include=FALSE}
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql55","mysql56.bpi32","mysql56.psOFF","mysql57.bpi32","mysql57.psOFF") ))
+#ss=subset(aggdata)
+
+m <- ggplot(data1, 
+            aes(x=as.factor(V5),y=as.numeric(V2),color=as.factor(V4),group=V4))
+m+geom_jitter(size=0.5,alpha=3/4)+labs(x="Threads",y="Throughput,OPS",title="sysbench PK lookup")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 450000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
 
 ## Performance Schema overhead in 5.6
 
-* psOFF - MySQL 5.6 started with --performance-schema=OFF
-* mysql56sc.no-perf-schema-compiled.ibpi32 - PERFORMANCE_SCHEMA was not compiled
+* psOFF - MySQL 5.6 started with `--performance-schema=OFF`
+* mysql56.tiRC.no-perf-schema-compiled - `PERFORMANCE_SCHEMA` was not compiled
 
 ```{r, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
-ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql55","mysql56.itc56.ibpi32.psOFF","mysql56.ibpi32","mysql56sc.no-perf-schema-compiled.ibpi32") ))
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql56.psOFF","mysql56.bpi32","mysql56.tiRC.no-perf-schema-compiled") ))
 #ss=subset(aggdata)
 
 m <- ggplot(ss, 
             aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
-m+geom_line()+labs(x="Threads",y="Throughput,tps",title="sysbench read-only, Performance Schema overhead in 5.6")+scale_color_tableau(name="Version")+scale_y_continuous(labels = scales::comma)
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysbench PK lookup, Performance Schema overhead in 5.6")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 450000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
 ```
 
 ## Performance Schema overhead in 5.7
 
-* psOFF - MySQL 5.7 started with --performance-schema=OFF
-* mysql57sc.no-perf-schema-compiled.ibpi32 - PERFORMANCE_SCHEMA was not compiled
+* psOFF - MySQL 5.7 started with `--performance-schema=OFF`
+* psALL_ON - MySQL 5.6 started with `--performance-schema-instrument='%=ON'`
+* mysql57.tiRC.no-perf-schema-compiled `- PERFORMANCE_SCHEMA` was not compiled
 
 ```{r, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
-ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql55","mysql57.ibpi32","mysql57.ibpi32.psOFF","mysql57sc.no-perf-schema-compiled.ibpi32") ))
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql57.bpi32","mysql57.psOFF","mysql57.tiRC.psALL_ON","mysql57.tiRC.no-perf-schema-compiled") ))
 #ss=subset(aggdata)
 
 m <- ggplot(ss, 
             aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
-m+geom_line()+labs(x="Threads",y="Throughput,tps",title="sysbench read-only, Performance Schema overhead in 5.7")+scale_color_tableau(name="Version")+scale_y_continuous(labels = scales::comma)
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysbench read-only, Performance Schema overhead in 5.7")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 490000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
 ```
 
 ## InnoDB_Metrics overhead in 5.7
 
-* psOFF - MySQL 5.7 started with --performance-schema=OFF
-* mysql57sc.no-perf-schema-compiled.ibpi32 - PERFORMANCE_SCHEMA was not compiled
-* mysql57.ibpi32.imON - MySQL 5.7 with INNODB_METRICS enabled (all)
+* mysql57.ibpi32.imON - MySQL 5.7 with `INNODB_METRICS` enabled (all) (`innodb_monitor_enable = '%'`)
 
 ```{r innodbmetrics, echo=FALSE, fig.height=8, fig.width=10, warning=FALSE}
-ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql57.ibpi32","mysql57.ibpi32.imON") ))
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql57.short","mysql57.imON") ))
 #ss=subset(aggdata)
 
 m <- ggplot(ss, 
             aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
-m+geom_line()+labs(x="Threads",y="Throughput,tps",title="sysbench read-only, Performance Schema overhead in 5.7")+scale_color_tableau(name="Version")+scale_y_continuous(labels = scales::comma)
+m+geom_line()+labs(x="Threads",y="Throughput,tps",title="sysbench read-only, INNODB_METRICS overhead in 5.7")+scale_color_tableau(name="Version")+scale_y_continuous(labels = scales::comma)
 ```
 
 ## Tabular format
@@ -101,7 +115,7 @@ m+geom_line()+labs(x="Threads",y="Throughput,tps",title="sysbench read-only, Per
 Res<-data.frame(aggdata$Group.1, aggdata$Group.2, aggdata$V2)
 
 #wide_format <- dcast(subset(Res,((aggdata.Group.1=="mysql55.itc75") | (aggdata.Group.1=="mysql56.itc75") | (aggdata.Group.1=="mysql57"))), aggdata.Group.2 ~ aggdata.Group.1)
-wide_format <- dcast(subset(Res, is.element(aggdata.Group.1,c("mysql55","mysql56.ibpi32","mysql57.ibpi32","mysql56.itc56.ibpi32.psOFF","mysql57.ibpi32.psOFF") )), aggdata.Group.2 ~ aggdata.Group.1)
+wide_format <- dcast(subset(Res, is.element(aggdata.Group.1,c("mysql55","mysql56.bpi32","mysql57.bpi32","mysql56.psOFF","mysql57.psOFF") )), aggdata.Group.2 ~ aggdata.Group.1)
 
 names(wide_format)<-c("Threads","MySQL 5.5","MySQL 5.6","MySQL 5.6 Perf_schema OFF","MySQL 5.7","MySQL 5.7 Perf_schema OFF")
 #wide_format$`MySQL 5.5 / MySQL 5.6` = wide_format$`MySQL 5.5`/wide_format$`MySQL 5.6`
