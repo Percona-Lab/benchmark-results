@@ -71,7 +71,7 @@ m+geom_jitter(size=0.5,alpha=3/4)+labs(x="Threads",y="Throughput,OPS",title="sys
 * mysql56sc.no-perf-schema-compiled.ibpi32 - PERFORMANCE_SCHEMA was not compiled
 
 ```{r, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
-ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql56.psOFF","mysql56.bpi32") ))
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql56.psOFF","mysql56.bpi32","mysql56.tiRC.no-perf-schema-compiled") ))
 #ss=subset(aggdata)
 
 m <- ggplot(ss, 
