@@ -6,30 +6,31 @@ Setup
 
 -   Client (sysbench) and server are on the same server
 -   CPU: 56 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2683 v3 @ 2.00GHz
+-   sysbench 100 tables x 1mln rows, uniform distribution
 
 ![](local-PK_files/figure-markdown_github/versions-1.png)
 
 Performance Schema overhead in 5.6
 ----------------------------------
 
--   psOFF - MySQL 5.6 started with --performance-schema=OFF
--   mysql56sc.no-perf-schema-compiled.ibpi32 - PERFORMANCE\_SCHEMA was not compiled
+-   psOFF - MySQL 5.6 started with `--performance-schema=OFF`
+-   mysql56.tiRC.no-perf-schema-compiled - `PERFORMANCE_SCHEMA` was not compiled
 
 ![](local-PK_files/figure-markdown_github/unnamed-chunk-2-1.png)
 
 Performance Schema overhead in 5.7
 ----------------------------------
 
--   psOFF - MySQL 5.7 started with --performance-schema=OFF
--   psALL\_ON - MySQL 5.6 started with --performance-schema-instrument='%=ON'
--   mysql57.tiRC.no-perf-schema-compiled - PERFORMANCE\_SCHEMA was not compiled
+-   psOFF - MySQL 5.7 started with `--performance-schema=OFF`
+-   psALL\_ON - MySQL 5.6 started with `--performance-schema-instrument='%=ON'`
+-   mysql57.tiRC.no-perf-schema-compiled `- PERFORMANCE_SCHEMA` was not compiled
 
 ![](local-PK_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 InnoDB\_Metrics overhead in 5.7
 -------------------------------
 
--   mysql57.ibpi32.imON - MySQL 5.7 with INNODB\_METRICS enabled (all)
+-   mysql57.ibpi32.imON - MySQL 5.7 with `INNODB_METRICS` enabled (all) (`innodb_monitor_enable = '%'`)
 
 ![](local-PK_files/figure-markdown_github/innodbmetrics-1.png)
 
