@@ -1,0 +1,49 @@
+---
+title: "Percona Server for MongoDB: Storage Engine comparison"
+author: "Percona Lab"
+generated on: ```format(Sys.Date(), "%B %d, %Y")```
+output:
+  md_document:
+    variant: markdown_github
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+library(plyr)
+
+label_custom <- function(variable, value) {
+    if (variable=="size") {
+        return (paste(variable,":",value))
+    } else if (variable=="engine"){
+        return (as.character(value))
+    } else {
+        return (value)
+    }
+}
+
+data <- read.csv("../alldata.csv", header=T)
+data_ft <- subset(data, engine == "ft")
+data_wt <- subset(data, engine == "wt")
+data_rocks <- subset(data, engine == "rocks")
+```
+# Percona Server for MongoDB 3.0.8-1.2 - data set that fits in RAM 
+
+## Setup
+
+* Client (sysbench) and server are on the same machine
+* CPU: 48 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz
+* sysbench with mongodb support, 16 collections x 2M documents, uniform distribution. 
+
+## Throughput per threads and workload (ro/rw), for all engines 
+
+```{r summary, fig.height=8, fig.width=10, warning=FALSE, echo=FALSE}
+
+ggplot(data, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(user_provided_threads ~ engine, labeller = label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads and engine") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data$display_y_axis)))  + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24))
+
+
+```
