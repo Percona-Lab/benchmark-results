@@ -1,7 +1,8 @@
 ---
+
 title: "Percona Server for MongoDB: Storage Engine comparison"
 author: "Percona Lab"
-generated on: ```format(Sys.Date(), "%B %d, %Y")```
+generated on:March 26, 2016
 output:
   md_document:
     variant: markdown_github
