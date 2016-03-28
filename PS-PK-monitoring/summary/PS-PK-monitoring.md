@@ -10,6 +10,9 @@ Setup
 -   OS: Ubuntu 15.10 (Wily Werewolf)
 -   Kernel 4.2.0-30-generic
 
+Results with query\_response\_time plugin
+-----------------------------------------
+
 -   Vanilla PS 5.7
 -   `query_response_time` plugins installed (but `query_response_time_stats = off`)
 
