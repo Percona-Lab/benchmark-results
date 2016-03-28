@@ -7,6 +7,8 @@ Setup
 -   Client (sysbench) and server are on the same server
 -   CPU: 56 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2683 v3 @ 2.00GHz
 -   sysbench 100 tables x 1mln rows, uniform distribution
+-   OS: Ubuntu 15.10 (Wily Werewolf)
+-   Kernel 4.2.0-30-generic
 
 ![](local-PK_files/figure-markdown_github/versions-1.png)
 
