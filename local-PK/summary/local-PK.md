@@ -7,6 +7,8 @@ Setup
 -   Client (sysbench) and server are on the same server
 -   CPU: 56 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2683 v3 @ 2.00GHz
 -   sysbench 100 tables x 1mln rows, uniform distribution
+-   OS: Ubuntu 15.10 (Wily Werewolf)
+-   Kernel 4.2.0-30-generic
 
 ![](local-PK_files/figure-markdown_github/versions-1.png)
 
@@ -24,8 +26,15 @@ Performance Schema overhead in 5.7
 -   psOFF - MySQL 5.7 started with `--performance-schema=OFF`
 -   psALL\_ON - MySQL 5.6 started with `--performance-schema-instrument='%=ON'`
 -   mysql57.tiRC.no-perf-schema-compiled `- PERFORMANCE_SCHEMA` was not compiled
+-   mysql57.PS-CONS-ALL - `--performance-schema-instrument='%=ON'` and `update performance_schema.setup_consumers set enabled='yes';`
 
 ![](local-PK_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+### Relative performance
+
+base value with `--performance-schema=ON`
+
+![](local-PK_files/figure-markdown_github/perf-schema-relative-1.png)
 
 InnoDB\_Metrics overhead in 5.7
 -------------------------------
