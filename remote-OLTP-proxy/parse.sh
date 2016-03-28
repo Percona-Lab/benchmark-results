@@ -5,7 +5,7 @@ cat $1 | awk -F ',' -v extra=$2 '{
                 if(tmp) {
                         f1=a[1]
                 }
-                tmp=match($i, /[[:space:]]*reads:[[:space:]]+(.*)/,b)
+                tmp=match($i, /[[:space:]]*tps:[[:space:]]+(.*)/,b)
                 if(tmp) {
                         f2=b[1]
                 }
