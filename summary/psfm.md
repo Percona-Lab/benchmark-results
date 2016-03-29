@@ -18,9 +18,6 @@ output:
 * CPU: 48 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz
 * sysbench with mongodb support, 16 collections x 2M documents, uniform distribution. 
 
-## Throughput per threads and workload (ro/rw), for all engines 
-
-![plot of chunk summary](figure/summary-1.png)
 
 ## Throughput per threads and workload, summary for each engine
 
