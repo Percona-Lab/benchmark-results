@@ -4,6 +4,7 @@ do
 for t in raw/res*
 do
 res=$(basename "$t")
+res=${res#res.}
 bash parse.sh  ${t}/res.thr${i}.ro.txt $res,$i >> summary.csv
 done
 done
