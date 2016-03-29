@@ -4,7 +4,7 @@ Percona Server 5.7 - proxy overhead
 Setup
 -----
 
--   Client (sysbench) and server are on the same server
+-   Client (sysbench) and server are on different servers, connected via 10Gb network.
 -   CPU: 56 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2683 v3 @ 2.00GHz
 -   sysbench 10 tables x 10mln rows, pareto distribution
 -   OS: Ubuntu 15.10 (Wily Werewolf)

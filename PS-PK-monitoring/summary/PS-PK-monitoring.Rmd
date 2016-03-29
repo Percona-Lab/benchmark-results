@@ -51,13 +51,53 @@ m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysb
 #+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
 ```
 
-## Results with query_response_time plugin
+## Results with plugins
 
-* Vanilla PS 5.7
-* `query_response_time` plugins installed (but `query_response_time_stats = off`)
+* PS 5.7
+* query_rt_plugin : `query_response_time` plugins installed (but `query_response_time_stats = off`)
+* qrt_enabled:  `query_response_time` plugins installed and `query_response_time_stats = on`
+* audit.no_policy: audit plugin installed, but `audit_log_policy=NONE`
 
-```{r versions, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
-ss=subset(aggdata,(Group.2<=1000) )
+```{r plugins, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
+ss=subset(aggdata,(Group.2<=1000) & (Group.1 %in% c("ps57.long.try3","ps57.audit.no_policy","ps57.qrt_enabled","ps57.long.query_rt_plugin")))
+#ss=subset(aggdata)
+
+m <- ggplot(ss, 
+            aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,OPS",title="sysbench PK lookup")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 450000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+
+## Results with userstat
+
+* PS 5.7
+* userstat - userstat enabled (`userstat=1`)
+
+```{r userstat, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
+ss=subset(aggdata,(Group.2<=1000) & (Group.1 %in% c("ps57.long.try3","ps57.userstat")))
+#ss=subset(aggdata)
+
+m <- ggplot(ss, 
+            aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,OPS",title="sysbench PK lookup")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 450000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+
+## Results with slowlog
+
+* PS 5.7
+* slowlog - slowlog enabled 
+    * slow-query-log=ON
+    * slow-query-log-file=slow.log
+    * long_query_time=0
+    * loose_slow_query_log_use_global_control=all
+    * loose_log_slow_verbosity=full 
+    * loose_log_slow_rate_type=query
+    * loose_log_slow_rate_limit=5000
+    * loose_slow_query_log_use_global_control=all
+    * loose_slow_query_log_always_write_time=1  
+
+
+```{r slowlog, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
+ss=subset(aggdata,(Group.2<=1000) & (Group.1 %in% c("ps57.long.try3","ps57.slowlog")))
 #ss=subset(aggdata)
 
 m <- ggplot(ss, 
