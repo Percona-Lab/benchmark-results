@@ -16,8 +16,12 @@ output:
 
 * Client (sysbench) and server are on the same machine
 * CPU: 48 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz
-* sysbench with mongodb support, 16 collections x 2M documents, uniform distribution. 
+* 128GB RAM (64GB storage engine cache)
+* sysbench with mongodb support, 16 collections x 2M documents (~6GB compressed), uniform distribution. 
 
+## Throughput per threads and workload
+
+![plot of chunk summary](figure/summary-1.png)![plot of chunk summary](figure/summary-2.png)
 
 ## Throughput per threads and workload, summary for each engine
 

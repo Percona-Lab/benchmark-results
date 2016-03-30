@@ -41,8 +41,17 @@ nothreads <- c(1,2,4,8,16,24,32,40,48,64,128,256,512)
 
 * Client (sysbench) and server are on the same machine
 * CPU: 48 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz
-* sysbench with mongodb support, 16 collections x 2M documents, uniform distribution. 
+* 128GB RAM (64GB storage engine cache)
+* sysbench with mongodb support, 16 collections x 2M documents (~6GB compressed), uniform distribution. 
 
+## Throughput per threads and workload
+
+```{r summary, fig.width=16, warning=FALSE, echo=FALSE}
+data0 = subset(data, user_provided_threads <= 32 & ts <= 600)
+data1 = subset(data, user_provided_threads > 32)
+ggplot(data0, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(user_provided_threads ~ engine, labeller = label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads and engine") + scale_y_continuous(breaks=c(0,max(data0$tps)))+ expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24))
+ggplot(data1, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(user_provided_threads ~ engine, labeller = label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads and engine") + scale_y_continuous(breaks=c(0,max(data1$tps)))+ expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24))
+```
 
 ## Throughput per threads and workload, summary for each engine
 
