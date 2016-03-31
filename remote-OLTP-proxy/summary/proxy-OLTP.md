@@ -1,5 +1,5 @@
-Percona Server 5.7 - proxy overhead
-===================================
+MySQL 5.7 - proxy overhead
+==========================
 
 Setup
 -----
@@ -14,8 +14,10 @@ Results with proxysql
 ---------------------
 
 -   Vanilla MySQL 5.7
--   ProxySQL `mysql-threads=4`
 -   ProxySQL `mysql-threads=16`
+-   MaxScale `threads=4`
+-   MaxScale `threads=8`
+-   MaxScale `threads=16`
 
 ProxySQL is running on the same host with sysbench, connected via unix-socket
 
@@ -24,5 +26,3 @@ ProxySQL is running on the same host with sysbench, connected via unix-socket
 ### Relative performance
 
 base value: MySQL 5.7
-
-![](proxy-OLTP_files/figure-markdown_github/perf-schema-relative-1.png)
