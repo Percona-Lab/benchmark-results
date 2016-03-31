@@ -62,7 +62,7 @@ m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysb
 * MySQL 5.7 / 5.6 / 5.5
     * MySQL 5.6 uses `START TRANSACTION READ ONLY`
 
-```{r versions, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
+```{r versions, echo=FALSE, warning=FALSE,fig.width=8, fig.height=6}
 ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql55","mysql56","mysql57") ))
 #ss=subset(aggdata)
 
@@ -75,7 +75,7 @@ m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput, tps",title="sys
 
 * base value: MySQL 5.7 (horizontal line 1.0)
 
-```{r perf-schema-relative, echo=FALSE, fig.height=8, fig.width=10, message=FALSE, warning=FALSE}
+```{r perf-schema-relative, echo=FALSE, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
 Res<-data.frame(aggdata$Group.1, aggdata$Group.2, aggdata$V2)
 
 wide_format <- dcast(subset(Res), aggdata.Group.2 ~ aggdata.Group.1)
