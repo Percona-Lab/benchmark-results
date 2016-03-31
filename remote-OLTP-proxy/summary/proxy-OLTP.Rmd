@@ -16,7 +16,7 @@ library(ggthemes)
 library(reshape2)
 library(knitr)
 
-tm<-theme(legend.position="bottom",
+tm<-theme(legend.position="right",
           text=element_text(family="Georgia"),
           strip.background = element_rect(colour="red", fill="#CCCCFF"))
 
@@ -27,7 +27,7 @@ data1=subset(data,V1>100)
 attach(data1)
 aggdata <-aggregate(data1, by=list(V4,V5),FUN=mean, na.rm=TRUE)
 ```
-# Percona Server 5.7 - proxy overhead
+# MySQL 5.7 - proxy overhead
 
 ## Setup
 
@@ -54,8 +54,10 @@ m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysb
 ## Results with proxysql
 
 * Vanilla MySQL 5.7
-* ProxySQL `mysql-threads=4`
 * ProxySQL `mysql-threads=16`
+* MaxScale `threads=4`
+* MaxScale `threads=8`
+* MaxScale `threads=16`
 
 ProxySQL is running on the same host with sysbench, connected via unix-socket
 
@@ -72,7 +74,7 @@ m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput, tps",title="sys
 
 base value: MySQL 5.7
 
-```{r perf-schema-relative, echo=FALSE, fig.height=8, fig.width=10, message=FALSE, warning=FALSE}
+```{r perf-schema-relative, eval=FALSE, fig.height=8, fig.width=10, message=FALSE, warning=FALSE, include=FALSE}
 Res<-data.frame(aggdata$Group.1, aggdata$Group.2, aggdata$V2)
 
 wide_format <- dcast(subset(Res), aggdata.Group.2 ~ aggdata.Group.1)

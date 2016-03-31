@@ -1,5 +1,5 @@
-Percona Server 5.7 - proxy overhead
-===================================
+MySQL 5.7 / 5.6 / 5.5 (10Gb network connection)
+===============================================
 
 Setup
 -----
@@ -13,12 +13,18 @@ Setup
 Results under OLTP RO pareto
 ----------------------------
 
--   MySQL 5.7
+-   MySQL 5.7 / 5.6 / 5.5
+    -   MySQL 5.6 uses `START TRANSACTION READ ONLY`
 
 ![](remote-OLTP_files/figure-markdown_github/versions-1.png)
 
 ### Relative performance
 
--   base value: MySQL 5.7
+-   base value: MySQL 5.7 (horizontal line 1.0)
 
 ![](remote-OLTP_files/figure-markdown_github/perf-schema-relative-1.png)
+
+MySQL 5.6 with `innodb-thread-concurrency=64`
+---------------------------------------------
+
+![](remote-OLTP_files/figure-markdown_github/noSTRO-1.png)
