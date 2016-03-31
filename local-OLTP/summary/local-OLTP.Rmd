@@ -27,7 +27,7 @@ data1=subset(data,V1>100)
 attach(data1)
 aggdata <-aggregate(data1, by=list(V4,V5),FUN=mean, na.rm=TRUE)
 ```
-# MySQL 5.7 - OLTP RO workload (local connection)
+# MySQL 5.7 / 5.6 / 5.5 - OLTP RO workload (local connection)
 
 ## Setup
 
