@@ -1,5 +1,5 @@
 ---
-title: "remote OLTP"
+title: "local OLTP"
 author: "None"
 date: "March 17, 2016"
 --output: html_document
@@ -27,11 +27,11 @@ data1=subset(data,V1>100)
 attach(data1)
 aggdata <-aggregate(data1, by=list(V4,V5),FUN=mean, na.rm=TRUE)
 ```
-# MySQL 5.7 / 5.6 / 5.5 (10Gb network connection)
+# MySQL 5.7 / 5.6 / 5.5 - OLTP RO workload (local connection)
 
 ## Setup
 
-* Client (sysbench) and server are on different servers, connected via 10Gb network. 
+* Client (sysbench) and server are the same server
 * CPU: 56 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2683 v3 @ 2.00GHz
 * sysbench 10 tables x 10mln rows, pareto distribution
 * OS: Ubuntu 15.10 (Wily Werewolf)
@@ -63,7 +63,7 @@ m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysb
     * MySQL 5.6 uses `START TRANSACTION READ ONLY`
 
 ```{r versions, echo=FALSE, warning=FALSE,fig.width=8, fig.height=6}
-ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql55.long","mysql56.long","mysql57.long") ) )
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql55","mysql56","mysql57") ))
 #ss=subset(aggdata)
 
 m <- ggplot(ss, 
@@ -83,10 +83,10 @@ wide_format <- dcast(subset(Res), aggdata.Group.2 ~ aggdata.Group.1)
 
 ss=subset(aggdata,(Group.2<=1000))
 #ss=subset(aggdata)
-wide_format$`MySQL 55` = wide_format$`mysql55.long`/wide_format$`mysql57.long`
-wide_format$`MySQL 56 (itc 64)` = wide_format$`mysql56.itc64.long`/wide_format$`mysql57.long`
+wide_format$`MySQL 55` = wide_format$`mysql55`/wide_format$`mysql57`
+wide_format$`MySQL 56` = wide_format$`mysql56`/wide_format$`mysql57`
 
-dat_m <- melt(subset(wide_format), id.vars = "aggdata.Group.2", measure.vars=c("MySQL 55","MySQL 56 (itc 64)"))
+dat_m <- melt(subset(wide_format), id.vars = "aggdata.Group.2", measure.vars=c("MySQL 55","MySQL 56"))
 
 m <- ggplot(dat_m, 
             aes(x=as.factor(aggdata.Group.2),y=as.numeric(value),group=variable))
@@ -95,10 +95,23 @@ m+geom_bar(stat = "identity",position = "dodge",aes(fill = as.factor(variable)))
             position = position_dodge(width=0.9),size=3,angle = 90)+labs(x="Threads",y="relative performance",title="sysbench OLTP RO")+scale_fill_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 1.5, 0.1),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
 ```
 
-## MySQL 5.6 with `innodb-thread-concurrency=64`
+## MySQL 5.6 without `START TRANSACTION READ ONLY`
 
 ```{r noSTRO, echo=FALSE, warning=FALSE,fig.width=8, fig.height=6}
-ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql56.itc64.try2","mysql56.long","mysql57.long") ) )
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql56","mysql56.noSTRO") ))
+#ss=subset(aggdata)
+
+m <- ggplot(ss, 
+            aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput, tps",title="sysbench OLTP RO")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 22000, 1000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+
+## MySQL 5.6/5.7 without `innodb-adaptive-hash-index`
+
+* AHI0 - `innodb_adaptive_hash_index=0`
+
+```{r AHI0, echo=FALSE, warning=FALSE,fig.width=8, fig.height=6}
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql56","mysql56.AHI0","mysql57","mysql57.AHI0") ))
 #ss=subset(aggdata)
 
 m <- ggplot(ss, 
