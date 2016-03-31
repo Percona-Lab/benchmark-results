@@ -1,0 +1,88 @@
+# Percona Server template configuration
+
+[mysqld]
+#
+# Remove leading # and set to the amount of RAM for the most important data
+# cache in MySQL. Start at 70% of total RAM for dedicated server, else 10%.
+#
+# Remove leading # to turn on a very important data integrity option: logging
+# changes to the binary log between backups.
+# log_bin
+#
+# Remove leading # to set options mainly useful for reporting servers.
+# The server defaults are faster for transactions and fast SELECTs.
+# Adjust sizes as needed, experiment to find the optimal values.
+# join_buffer_size = 128M
+# sort_buffer_size = 2M
+# read_rnd_buffer_size = 2M
+datadir=/var/lib/mysql
+socket=/tmp/mysql.sock
+ssl=0
+
+innodb_autoinc_lock_mode=2
+
+# Recommended in standard MySQL setup
+sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
+
+# general
+thread_cache_size=2000
+table_open_cache = 200000
+table_open_cache_instances=64
+back_log=1500
+query_cache_type=0
+max_connections=4000
+
+# files
+innodb_file_per_table
+innodb_log_file_size=15G
+innodb_log_files_in_group=2
+innodb_open_files=4000
+
+# buffers
+innodb_buffer_pool_size= 200G
+innodb_buffer_pool_instances=8
+innodb_log_buffer_size=64M
+
+# tune
+innodb_doublewrite= 0 
+innodb_support_xa=0
+innodb_thread_concurrency=0 
+innodb_flush_log_at_trx_commit= 1
+innodb_flush_method=O_DIRECT_NO_FSYNC
+innodb_max_dirty_pages_pct=90
+innodb_max_dirty_pages_pct_lwm=10
+innodb_lru_scan_depth=8192
+#innodb_page_cleaners=4
+join_buffer_size=32K
+sort_buffer_size=32K
+innodb_use_native_aio=1
+innodb_stats_persistent = 1
+
+# perf special
+innodb_adaptive_flushing = 1
+innodb_flush_neighbors = 0
+innodb_read_io_threads = 8
+innodb_write_io_threads = 8
+innodb_io_capacity=15000 
+innodb_io_capacity_max=25000 
+innodb_purge_threads=4
+
+transaction-isolation = READ-COMMITTED
+
+#innodb_adaptive_hash_index=0
+#innodb_change_buffering=none
+
+
+
+# Monitoring
+#innodb_monitor_enable = all
+#  performance_schema=OFF
+#performance_schema=ON
+#performance-schema-instrument='wait/synch/%=ON'
+#innodb_monitor_enable=all
+#log-error=mysqld.log
+
+
+[mysqld_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
