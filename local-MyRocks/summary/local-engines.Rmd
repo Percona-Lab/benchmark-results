@@ -1,0 +1,94 @@
+---
+title: "local OLTP"
+author: "None"
+date: "March 17, 2016"
+--output: html_document
+output:
+  md_document:
+    variant: markdown_github
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+
+tm<-theme(legend.position="bottom",
+          text=element_text(family="Georgia"),
+          strip.background = element_rect(colour="red", fill="#CCCCFF"))
+
+guides(colour = guide_legend(override.aes = list(size=4)))
+
+data = read.table("../summary.csv",sep=",",header=F)
+data1=subset(data,V1>100)
+attach(data1)
+aggdata <-aggregate(data1, by=list(V4,V5),FUN=mean, na.rm=TRUE)
+
+st.err <- function(x) {
+    sd(x)/sqrt(length(x))
+}
+
+SE <- aggregate(data1, by=list(V4,V5),FUN=st.err)
+
+aggdata <- cbind(aggdata, SE[,4])
+
+dataPK = read.table("../summaryPK.csv",sep=",",header=F)
+data1PK=subset(dataPK,V1>100)
+attach(data1PK)
+aggdataPK <-aggregate(data1PK, by=list(V4,V5),FUN=mean, na.rm=TRUE)
+```
+# MySQL 5.7 / 5.6 / 5.5 - OLTP RO workload (local connection)
+
+## Setup
+
+* Client (sysbench) and server are the same server
+* CPU: 56 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2683 v3 @ 2.00GHz
+* sysbench 10 tables x 10mln rows, pareto distribution
+* OS: Ubuntu 15.10 (Wily Werewolf)
+* Kernel 4.2.0-30-generic
+
+```{r test, eval=FALSE, fig.height=8, fig.width=10, warning=FALSE, include=FALSE}
+ss=subset(aggdata)
+
+m <- ggplot(ss, aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_errorbar(aes(ymin=V2-SE[,4], ymax=V2+SE[,4]), width=0.3,size=0.3)+labs(x="Threads",y="Throughput,tps",title="sysbench OLTP read-only")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 22000, 1000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+```{r perthread, eval=FALSE, fig.height=8, fig.width=10, warning=FALSE, include=FALSE}
+ss=subset(aggdata)
+ss$rel<-ss$V2/ss$V5
+m <- ggplot(ss, aes(x=as.factor(Group.2),y=as.numeric(rel),fill=as.factor(Group.1),group=Group.1))
+m+geom_bar(stat = "identity",position = "dodge")+labs(x="Threads",y="Throughput,tps",title="sysbench OLTP read-only")+scale_fill_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 1000, 100),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+```{r test2, eval=FALSE, fig.height=8, fig.width=10, warning=FALSE, include=FALSE}
+ss=subset(aggdata)
+
+m <- ggplot(ss, aes(x=as.factor(Group.2),y=as.numeric(V3),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysbench read-only")+scale_color_tableau(name="Version")+scale_y_log10(breaks=c(.001,.01,0.05,.1,.5,1,10,100,250,500,1000),limits = c(.01,1000))
+#+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+
+## Results under OLTP RO pareto
+
+```{r oltp, echo=FALSE, warning=FALSE,fig.width=8, fig.height=6}
+ss=subset(aggdata,(Group.2<=1000)&(Group.1 %in% c("mysql56.OLTP","mysql56.rocksdb.OLTP","mysql57.tokudb.OLTP") ))
+#ss=subset(aggdata)
+
+m <- ggplot(ss, 
+            aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput, tps",title="sysbench OLTP RO")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 22000, 1000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+
+## Results under PK lookup
+
+```{r pk, echo=FALSE, warning=FALSE,fig.width=8, fig.height=6}
+ss=subset(aggdataPK,(Group.2<=1000)&!(Group.1 %in% c("mysql56.OLTP","mysql56.rocksdb.OLTP") ))
+#ss=subset(aggdata)
+
+m <- ggplot(ss, 
+            aes(x=as.factor(Group.2),y=as.numeric(V2),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput, tps",title="sysbench PK lookup")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=seq(0, 450000, 20000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm
+```
+
