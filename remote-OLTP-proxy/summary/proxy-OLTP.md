@@ -10,11 +10,27 @@ Setup
 -   OS: Ubuntu 15.10 (Wily Werewolf)
 -   Kernel 4.2.0-30-generic
 
-Results with proxysql
----------------------
+-   MaxScale 1.4.1 - self compiled
+
+Results
+-------
+
+![](proxy-OLTP_files/figure-markdown_github/i1-1.png)
+
+### MaxScale variance on high threads
+
+![](proxy-OLTP_files/figure-markdown_github/i2-1.png)
+
+### Relative performance
+
+base value: MySQL 5.7
+
+Previous Results with proxysql
+------------------------------
 
 -   Vanilla MySQL 5.7
 -   ProxySQL `mysql-threads=16`
+-   MaxScale 1.3.0
 -   MaxScale `threads=4`
 -   MaxScale `threads=8`
 -   MaxScale `threads=16`
