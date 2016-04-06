@@ -1,4 +1,4 @@
-cat $1 | gawk -F ',' -v extra=$2 '{
+cat $1 | awk -F ',' -v extra=$2 '{
         f1=""
         for(i=1; i<=NF; i++) {
                 tmp=match($i, /\[[[:space:]]*(.*)s\]/,a)
