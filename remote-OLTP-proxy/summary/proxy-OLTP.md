@@ -25,6 +25,8 @@ Results
 
 base value: MySQL 5.7
 
+![](proxy-OLTP_files/figure-markdown_github/schema-relative-1.png)
+
 Previous Results with proxysql
 ------------------------------
 
