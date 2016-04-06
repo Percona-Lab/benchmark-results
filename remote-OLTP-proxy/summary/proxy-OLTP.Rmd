@@ -87,7 +87,7 @@ m+geom_boxplot()+labs(x="Threads",y="Throughput,tps",title="sysbench read-only")
 
 base value: MySQL 5.7
 
-```{r schema-relative, echo=FALSE, fig.height=4, fig.width=8, message=FALSE, warning=FALSE}
+```{r schema-relative, echo=FALSE, fig.height=4, fig.width=10, message=FALSE, warning=FALSE}
 Res<-data.frame(aggdata$Group.1, aggdata$Group.2, aggdata$tps)
 
 wide_format <- dcast(subset(Res), aggdata.Group.2 ~ aggdata.Group.1)
