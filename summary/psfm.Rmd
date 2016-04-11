@@ -31,6 +31,10 @@ data <- read.csv("../alldata.csv", header=T)
 data_ft <- subset(data, engine == "ft")
 data_wt <- subset(data, engine == "wt")
 data_rocks <- subset(data, engine == "rocks")
+data_stable_tps_oltp <- subset(data, ts>=300 & workload=="oltp")
+data_stable_tps_oltp_ro <- subset(data, ts>=300 & workload=="oltp_ro")
+aggdata_oltp <- aggregate(data_stable_tps_oltp, by=list(data_stable_tps_oltp$engine,data_stable_tps_oltp$user_provided_threads), FUN=mean, na.rm=TRUE)
+aggdata_oltp_ro <- aggregate(data_stable_tps_oltp_ro, by=list(data_stable_tps_oltp_ro$engine,data_stable_tps_oltp_ro$user_provided_threads), FUN=mean, na.rm=TRUE)
 
 nothreads <- c(1,2,4,8,16,24,32,40,48,64,128,256,512)
 
@@ -45,6 +49,18 @@ nothreads <- c(1,2,4,8,16,24,32,40,48,64,128,256,512)
 * sysbench with mongodb support, 16 collections x 2M documents (~6GB compressed), uniform distribution. 
 
 ## Throughput per threads and workload
+
+```{r global, fig.width=16, warning=FALSE, echo=FALSE}
+
+ss=subset(aggdata_oltp)
+ss2=subset(aggdata_oltp_ro)
+
+m <- ggplot(ss, aes(x=as.factor(Group.2),y=as.numeric(tps),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysbench OLTP")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,ss$tps)),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24))#+tm
+
+m <- ggplot(ss2, aes(x=as.factor(Group.2),y=as.numeric(tps),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysbench OLTP read only")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,ss2$tps)),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24))#+tm
+```
 
 ```{r summary, fig.width=16, warning=FALSE, echo=FALSE}
 data0 = subset(data, user_provided_threads <= 32 & ts <= 600)

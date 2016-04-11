@@ -2,7 +2,7 @@
 
 title: "Percona Server for MongoDB: Storage Engine comparison"
 author: "Percona Lab"
-generated on:April 10, 2016
+generated on:April 11, 2016
 output:
   md_document:
     variant: markdown_github
@@ -20,6 +20,8 @@ output:
 * sysbench with mongodb support, 16 collections x 2M documents (~6GB compressed), uniform distribution. 
 
 ## Throughput per threads and workload
+
+![plot of chunk global](figure/global-1.png)![plot of chunk global](figure/global-2.png)
 
 ![plot of chunk summary](figure/summary-1.png)![plot of chunk summary](figure/summary-2.png)
 
