@@ -10,7 +10,7 @@ output:
 ---
 
 
-# Percona Server for MongoDB 3.0.8-1.2 - data set that fits in RAM 
+# Percona Server for MongoDB 3.2.0-1.0 - data set that fits in RAM 
 
 ## Setup
 
