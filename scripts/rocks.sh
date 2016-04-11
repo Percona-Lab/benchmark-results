@@ -6,7 +6,9 @@ storage.rocksdb.configString: "bytes_per_sync=16m;max_background_flushes=3;max_b
 
 EOF
 
-numactl --interleave=all ./percona-server-mongodb-3.0.8-1.2/bin/mongod \
+[ -z "$VERSION" ] && VERSION=3.0.8-1.2
+
+numactl --interleave=all ./percona-server-mongodb-$VERSION/bin/mongod \
   $* \
   --dbpath=/mnt/i3600/PERF-15/rocks \
   --storageEngine=rocksdb \
