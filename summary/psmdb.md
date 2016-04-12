@@ -2,7 +2,7 @@
 
 title: "Percona Server for MongoDB: Storage Engine comparison"
 author: "Percona Lab"
-generated on:April 11, 2016
+generated on:April 12, 2016
 output:
   md_document:
     variant: markdown_github
@@ -10,7 +10,7 @@ output:
 ---
 
 
-# Percona Server for MongoDB 3.2.0-1.0 - data set that fits in RAM 
+# Percona Server for MongoDB 3.0.10-1.5 and 3.2.0-1.0 - data set that fits in RAM 
 
 ## Setup
 
@@ -22,8 +22,6 @@ output:
 ## Throughput per threads and workload
 
 ![plot of chunk global](figure/global-1.png)![plot of chunk global](figure/global-2.png)
-
-![plot of chunk summary](figure/summary-1.png)![plot of chunk summary](figure/summary-2.png)
 
 ## Throughput per threads and workload, summary for each engine
 
