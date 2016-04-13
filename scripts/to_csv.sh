@@ -2,8 +2,9 @@
 #This expects csv_from_sysbench and csv_to_png from https://github.com/Percona-Lab/benchmark_automation/ to be on the PATH 
 #It must be executed from within the scripts directory, as it uses relative paths
 
-for version in "" "3.0"; do
+for version in "" "3.0" "upstream-3.0" "upstream-3.2"; do
     for engine in ft wt rocks; do
+	echo $version|grep upstream>/dev/null && [ "$engine" != "wt" ] && continue
 	env _ONLYHEADER=1 csv_from_sysbench.sh ../raw${version}/sysbench-${engine}-2000000-1-oltp.txt psfm 2000000 1 > ../alldata-${engine}${version}.csv
 	for workload in oltp oltp_ro; do
 	    for f in ../raw${version}/sysbench-$engine-*$workload.txt; do 
@@ -14,6 +15,7 @@ for version in "" "3.0"; do
     done
     echo "engine,$(head -1 ../alldata-ft.csv)" > ../alldata${version}.csv
     for engine in ft wt rocks; do
+       echo $version|grep upstream>/dev/null && [ "$engine" != "wt" ] && continue
        cat ../alldata-${engine}${version}.csv | grep -v workload|while read l; do
 					  echo "$engine,$l" >> ../alldata${version}.csv
        done
@@ -21,13 +23,20 @@ for version in "" "3.0"; do
 done
 
 echo "version,engine_and_version,$(head -1 ../alldata.csv)" > ../alldata-bothversions.csv
-for f in ../alldata.csv ../alldata3.0.csv; do
-    version=3.2 
-    if [ "$f" == "../alldata3.0.csv" ]; then
-	version=3.0
-    fi
+for f in ../alldata.csv ../alldata3.0.csv ../alldataupstream-3.0.csv ../alldataupstream-3.2.csv; do
+    version=NA
+    case $f in
+	"../alldata.csv")
+	    version="psmdb3.2";;
+	"../alldata3.0.csv")
+	    version="psmdb3.0";;
+	"../alldataupstream-3.0.csv")
+	    version="upstream3.0";;
+	"../alldataupstream-3.2.csv")
+	    version="upstream3.2";
+    esac
     cat $f | grep -v workload|while read l; do
 				  engine=$(echo $l|awk -F, '{print $1}')
-				  echo "$version,$engine$version,$l" >> ../alldata-bothversions.csv
+				  echo "$version,${engine}_${version},$l" >> ../alldata-bothversions.csv
     done
 done

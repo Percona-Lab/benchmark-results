@@ -2,7 +2,7 @@
 
 title: "Percona Server for MongoDB: Storage Engine comparison"
 author: "Percona Lab"
-generated on:April 12, 2016
+generated on:April 13, 2016
 output:
   md_document:
     variant: markdown_github
@@ -23,7 +23,9 @@ output:
 
 ![plot of chunk global](figure/global-1.png)![plot of chunk global](figure/global-2.png)
 
-## Throughput per threads and workload, summary for each engine
+## Throughput per threads and workload, summary for each version and engine
+
+Versions marked with an 'M' correspond to upstream MongoDB, and with a 'P' to Percona Server for MongoDB
 
 ![plot of chunk engines](figure/engines-1.png)![plot of chunk engines](figure/engines-2.png)![plot of chunk engines](figure/engines-3.png)
 
