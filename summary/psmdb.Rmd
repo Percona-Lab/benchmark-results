@@ -17,28 +17,12 @@ library(reshape2)
 library(knitr)
 library(plyr)
 
-build_label_arr <- function(value, dimension) {
-    res <- c()
-    for (i in 1:dimension) {
-    	res[i] = value
-    }
-    return (res)
-}
-
 label_custom <- function(variable, value) {
-	if (variable=="version") {
-		if (value=="psmdb3.0") {
-			return (build_label_arr("P3.0",length(value)))
-		} else if (value=="psmdb3.2") {
-		    return (build_label_arr("P3.2",length(value)))
-		} else if (value=="upstream3.0") {
-		    return (build_label_arr("M3.0",length(value)))
-		} else if (value=="upstream3.2") {
-		    return (build_label_arr("M3.2",length(value)))
-		}
-	} else {
-		return (as.character(value))
-	}
+    if (variable=="engine_and_version") {
+       return(sub("upstream","M",sub("psmdb","P",value)))
+    } else {
+      return (as.character(value))
+    }
 }
 
 data <- read.csv("../alldata-bothversions.csv", header=T)
@@ -86,11 +70,11 @@ Versions marked with an 'M' correspond to upstream MongoDB, and with a 'P' to Pe
 
 ```{r engines,  fig.width=16, warning=FALSE, echo=FALSE}
 
-print(ggplot(data_ft, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(engine + version~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (PerconaFT)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_ft$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
+print(ggplot(data_ft, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(engine_and_version ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (PerconaFT)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_ft$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
 
-print(ggplot(data_wt, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(engine + version ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (WiredTiger)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_wt$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
+print(ggplot(data_wt, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(engine_and_version ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (WiredTiger)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_wt$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
 
-print(ggplot(data_rocks, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(engine + version ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (RocksDB)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_rocks$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
+print(ggplot(data_rocks, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(engine_and_version ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (RocksDB)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_rocks$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
 
 
 ```
