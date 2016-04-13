@@ -18,6 +18,7 @@ output:
 * CPU: 48 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz
 * 128GB RAM (64GB storage engine cache)
 * sysbench with mongodb support, 16 collections x 2M documents (~6GB compressed), uniform distribution. 
+* For WiredTiger, MongoDB 3.0.11 and 3.2.4 were also tested. 
 
 ## Throughput per threads and workload
 
