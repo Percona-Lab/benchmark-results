@@ -18,25 +18,32 @@ library(knitr)
 library(plyr)
 
 label_custom <- function(variable, value) {
-    if (variable=="engine_and_version") {
+    if (variable=="version") {
        return(sub("upstream","M",sub("psmdb","P",value)))
     } else {
       return (as.character(value))
     }
 }
 
-data <- read.csv("../alldata-bothversions.csv", header=T)
+data <- read.csv("../alldata-bothversions-bothdistributions.csv", header=T)
+data <- cbind(data, version_and_engine = paste(data$version, data$engine))
+
+data_uniform <- subset(data, distribution == "uniform")
+data_pareto <- subset(data, distribution == "pareto")
 
 data_ft <- subset(data, engine == "ft")
 data_wt <- subset(data, engine == "wt")
 data_rocks <- subset(data, engine == "rocks")
-data_stable_tps_oltp <- subset(data, ts>=300 & workload=="oltp")
-data_stable_tps_oltp_ro <- subset(data, ts>=300 & workload=="oltp_ro")
 
-aggdata_oltp <- aggregate(data_stable_tps_oltp$tps, by=list(data_stable_tps_oltp$engine_and_version, data_stable_tps_oltp$user_provided_threads), FUN=mean, na.rm=TRUE)
-aggdata_oltp_ro <- aggregate(data_stable_tps_oltp_ro$tps, by=list(data_stable_tps_oltp_ro$engine_and_version, data_stable_tps_oltp_ro$user_provided_threads), FUN=mean, na.rm=TRUE)
+data_stable_oltp_pareto <- subset(data_pareto, ts>=300 & workload=="oltp")
+data_stable_oltp_uniform <- subset(data_uniform, ts>=300 & workload=="oltp")
+data_stable_oltp_ro_pareto <- subset(data_pareto, ts>=300 & workload=="oltp_ro")
+data_stable_oltp_ro_uniform <- subset(data_uniform, ts>=300 & workload=="oltp_ro")
 
-print(head(aggdata_oltp))
+aggdata_oltp_pareto <- aggregate(data_stable_oltp_pareto$tps, by=list(data_stable_oltp_pareto$version_and_engine, data_stable_oltp_pareto$user_provided_threads), FUN=mean, na.rm=TRUE)
+aggdata_oltp_uniform <- aggregate(data_stable_oltp_uniform$tps, by=list(data_stable_oltp_uniform$version_and_engine, data_stable_oltp_uniform$user_provided_threads), FUN=mean, na.rm=TRUE)
+aggdata_oltp_ro_pareto <- aggregate(data_stable_oltp_ro_pareto$tps, by=list(data_stable_oltp_ro_pareto$version_and_engine, data_stable_oltp_ro_pareto$user_provided_threads), FUN=mean, na.rm=TRUE)
+aggdata_oltp_ro_uniform <- aggregate(data_stable_oltp_ro_uniform$tps, by=list(data_stable_oltp_ro_uniform$version_and_engine, data_stable_oltp_ro_uniform$user_provided_threads), FUN=mean, na.rm=TRUE)
 
 nothreads <- c(1,2,4,8,16,24,32,40,48,64,128,256,512)
 
@@ -48,69 +55,73 @@ nothreads <- c(1,2,4,8,16,24,32,40,48,64,128,256,512)
 * Client (sysbench) and server are on the same machine
 * CPU: 48 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz
 * 128GB RAM (64GB storage engine cache)
-* sysbench with mongodb support, 16 collections x 2M documents (~6GB compressed), uniform distribution. 
+* sysbench with mongodb support, 16 collections x 2M documents (~6GB compressed), uniform and pareto distributions. 
 * For WiredTiger, MongoDB 3.0.11 and 3.2.4 were also tested. 
 
 ## Throughput per threads and workload
 
-```{r global, fig.width=16, warning=FALSE, echo=FALSE}
+```{r global, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 
-ss=subset(aggdata_oltp)
-ss2=subset(aggdata_oltp_ro)
+m <- ggplot(aggdata_oltp_pareto, aes(x=as.factor(Group.2),y=as.numeric(aggdata_oltp_pareto$x),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=4) + labs(x="Threads",y="Throughput,tps",title="sysbench OLTP - Pareto")+scale_color_tableau(name="Engine & Version")+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,data_stable_oltp_pareto$tps)),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
 
-m <- ggplot(ss, aes(x=as.factor(Group.2),y=as.numeric(x),color=as.factor(Group.1),group=Group.1))
-m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysbench OLTP")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,data_stable_tps_oltp$tps)),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24))
+m <- ggplot(aggdata_oltp_uniform, aes(x=as.factor(Group.2),y=as.numeric(aggdata_oltp_uniform$x),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=4) + labs(x="Threads",y="Throughput,tps",title="sysbench OLTP - Uniform")+scale_color_tableau(name="Engine & Version")+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,data_stable_oltp_uniform$tps)),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
 
-m <- ggplot(ss2, aes(x=as.factor(Group.2),y=as.numeric(x),color=as.factor(Group.1),group=Group.1))
-m+geom_line()+geom_point(size=1)+labs(x="Threads",y="Throughput,tps",title="sysbench OLTP read only")+scale_color_tableau(name="Version")+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,data_stable_tps_oltp_ro$tps)),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24))
+m <- ggplot(aggdata_oltp_ro_pareto, aes(x=as.factor(Group.2),y=as.numeric(aggdata_oltp_ro_pareto$x),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=4) + labs(x="Threads",y="Throughput,tps",title="sysbench OLTP read only - Pareto")+scale_color_tableau(name="Engine & Version")+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,data_stable_oltp_ro_pareto$tps)),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
+
+m <- ggplot(aggdata_oltp_ro_uniform, aes(x=as.factor(Group.2),y=as.numeric(aggdata_oltp_ro_uniform$x),color=as.factor(Group.1),group=Group.1))
+m+geom_line()+geom_point(size=4) + labs(x="Threads",y="Throughput,tps",title="sysbench OLTP read only - Uniform")+scale_color_tableau(name="Engine & Version")+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,data_stable_oltp_ro_uniform$tps)),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
 ```
 
 ## Throughput per threads and workload, summary for each version and engine
 
 Versions marked with an 'M' correspond to upstream MongoDB, and with a 'P' to Percona Server for MongoDB
 
-```{r engines,  fig.width=16, warning=FALSE, echo=FALSE}
+```{r engines,  fig.width=36, fig.height=26, warning=FALSE, echo=FALSE}
 
-print(ggplot(data_ft, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(engine_and_version ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (PerconaFT)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_ft$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
+print(ggplot(data_ft, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter(size=4) + scale_colour_discrete(name = "") + facet_grid(engine + version + distribution ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (PerconaFT)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_ft$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60)))
 
-print(ggplot(data_wt, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(engine_and_version ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (WiredTiger)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_wt$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
+print(ggplot(data_wt, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter(size=4) + scale_colour_discrete(name = "") + facet_grid(engine + version +distribution ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (WiredTiger)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_wt$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60)))
 
-print(ggplot(data_rocks, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(engine_and_version ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (RocksDB)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_rocks$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
+print(ggplot(data_rocks, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter(size=4) + scale_colour_discrete(name = "") + facet_grid(engine + version +distribution ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (RocksDB)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data_rocks$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60)))
 
 
 ```
 
 ## Throughput per threads and workload, details. 
+## Throughput per threads and workload, PerconaFT
 
-```{r ft,  fig.width=16, warning=FALSE, echo=FALSE}
+```{r ft,  fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 
 for (t in nothreads) {
     subdata <- subset(data_ft, threads == t)
 	gtitle <- paste("Percona Server for MongoDB / throughput (PerconaFT/", t," threads)")
-	print(ggplot(subdata, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(. ~ engine_and_version) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle(gtitle) + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,subdata$tps)))  + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
+	print(ggplot(subdata, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(distribution ~ version_and_engine) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle(gtitle) + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,subdata$tps)))  + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60)))
 }
 ```
 
 ## Throughput per threads and workload, WiredTiger
 
-```{r wt,  fig.width=16, warning=FALSE, echo=FALSE}
+```{r wt,  fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 
 
 for (t in nothreads) {
     subdata <- subset(data_wt, threads == t)
 	gtitle <- paste("Percona Server for MongoDB / throughput (WiredTiger/", t," threads)")
-	print(ggplot(subdata, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(. ~ engine_and_version) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle(gtitle) + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,subdata$tps)))  + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
+	print(ggplot(subdata, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(distribution ~ version_and_engine) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle(gtitle) + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,subdata$tps)))  + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60)))
 }
 ```
 
 ## Throughput per threads and workload, RocksDB
 
-```{r rocks,  fig.width=16, warning=FALSE, echo=FALSE}
+```{r rocks,  fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 
 
 for (t in nothreads) {
     subdata <- subset(data_rocks, threads == t)
 	gtitle <- paste("Percona Server for MongoDB / throughput (RocksDB/", t," threads)")
-	print(ggplot(subdata, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(. ~ engine_and_version) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle(gtitle) + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,subdata$tps)))  + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=20), strip.text=element_text(size=24)))
+	print(ggplot(subdata, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter() + scale_colour_discrete(name = "") + facet_grid(distribution ~ version_and_engine) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle(gtitle) + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,subdata$tps)))  + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60)))
 }
 ```

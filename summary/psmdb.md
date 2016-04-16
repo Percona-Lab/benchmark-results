@@ -2,7 +2,7 @@
 
 title: "Percona Server for MongoDB: Storage Engine comparison"
 author: "Percona Lab"
-generated on:April 13, 2016
+generated on:April 15, 2016
 output:
   md_document:
     variant: markdown_github
@@ -17,12 +17,12 @@ output:
 * Client (sysbench) and server are on the same machine
 * CPU: 48 logical CPU threads servers Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz
 * 128GB RAM (64GB storage engine cache)
-* sysbench with mongodb support, 16 collections x 2M documents (~6GB compressed), uniform distribution. 
+* sysbench with mongodb support, 16 collections x 2M documents (~6GB compressed), uniform and pareto distributions. 
 * For WiredTiger, MongoDB 3.0.11 and 3.2.4 were also tested. 
 
 ## Throughput per threads and workload
 
-![plot of chunk global](figure/global-1.png)![plot of chunk global](figure/global-2.png)
+![plot of chunk global](figure/global-1.png)![plot of chunk global](figure/global-2.png)![plot of chunk global](figure/global-3.png)![plot of chunk global](figure/global-4.png)
 
 ## Throughput per threads and workload, summary for each version and engine
 
@@ -31,6 +31,7 @@ Versions marked with an 'M' correspond to upstream MongoDB, and with a 'P' to Pe
 ![plot of chunk engines](figure/engines-1.png)![plot of chunk engines](figure/engines-2.png)![plot of chunk engines](figure/engines-3.png)
 
 ## Throughput per threads and workload, details. 
+## Throughput per threads and workload, PerconaFT
 
 ![plot of chunk ft](figure/ft-1.png)![plot of chunk ft](figure/ft-2.png)![plot of chunk ft](figure/ft-3.png)![plot of chunk ft](figure/ft-4.png)![plot of chunk ft](figure/ft-5.png)![plot of chunk ft](figure/ft-6.png)![plot of chunk ft](figure/ft-7.png)![plot of chunk ft](figure/ft-8.png)![plot of chunk ft](figure/ft-9.png)![plot of chunk ft](figure/ft-10.png)![plot of chunk ft](figure/ft-11.png)![plot of chunk ft](figure/ft-12.png)![plot of chunk ft](figure/ft-13.png)
 
