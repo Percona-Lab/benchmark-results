@@ -2,7 +2,7 @@
 
 title: "Percona Server for MongoDB: Storage Engine comparison"
 author: "Percona Lab"
-generated on:April 24, 2016
+generated on:May 02, 2016
 output:
   md_document:
     variant: markdown_github
@@ -25,22 +25,12 @@ output:
 
 ## Throughput per threads and workload, summary for engine
 
-
-```
-## Error: Faceting variables must have at least one value
-```
-
-![plot of chunk engines](figure/engines-1.png)![plot of chunk engines](figure/engines-2.png)
+![plot of chunk engines](figure/engines-1.png)![plot of chunk engines](figure/engines-2.png)![plot of chunk engines](figure/engines-3.png)
 
 ## Throughput per threads and workload, details. 
 ## Throughput per threads and workload, PerconaFT
 
-
-```
-## Error: Faceting variables must have at least one value
-```
-
-![plot of chunk ft](figure/ft-1.png)
+![plot of chunk ft](figure/ft-1.png)![plot of chunk ft](figure/ft-2.png)![plot of chunk ft](figure/ft-3.png)![plot of chunk ft](figure/ft-4.png)![plot of chunk ft](figure/ft-5.png)![plot of chunk ft](figure/ft-6.png)![plot of chunk ft](figure/ft-7.png)![plot of chunk ft](figure/ft-8.png)![plot of chunk ft](figure/ft-9.png)![plot of chunk ft](figure/ft-10.png)![plot of chunk ft](figure/ft-11.png)![plot of chunk ft](figure/ft-12.png)![plot of chunk ft](figure/ft-13.png)
 
 ## Throughput per threads and workload, WiredTiger
 
