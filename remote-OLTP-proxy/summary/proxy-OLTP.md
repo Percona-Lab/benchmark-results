@@ -15,32 +15,8 @@ Setup
 Results
 -------
 
-![](proxy-OLTP_files/figure-markdown_github/i1-1.png)
-
-### MaxScale variance on high threads
-
-![](proxy-OLTP_files/figure-markdown_github/i2-1.png)
-
 ### Relative performance
 
 base value: MySQL 5.7
 
 ![](proxy-OLTP_files/figure-markdown_github/schema-relative-1.png)
-
-Previous Results with proxysql
-------------------------------
-
--   Vanilla MySQL 5.7
--   ProxySQL `mysql-threads=16`
--   MaxScale 1.3.0
--   MaxScale `threads=4`
--   MaxScale `threads=8`
--   MaxScale `threads=16`
-
-ProxySQL is running on the same host with sysbench, connected via unix-socket
-
-![](proxy-OLTP_files/figure-markdown_github/versions-1.png)
-
-### Relative performance
-
-base value: MySQL 5.7
