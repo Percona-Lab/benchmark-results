@@ -17,8 +17,9 @@ output:
 * Client and server on different (equal) machines.
 * Client sofwware is sysbench (https://github.com/Percona-Lab/sysbench/tree/dev-mongodb-support).
 * CPU: 56 logical CPU threads (Intel(R) Xeon(R) CPU E5-2683 v3 @ 2.00GHz).
-* 20GB RAM (limited via cgroup).
-* sysbench with mongodb support, 16 collections x 60M documents (~50G uncompressed), uniform and pareto distributions. 
+* Memory: 20GB (limited via cgroup).
+* Disk: Seagate Enterprise  Performance 10K HDD (512e) in RAID1
+* sysbench with mongodb support, 16 collections x 60M documents (~200G uncompressed), uniform and pareto distributions. 
 
 ## Throughput per threads and workload
 
