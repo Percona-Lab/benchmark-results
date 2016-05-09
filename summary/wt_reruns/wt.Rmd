@@ -1,0 +1,69 @@
+---
+
+title: "Percona Server for MongoDB: Storage Engine comparison (WiredTiger reruns)"
+author: "Percona Lab"
+generated on:`r format(Sys.Date(), "%B %d, %Y")`
+output:
+  md_document:
+    variant: markdown_github
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+library(plyr)
+
+label_custom <- function(variable, value) {
+    if (variable=="version") {
+       return(sub("upstream","M",sub("psmdb","P",value)))
+    } else {
+      return (as.character(value))
+    }
+}
+
+data <- read.csv("../../wt_reruns.csv", header=T)
+
+data_oltp_uniform <- subset(data,  workload=="oltp")
+data_oltp_ro_uniform <- subset(data,  workload=="oltp_ro")
+
+aggdata_oltp_uniform <- aggregate(data_oltp_uniform$tps, by=list(data_oltp_uniform$engine, data_oltp_uniform$user_provided_threads), FUN=function(x) quantile(x, probs = 0.99))
+aggdata_oltp_ro_uniform <- aggregate(data_oltp_ro_uniform$tps, by=list(data_oltp_ro_uniform$engine, data_oltp_ro_uniform$user_provided_threads), FUN=function(x) quantile(x, probs = 0.99))
+
+nothreads <- c(48,128,512)
+
+```
+# Percona Server for MongoDB 3.2.0-1.0 - data that does not fit in RAM 
+
+## WiredTiger reruns
+
+These were obtained by running the same benchmark, with the following changes to WiredTiger's configuration:
+- No compression for journal
+- syncdelay set to 900
+
+## Throughput per threads and workload, WiredTiger 
+
+```{r engines,  fig.width=36, fig.height=26, warning=FALSE, echo=FALSE}
+
+print(ggplot(data, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter(size=4) + scale_colour_discrete(name = "") + facet_grid( distribution ~ user_provided_threads, labeller=label_custom) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle("Percona Server for MongoDB / throughput per threads (PerconaFT)") + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,data$tps)))  + scale_x_discrete(breaks = c(600)) + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60)))
+
+
+
+
+```
+
+## Throughput per threads and workload, WiredTiger
+
+```{r wt,  fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
+
+
+for (t in nothreads) {
+    subdata <- subset(data, threads == t)
+	gtitle <- paste("Percona Server for MongoDB / throughput (WiredTiger/", t," threads)")
+	print(ggplot(subdata, aes(x=ts, y=tps, colour=as.factor(workload))) + geom_jitter(size=4) + scale_colour_discrete(name = "") + facet_grid(. ~ distribution) + xlab("Time in seconds (10 sec interval)") + ylab("Throughput (read/write ops per second)") + ggtitle(gtitle) + scale_y_continuous(breaks = extended_range_breaks()(rbind(0,subdata$tps)))  + expand_limits(x=0, y=0) + theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60)))
+}
+```
+
