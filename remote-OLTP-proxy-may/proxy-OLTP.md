@@ -15,6 +15,14 @@ Setup
 Results
 -------
 
+![](proxy-OLTP_files/figure-markdown_github/proxysql-1.png)
+
+![](proxy-OLTP_files/figure-markdown_github/proxysql-ff-1.png)
+
+![](proxy-OLTP_files/figure-markdown_github/proxysql-maxscale-1.png)
+
+![](proxy-OLTP_files/figure-markdown_github/proxysql-maxscale-16thr-1.png)
+
 ![](proxy-OLTP_files/figure-markdown_github/test-1.png)
 
 ### Relative performance

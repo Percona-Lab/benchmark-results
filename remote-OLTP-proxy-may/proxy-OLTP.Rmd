@@ -18,7 +18,7 @@ library(ggthemes)
 library(reshape2)
 library(knitr)
 
-tm<-theme(legend.position="bottom",
+tm<-theme(legend.position="right",
           strip.background = element_rect(colour="red", fill="#CCCCFF"))
 
 guides(colour = guide_legend(override.aes = list(size=4)))
@@ -45,6 +45,49 @@ con <- dbConnect(MySQL(), user="sbtest", dbname="benchmarks", host="10.20.2.4")
 
 ## Results
 
+```{r proxysql, echo=FALSE, fig.height=8, fig.width=10, warning=FALSE}
+title <- "[network] sysbench OLTP RO memory - ProxySQL (16 threads)"
+p2 = dbGetQuery( con,'select sr.runid runidfull,sr.threads, avg(tps) tps, STDDEV_POP(tps) se,avg(rt) rt, STDDEV_POP(rt) sert
+                 from sbtest_results sr,(select runid,threads from sbtest_results where (runid like "OLTP-RO-proxy#smblade01-net#%") group by runid,threads having count(*) > 10) t 
+                 where sec>100 and sec<600 and (sr.runid like "OLTP-RO-proxy#smblade01-net#%")
+                 and sr.runid=t.runid and sr.threads=t.threads GROUP BY sr.runid, sr.threads
+                 ' )
+#(sr.runid like "OLTP-RW-MEM%mysql57" or sr.runid like "OLTP-RW-MEM%tp64%" or sr.runid like "OLTP-RW-MEM%proxy200%"
+p2$runid <- str_extract(p2$runidfull, "([^#]*)$")
+
+ss=subset(p2,runid %in% c("mysql57.long2","mysql57.proxysql.oldintel") )
+m <- ggplot(ss, aes(x=as.factor(threads),y=as.numeric(tps),color=runid,group=runid))
+m+geom_line()+geom_errorbar(aes(ymin=tps-se, ymax=tps+se),width=0.15)+labs(x="Threads",y="Throughput, tps",title=title)+scale_y_continuous(breaks=seq(0, 20000, 1000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm+scale_color_tableau(name="Version")
+
+```
+
+```{r proxysql-ff, echo=FALSE, fig.height=8, fig.width=10, warning=FALSE}
+title <- "[network] sysbench OLTP RO memory - ProxySQL (16 threads)"
+
+ss=subset(p2,runid %in% c("mysql57.long2","mysql57.proxysql.oldintel","mysql57.proxysql.16thr.fast-forward") )
+m <- ggplot(ss, aes(x=as.factor(threads),y=as.numeric(tps),color=runid,group=runid))
+m+geom_line()+geom_errorbar(aes(ymin=tps-se, ymax=tps+se),width=0.15)+labs(x="Threads",y="Throughput, tps",title=title)+scale_y_continuous(breaks=seq(0, 20000, 1000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm+scale_color_tableau(name="Version")
+
+```
+
+```{r proxysql-maxscale, echo=FALSE, fig.height=8, fig.width=10, warning=FALSE}
+title <- "[network] sysbench OLTP RO memory"
+
+ss=subset(p2,runid %in% c("mysql57.long2","mysql57.proxysql.oldintel","mysql57.maxscale.8thr") )
+m <- ggplot(ss, aes(x=as.factor(threads),y=as.numeric(tps),color=runid,group=runid))
+m+geom_line()+geom_errorbar(aes(ymin=tps-se, ymax=tps+se),width=0.15)+labs(x="Threads",y="Throughput, tps",title=title)+scale_y_continuous(breaks=seq(0, 20000, 1000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm+scale_color_tableau(name="Version")
+
+```
+
+```{r proxysql-maxscale-16thr, echo=FALSE, fig.height=8, fig.width=10, warning=FALSE}
+title <- "[network] sysbench OLTP RO memory"
+
+ss=subset(p2,runid %in% c("mysql57.long2","mysql57.maxscale.16thr","mysql57.maxscale.8thr") )
+m <- ggplot(ss, aes(x=as.factor(threads),y=as.numeric(tps),color=runid,group=runid))
+m+geom_line()+geom_errorbar(aes(ymin=tps-se, ymax=tps+se),width=0.15)+labs(x="Threads",y="Throughput, tps",title=title)+scale_y_continuous(breaks=seq(0, 20000, 1000),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+tm+scale_color_tableau(name="Version")
+
+```
+
 ```{r test, echo=FALSE, fig.height=8, fig.width=10, warning=FALSE}
 title <- "[network] sysbench OLTP RO memory"
 p2 = dbGetQuery( con,'select sr.runid runidfull,sr.threads, avg(tps) tps, STDDEV_POP(tps) se,avg(rt) rt, STDDEV_POP(rt) sert
@@ -62,18 +105,6 @@ m+geom_line()+geom_errorbar(aes(ymin=tps-se, ymax=tps+se),width=0.15)+labs(x="Th
 
 ```
 
-
-```{r i1, echo=FALSE, warning=FALSE,fig.width=10, fig.height=8}
-p2 = dbGetQuery( con,'select sr.runid runidfull,sr.threads, tps, rt
-                 from sbtest_results sr,(select runid,threads from sbtest_results group by runid,threads having count(*) > 10) t 
-                 where sec>100 and sec<600 and (sr.runid like "OLTP-RO-proxy#smblade01-net%") and
-                 (sr.runid like "%maxscale%" or sr.runid like "%proxysql%" or sr.runid like "%mysql57.long2%")
-                 and sr.runid=t.runid and sr.threads=t.threads
-                 ' )
-p2$runid <- str_extract(p2$runidfull, "([^#]*)$")
-aggdata <-aggregate(p2, by=list(p2$runid,p2$threads),FUN=mean, na.rm=TRUE)
-
-```
 
 
 ### Relative performance 
