@@ -111,7 +111,7 @@ m+geom_line()+geom_errorbar(aes(ymin=tps-se, ymax=tps+se),width=0.15)+labs(x="Th
 
 base value: MySQL 5.7
 
-```{r schema-relative, echo=FALSE, fig.height=4, fig.width=10, message=FALSE, warning=FALSE}
+```{r schema-relative-2, echo=FALSE, fig.height=4, fig.width=10, message=FALSE, warning=FALSE}
 Res<-data.frame(aggdata$Group.1, aggdata$Group.2, aggdata$tps)
 
 wide_format <- dcast(subset(Res), aggdata.Group.2 ~ aggdata.Group.1)
