@@ -58,3 +58,40 @@ Threads started!
 [ 470s] threads: 512, tps: 54264.10, reads: 162792.49, writes: 0.00, response time: 40.79ms (95%), errors: 0.00, reconnects:  0.00
 [ 480s] threads: 512, tps: 54296.12, reads: 162888.76, writes: 0.00, response time: 40.64ms (95%), errors: 0.00, reconnects:  0.00
 [ 490s] threads: 512, tps: 53707.50, reads: 161122.20, writes: 0.00, response time: 40.81ms (95%), errors: 0.00, reconnects:  0.00
+[ 500s] threads: 512, tps: 53436.50, reads: 160309.09, writes: 0.00, response time: 40.96ms (95%), errors: 0.00, reconnects:  0.00
+[ 510s] threads: 512, tps: 53637.70, reads: 160913.81, writes: 0.00, response time: 40.57ms (95%), errors: 0.00, reconnects:  0.00
+[ 520s] threads: 512, tps: 53600.09, reads: 160800.48, writes: 0.00, response time: 40.75ms (95%), errors: 0.00, reconnects:  0.00
+[ 530s] threads: 512, tps: 53495.60, reads: 160485.99, writes: 0.00, response time: 40.65ms (95%), errors: 0.00, reconnects:  0.00
+[ 540s] threads: 512, tps: 53542.81, reads: 160627.93, writes: 0.00, response time: 40.89ms (95%), errors: 0.00, reconnects:  0.00
+[ 550s] threads: 512, tps: 55798.92, reads: 167493.16, writes: 0.00, response time: 40.18ms (95%), errors: 0.00, reconnects:  0.00
+[ 560s] threads: 512, tps: 56326.88, reads: 168980.24, writes: 0.00, response time: 39.72ms (95%), errors: 0.00, reconnects:  0.00
+[ 570s] threads: 512, tps: 56233.50, reads: 168701.09, writes: 0.00, response time: 39.73ms (95%), errors: 0.00, reconnects:  0.00
+[ 580s] threads: 512, tps: 56292.81, reads: 168878.74, writes: 0.00, response time: 39.72ms (95%), errors: 0.00, reconnects:  0.00
+[ 590s] threads: 512, tps: 56423.59, reads: 169269.88, writes: 0.00, response time: 39.54ms (95%), errors: 0.00, reconnects:  0.00
+[ 600s] threads: 507, tps: 56241.80, reads: 168725.09, writes: 0.00, response time: 39.98ms (95%), errors: 0.00, reconnects:  0.00
+OLTP test statistics:
+    queries performed:
+        read:                            97140417
+        write:                           0
+        other:                           32380139
+        total:                           129520556
+    transactions:                        32380139 (53964.96 per sec.)
+    read/write requests:                 97140417 (161894.89 per sec.)
+    other operations:                    32380139 (53964.96 per sec.)
+    ignored errors:                      0      (0.00 per sec.)
+    reconnects:                          0      (0.00 per sec.)
+
+General statistics:
+    total time:                          600.0215s
+    total number of events:              32380139
+    total time taken by event execution: 307152.4715s
+    response time:
+         min:                                  0.32ms
+         avg:                                  9.49ms
+         max:                               3253.33ms
+         approx.  95 percentile:              41.42ms
+
+Threads fairness:
+    events (avg/stddev):           63242.4590/407.82
+    execution time (avg/stddev):   599.9072/0.01
+
