@@ -22,22 +22,6 @@ stop_mongod()
     }
 }
 
-restore_datadir()
-{
-    [ $# -eq 0 ] && echo "missing args for restore_datadir" && return 
-    mongopath=$1
-    datapath=$2
-    dbpath=$3
-    engine=$4
-    size=$5
-    distribution=$6
-    stop_mongod
-    rm -rf $dbpath/data/$engine-$size
-    mkdir $dbpath/data/$engine-$size
-    'cp' -rv $datapath/$engine/ $dbpath/data/$engine-$size-$distribution
-    echo "Restored datadir from $datapath"
-}
-
 restart_mongod()
 {
     [ $# -eq 0 ] && echo "missing args for restore_datadir" && return 
@@ -100,34 +84,9 @@ time=300
 
 for engine in rocks wt; do
     for workload in iobound iobound_heavy cpubound; do
-	for distribution in uniform pareto; do
-	    for dev in $hdd $slowssd $fastssd; do
-		drive=fastssd
-		dbpath=$fastssd
-		size=small
-		datapath=/mnt/storage/PERF-15/${distribution}_ps32-$engine
-		if [ "$workload" == "cpubound" -a "$dev" != "$fastssd" ]; then
-		    continue
-		fi # if workload is cpubound and dev is not fastssd
-		if [ "$workload" == "iobound" -o "$workload" == "iobound_heavy" ]; then
-		    datapath=/mnt/storage/PERF-22/backups_large/${distribution}_3.2-$engine
-		    size=large
-		fi # if workload is iobound or iobound_heavy
-		dbpath=$dev
-		[ "$dbpath" == "$hdd" ] && drive=hdd
-		[ "$dbpath" == "$slowssd" ] && drive=slowssd
-		restore_datadir  mongo/percona-server-mongodb-3.2.4-1.0rc2 $datapath $dbpath $engine $size $distribution
-	    done
-	done
-    done
-done
-restore_datadir $mongopath $datapath $dbpath $engine 
-
-for engine in rocks wt; do
-    for workload in iobound iobound_heavy cpubound; do
-        size=10000000
+        colsize=10000000
 	memory=0
-        [ "$workload" == "iobound_heavy" -o "$workload" == "iobound" ] && size=60000000
+        [ "$workload" == "iobound_heavy" -o "$workload" == "iobound" ] && colsize=60000000
         [ "$workload" == "ibound_heavy" ] && memory=20 
 	for range_size in 1000 10000 100000; do
 	    for threads in 512 128 48 32 16 4 1; do
@@ -150,7 +109,8 @@ for engine in rocks wt; do
 			restart_mongod mongo/percona-server-mongodb-3.2.4-1.0rc2 $dbpath $engine $memory $size $distribution
 			echo -17 > /proc/$(pidof mongod)/oom_adj
 			tag="$workload-$range_size-$drive-$distribution-psfm32-$engine-$size-$threads-ranges_ro"
-			run_benchmark $time $threads $size $range_size $distribution $tag
+			run_benchmark $time $threads $colsize $range_size $distribution $tag
+	 		echo "validate log"; read
 		    done #for dev
 		done # for distribution
 	    done # for threads
