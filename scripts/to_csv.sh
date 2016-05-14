@@ -3,7 +3,7 @@
 #It must be executed from within the scripts directory, as it uses relative paths
 # sample file name for this benchmark: 
 # sysbench-iobound-1000-hdd-pareto-psfm32-rocks-60000000-512-ranges_ro.txt
-echo "disk,range_size,engine,distribution,$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/sysbench-iobound-10000-hdd-pareto-psfm32-rocks-60000000-1-ranges_ro.txt psfm 60000000 1)" > ../alldata.csv
+echo "disk,range_size,engine,distribution,$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/sysbench-iobound-1000-fastssd-pareto-psfm32-rocks-large-1-ranges_ro.txt psfm 60000000 1)" > ../alldata.csv
 
 for workload in iobound iobound_heavy cpubound; do
     for distribution in uniform pareto; do
@@ -11,7 +11,7 @@ for workload in iobound iobound_heavy cpubound; do
 	    for range_size in 10000 100000; do
 		for disk in hdd slowssd fastssd; do
 		    for f in ../raw/sysbench-$workload-$range_size-$disk-$distribution-psfm32-$engine-*; do
-			threads=$(echo $f|sed 's/.*[16]0000000-//g'|sed 's/-ranges.*//g')
+			threads=$(echo $f|sed 's/.*large-//g'|sed 's/.*small-//g'|sed 's/-ranges.*//g')
 			[ -f $f ] || continue
 			env _NOHEADER=1 csv_from_sysbench.sh $f $workload 2000000 $threads | while read l; do
 												echo "$disk,$range_size,$engine,$distribution,$l" >> ../alldata.csv
