@@ -8,7 +8,7 @@ echo "disk,range_size,engine,distribution,$(env _ONLYHEADER=1 csv_from_sysbench.
 for workload in iobound iobound_heavy cpubound; do
     for distribution in uniform pareto; do
 	for engine in wt rocks; do
-	    for range_size in 10000 100000; do
+	    for range_size in 1000 10000 100000; do
 		for disk in hdd slowssd fastssd; do
 		    for f in ../raw/sysbench-$workload-$range_size-$disk-$distribution-psfm32-$engine-*; do
 			threads=$(echo $f|sed 's/.*large-//g'|sed 's/.*small-//g'|sed 's/-ranges.*//g')

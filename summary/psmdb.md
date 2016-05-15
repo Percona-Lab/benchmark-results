@@ -2,7 +2,7 @@
 
 title: "Percona Server for MongoDB: Range Queries performance on RocksDB and WiredTiger"
 author: "Percona Lab"
-generated on:May 14, 2016
+generated on:May 15, 2016
 output:
   md_document:
     variant: markdown_github
@@ -31,76 +31,12 @@ output:
 
 ## Throughput per threads and workload, summary per engine
 
-
-```
-## Error: Faceting variables must have at least one value
-```
-
-```
-## The following objects are masked from data_wt_10000:
-## 
-##     disk, distribution, engine, range_size, reads, response_time,
-##     size, threads, tps, ts, user_provided_threads, workload,
-##     writes
-## 
-## The following objects are masked from data_wt_10000:
-## 
-##     disk, distribution, engine, range_size, reads, response_time,
-##     size, threads, tps, ts, user_provided_threads, workload,
-##     writes
-```
-
-![plot of chunk engines](figure/engines-1.png)
-
-```
-## The following objects are masked from data_wt_10000:
-## 
-##     disk, distribution, engine, range_size, reads, response_time,
-##     size, threads, tps, ts, user_provided_threads, workload,
-##     writes
-```
-
-![plot of chunk engines](figure/engines-2.png)
-
-```
-## The following objects are masked from data_wt_10000:
-## 
-##     disk, distribution, engine, range_size, reads, response_time,
-##     size, threads, tps, ts, user_provided_threads, workload,
-##     writes
-```
-
-![plot of chunk engines](figure/engines-3.png)
-
-```
-## The following objects are masked from data_wt_10000:
-## 
-##     disk, distribution, engine, range_size, reads, response_time,
-##     size, threads, tps, ts, user_provided_threads, workload,
-##     writes
-```
-
-![plot of chunk engines](figure/engines-4.png)
-
-```
-## The following objects are masked from data_wt_10000:
-## 
-##     disk, distribution, engine, range_size, reads, response_time,
-##     size, threads, tps, ts, user_provided_threads, workload,
-##     writes
-```
-
-![plot of chunk engines](figure/engines-5.png)![plot of chunk engines](figure/engines-6.png)
+![plot of chunk engines](figure/engines-1.png)![plot of chunk engines](figure/engines-2.png)![plot of chunk engines](figure/engines-3.png)![plot of chunk engines](figure/engines-4.png)![plot of chunk engines](figure/engines-5.png)![plot of chunk engines](figure/engines-6.png)![plot of chunk engines](figure/engines-7.png)![plot of chunk engines](figure/engines-8.png)![plot of chunk engines](figure/engines-9.png)![plot of chunk engines](figure/engines-10.png)![plot of chunk engines](figure/engines-11.png)![plot of chunk engines](figure/engines-12.png)
 
 ## Throughput per threads and workload, details. 
 ## Throughput per threads and workload, WiredTiger
 
-
-```
-## Error: Faceting variables must have at least one value
-```
-
-![plot of chunk wt](figure/wt-1.png)
+![plot of chunk wt](figure/wt-1.png)![plot of chunk wt](figure/wt-2.png)![plot of chunk wt](figure/wt-3.png)![plot of chunk wt](figure/wt-4.png)![plot of chunk wt](figure/wt-5.png)![plot of chunk wt](figure/wt-6.png)![plot of chunk wt](figure/wt-7.png)
 
 ## Throughput per threads and workload, RocksDB
 
