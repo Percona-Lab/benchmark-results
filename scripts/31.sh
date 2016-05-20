@@ -1,11 +1,19 @@
 #!/bin/bash
 
-export DATADIR=/mnt/storage/PERF-31/
+#export DATADIR=/mnt/storage/PERF-31/
+export HDD_DATADIR=/mnt/storage/PERF-31/
+export SSD_DATADIR=/mnt/i3600
+current_datadir()
+{
+  [ -z "$DATADIR" ] && echo $HDD_DATADIR || echo $DATADIR
+}
+
+
 export BACKUP_DIR=/mnt/storage/backup-PERF-31/
 export XB_DIR=/mnt/storage/xb-PERF-31/
 export PID_DIR=/home/fipar/PERF-31/
 export IB="innobackupex --defaults-file=/home/fipar/PERF-31/my.cnf --host=127.0.0.1 --user=root" 
-export TIME=1200
+export TIME=3600
 export SIZE=10000000
 export THREADS=16
 
@@ -19,6 +27,7 @@ sysbench_cmd()
 	--report-interval=1 \
 	--num-threads=$THREADS \
 	--mysql-db=sbtest \
+	--max-requests=999999999 \
 	--run-time=$TIME \
 	--test=/data/opt/alexey.s/sb2/tests/sysbench-standard/db/oltp.lua \
 	--mysql-table-engine=Innodb \
@@ -34,7 +43,7 @@ stop_mysqld()
 
 start_mysqld()
 {
-    mysqld_safe --defaults-file=/home/fipar/PERF-31/my.cnf &> mysqld_safe.log &
+    mysqld_safe --defaults-file=/home/fipar/PERF-31/my.cnf --datadir=$(current_datadir) &> mysqld_safe.log &
     sleep 1
 }
 
@@ -76,8 +85,8 @@ wait_for_mysqld()
 restore_datadir()
 {
     stop_mysqld
-    rm -rf $DATADIR/* 
-    cp -rv $BACKUP_DIR/* $DATADIR 
+    rm -rf $(current_datadir)/* 
+    cp -rv $BACKUP_DIR/* $(current_datadir) 
     start_mysqld
     echo -n "Waiting for mysqld to come up ... "
     wait_for_mysqld
@@ -163,4 +172,3 @@ for t in 1 4 8 16 32; do
     echo "Done"
  done # for t in ...
 }
-
