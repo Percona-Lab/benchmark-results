@@ -36,9 +36,9 @@ for type in baseline compression encryption; do
 			end_t=$(tail -1 ../raw/$disk/timestamps.$type-$extra.log)
 			echo "$disk,$type,$threads,$((end_t-start_t))" >> ../durations.csv
 			dev=$(eval "echo \$$disk")
-			echo "disk,busy,qtime,stime" > ../diskstats.csv
+			echo "disk,type,threads,busy,qtime,stime" > ../diskstats.csv
 			grep $dev ../raw/$disk/diskstats.$type-$extra.log|awk '{print $15, $18, $19}' | tr -d '%' |tr ' ' ','|while read l; do
-													       echo "$disk,$l" >> ../diskstats.csv
+													       echo "$disk,$type,$threads,$l" >> ../diskstats.csv
 													    done
 	    done # for f in ../$disk/
 	done # for engine
