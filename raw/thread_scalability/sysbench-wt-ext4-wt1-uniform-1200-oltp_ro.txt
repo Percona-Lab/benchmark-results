@@ -1,0 +1,69 @@
+sysbench 0.9:  multi-threaded system evaluation benchmark
+
+Running the test with following options:
+Number of threads: 1200
+Report intermediate results every 10 second(s)
+Initializing random number generator from current time
+
+
+setting write concern to 1
+Threads started!
+
+FATAL: error in distinct range (No suitable servers found (`serverselectiontryonce` set): [connection timeout calling ismaster on 'smblade04:27017'])
+[  10s] threads: 1200, tps: 10018.37, reads: 41253.18, writes: 0.00, response time: 213.65ms (95%), errors: 0.00, reconnects:  0.00
+[  20s] threads: 1200, tps: 9408.70, reads: 38623.10, writes: 0.00, response time: 287.69ms (95%), errors: 0.00, reconnects:  0.00
+[  30s] threads: 1200, tps: 9413.10, reads: 38653.00, writes: 0.00, response time: 286.83ms (95%), errors: 0.00, reconnects:  0.00
+[  40s] threads: 1200, tps: 9406.90, reads: 38673.00, writes: 0.00, response time: 287.26ms (95%), errors: 0.00, reconnects:  0.00
+[  50s] threads: 1200, tps: 9430.40, reads: 38744.30, writes: 0.00, response time: 286.66ms (95%), errors: 0.00, reconnects:  0.00
+[  60s] threads: 1200, tps: 9448.00, reads: 38784.80, writes: 0.00, response time: 286.14ms (95%), errors: 0.00, reconnects:  0.00
+[  70s] threads: 1200, tps: 9471.19, reads: 38904.16, writes: 0.00, response time: 285.20ms (95%), errors: 0.00, reconnects:  0.00
+[  80s] threads: 1200, tps: 9509.91, reads: 39106.23, writes: 0.00, response time: 284.10ms (95%), errors: 0.00, reconnects:  0.00
+[  90s] threads: 1200, tps: 9513.49, reads: 39083.57, writes: 0.00, response time: 284.01ms (95%), errors: 0.00, reconnects:  0.00
+[ 100s] threads: 1200, tps: 9502.41, reads: 39019.53, writes: 0.00, response time: 284.18ms (95%), errors: 0.00, reconnects:  0.00
+[ 110s] threads: 1200, tps: 9507.30, reads: 39022.30, writes: 0.00, response time: 284.18ms (95%), errors: 0.00, reconnects:  0.00
+[ 120s] threads: 1200, tps: 9513.50, reads: 39050.18, writes: 0.00, response time: 283.59ms (95%), errors: 0.00, reconnects:  0.00
+[ 130s] threads: 1200, tps: 9519.40, reads: 39098.32, writes: 0.00, response time: 283.42ms (95%), errors: 0.00, reconnects:  0.00
+[ 140s] threads: 1200, tps: 9529.30, reads: 39179.29, writes: 0.00, response time: 283.59ms (95%), errors: 0.00, reconnects:  0.00
+[ 150s] threads: 1200, tps: 9524.50, reads: 39145.02, writes: 0.00, response time: 283.42ms (95%), errors: 0.00, reconnects:  0.00
+[ 160s] threads: 1200, tps: 9519.09, reads: 39074.48, writes: 0.00, response time: 283.67ms (95%), errors: 0.00, reconnects:  0.00
+[ 170s] threads: 1200, tps: 9530.70, reads: 39186.72, writes: 0.00, response time: 283.16ms (95%), errors: 0.00, reconnects:  0.00
+[ 180s] threads: 1200, tps: 9523.20, reads: 39110.70, writes: 0.00, response time: 283.42ms (95%), errors: 0.00, reconnects:  0.00
+[ 190s] threads: 1200, tps: 9520.00, reads: 39100.20, writes: 0.00, response time: 283.59ms (95%), errors: 0.00, reconnects:  0.00
+[ 200s] threads: 1200, tps: 9527.20, reads: 39100.69, writes: 0.00, response time: 283.42ms (95%), errors: 0.00, reconnects:  0.00
+[ 210s] threads: 1200, tps: 9531.10, reads: 39115.91, writes: 0.00, response time: 283.50ms (95%), errors: 0.00, reconnects:  0.00
+[ 220s] threads: 1200, tps: 9543.70, reads: 39234.80, writes: 0.00, response time: 282.99ms (95%), errors: 0.00, reconnects:  0.00
+[ 230s] threads: 1200, tps: 9545.00, reads: 39159.80, writes: 0.00, response time: 282.82ms (95%), errors: 0.00, reconnects:  0.00
+[ 240s] threads: 1200, tps: 9543.20, reads: 39175.61, writes: 0.00, response time: 282.99ms (95%), errors: 0.00, reconnects:  0.00
+[ 250s] threads: 1200, tps: 9526.50, reads: 39147.68, writes: 0.00, response time: 283.16ms (95%), errors: 0.00, reconnects:  0.00
+[ 260s] threads: 1200, tps: 9537.20, reads: 39165.31, writes: 0.00, response time: 283.25ms (95%), errors: 0.00, reconnects:  0.00
+[ 270s] threads: 1200, tps: 9522.80, reads: 39039.49, writes: 0.00, response time: 283.67ms (95%), errors: 0.00, reconnects:  0.00
+[ 280s] threads: 1200, tps: 9546.98, reads: 39208.34, writes: 0.00, response time: 282.82ms (95%), errors: 0.00, reconnects:  0.00
+[ 290s] threads: 1200, tps: 9531.82, reads: 39190.98, writes: 0.00, response time: 283.25ms (95%), errors: 0.00, reconnects:  0.00
+[ 300s] threads: 1198, tps: 9551.48, reads: 39202.42, writes: 0.00, response time: 282.82ms (95%), errors: 0.00, reconnects:  0.00
+(last message repeated 131 times)
+OLTP test statistics:
+    queries performed:
+        read:                            11739516
+        write:                           0
+        other:                           2858365
+        total:                           14597881
+    transactions:                        2858365 (9524.35 per sec.)
+    read/write requests:                 11739516 (39117.23 per sec.)
+    other operations:                    2858365 (9524.35 per sec.)
+    ignored errors:                      0      (0.00 per sec.)
+    reconnects:                          0      (0.00 per sec.)
+
+General statistics:
+    total time:                          300.1112s
+    total number of events:              2858365
+    total time taken by event execution: 360056.4382s
+    response time:
+         min:                                  2.16ms
+         avg:                                125.97ms
+         max:                               8114.87ms
+         approx.  95 percentile:             283.76ms
+
+Threads fairness:
+    events (avg/stddev):           2381.9708/55.47
+    execution time (avg/stddev):   300.0470/0.03
+
