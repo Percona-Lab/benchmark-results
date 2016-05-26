@@ -115,21 +115,23 @@ prepare()
 # baseline. full, uncompressed, unencrypted backup
 test_baseline()
 {
-    for i in $(seq 5); do
-	restore_datadir
-	tag="baseline-$i"
-	echo -n "Sleeping 5 seconds before starting collectors ... "; sleep 5; echo "Done"
-	start_oltp $tag
-	start_collectors $tag
- 	echo -n "Sleep 20 seconds before starting backup ..."; sleep 20; echo "Done"
-	ts > timestamps.$tag.log
-	$IB $XB_DIR
-	ts >> timestamps.$tag.log
-	echo "Sleeping 10 seconds before stopping collectors ..."; sleep 20
-	stop_oltp
-	stop_collectors
-	echo "Done"
-    done
+i=1
+#for i in $(seq 5); do
+    restore_datadir
+    tag="baseline-$i"
+    [ $# -gt 0 ] && tag=$tag$(echo $*|tr ' ' '_')
+    echo -n "Sleeping 5 seconds before starting collectors ... "; sleep 5; echo "Done"
+    start_oltp $tag
+    start_collectors $tag
+    echo -n "Sleep 20 seconds before starting backup ..."; sleep 20; echo "Done"
+    ts > timestamps.$tag.log
+    $IB $* $XB_DIR
+    ts >> timestamps.$tag.log
+    echo "Sleeping 10 seconds before stopping collectors ..."; sleep 20
+    stop_oltp
+    stop_collectors
+    echo "Done"
+#done
 }
 # for the next two cases, play with threads, for t in 1 4 8 16 etc
 
@@ -139,12 +141,13 @@ test_encrypted()
 for t in 1 4 8 16 32; do
     restore_datadir
     tag="encryption-threads-$t"
+    [ $# -gt 0 ] && tag=$tag$(echo $*|tr ' ' '_')
     echo -n "Sleeping 5 seconds before starting collectors ... "; sleep 5; echo "Done"
     start_oltp $tag
     start_collectors $tag
     echo -n "Sleep 20 seconds before starting backup ..."; sleep 20; echo "Done"
     ts > timestamps.$tag.log
-    $IB --encryption=AES256 --encrypt-key-file=/home/fipar/PERF-31/key.256 --encrypt-threads=$t $XB_DIR 
+    $IB --encryption=AES256 --encrypt-key-file=/home/fipar/PERF-31/key.256 --encrypt-threads=$t $* $XB_DIR 
     ts >> timestamps.$tag.log
     echo "Sleeping 10 seconds before stopping collectors ..."; sleep 20
     stop_oltp
@@ -159,16 +162,30 @@ test_compressed()
 for t in 1 4 8 16 32; do
     restore_datadir
     tag="compression-threads-$t"
+    [ $# -gt 0 ] && tag=$tag$(echo $*|tr ' ' '_')
     echo -n "Sleeping 5 seconds before starting collectors ... "; sleep 5; echo "Done"
     start_oltp $tag
     start_collectors $tag
     echo -n "Sleep 20 seconds before starting backup ..."; sleep 20; echo "Done"
     ts > timestamps.$tag.log
-    $IB --compress --compress-threads=$t $XB_DIR
+    $IB --compress --compress-threads=$t $* $XB_DIR
     ts >> timestamps.$tag.log
     echo "Sleeping 10 seconds before stopping collectors ..."; sleep 20
     stop_oltp
     stop_collectors
     echo "Done"
  done # for t in ...
+}
+
+
+# --parallel
+# we're using 8 tables in the sbtest database, and innodb_file_per_table
+test_parallel()
+{
+    for t in 1 4 8 16; do
+	arg="--parallel=$t"
+	test_baseline $arg
+	test_compressed $arg
+	test_encrypted $arg
+    done # for t in ...
 }
