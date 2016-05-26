@@ -12,10 +12,16 @@ SIZE=60000000
 MONGO=/home/fipar/perf-32/mongo/percona-server-mongodb-3.2.4-1.0rc2/bin/mongo
 THREADS="1 3 5 8 13 20 31 46 68 100 145 210 300 430 630 870 1000 1200"
 
+
 set_cgroup()
 {
-    [ $# -eq 0 ] && echo "usage: set_cgroup <pid> <memory limit>">&2 && return 1
-    # create cgroup if needed, then cgclassify
+    [ $# -eq 0 ] && echo "usage: set_cgroup <memory limit>">&2 && return 1
+    memory=$1
+    test -d /sys/fs/cgroup/memory/DB${memory}/ || {
+	sudo cgcreate -g memory:DB${memory}
+	echo ${memory}G | sudo tee /sys/fs/cgroup/memory/DB${memory}/memory.limit_in_bytes >/dev/null
+    }
+    sudo cgclassify -g memory:DB${memory} $(pidof mongod)
 }
 
 wait_for_mongod()
@@ -36,8 +42,9 @@ start_mongod()
     shift 3
     sudo rm -f $DBPATH/journal/* # we remove the journal files so we can run benchmarks with and without journal compression
     sudo nohup ./start-$engine.sh $cache $* &> $engine.log &
+    sleep 3
     if [ $memory -gt 0 ]; then
-	set_cgroup $! $memory
+	set_cgroup $memory
     fi
     wait_for_mongod
 }

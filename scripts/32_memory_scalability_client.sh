@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# threads scalability - for data fitting into memory (cache size 210GB)
-# run in range of threads 1 3 5 8 13 20 31 46 68 100 145 210 300 430 630 870 1000 1200 
+# memory scalability - for increasing amounts of memory and cache (10GB increments)
+# for 100 threads (obtained as best number from cpu scalability)
 # run sysbench mongodb OLTP and OLTP_RW
+# test journal compressed / decompressed 
+# test ext4 and xfs
 
 DBPATH=/data/sam/mongod/
 BACKUPS_PATH=/home/fipar/PERF-22/backups_large/
@@ -10,7 +12,9 @@ BACKUPS_PATH=/home/fipar/PERF-22/backups_large/
 PID_DIR=/home/fipar/perf-32/
 SIZE=60000000
 MONGO=/home/fipar/perf-32/mongo/percona-server-mongodb-3.2.4-1.0rc2/bin/mongo
-THREADS="1200 1000 870 630 430 300 210 145 100 68 46 31 20 13 8 5 3 1"
+MEMORY_INCREMENT=10
+MEMORY_START=20
+MEMORY_MAX=210
 SERVER=smblade04
 REMOTE_SCRIPT=/home/fipar/perf-32/32_thread_scalability_server.sh
 
@@ -20,16 +24,20 @@ ulimit -n 4096
 total_tests=144
 current_test=0
 test_duration=300
+threads=100
 fs=ext4
 for distribution in uniform pareto; do
     for engine in wt rocks; do
 	for workload in oltp oltp_ro; do
 	    restored_datadir=0
-	    for threads in $THREADS; do
-		for config in "rocks0:" "wt0:--syncdelay=900 --wiredTigerJournalCompressor=none" "wt1:--syncdelay=900 --wiredTigerJournalCompressor=zlib" "wt2:--syncdelay=900 --wiredTigerJournalCompressor=snappy"; do
-		    configName=$(echo $config|awk -F: '{print $1}')
-		    echo $configName|grep $engine>/dev/null || continue 
-		    extraArgs=$(echo $config|awk -F: '{print $2}')
+	    for config in "rocks0:" "wt0:--syncdelay=900 --wiredTigerJournalCompressor=none" "wt1:--syncdelay=900 --wiredTigerJournalCompressor=zlib" "wt2:--syncdelay=900 --wiredTigerJournalCompressor=snappy"; do
+		configName=$(echo $config|awk -F: '{print $1}')
+		echo $configName|grep $engine>/dev/null || continue 
+		[ $engine == "wt" -a "$configName" != "wt2" -a "$workload" == "oltp_ro" ] && continue
+		extraArgs=$(echo $config|awk -F: '{print $2}')
+		memory=$MEMORY_START
+		while [ $memory -le $MEMORY_MAX ]; do
+		    cache=$((memory / 2))
 		    echo "stop_mongod"; ssh $SERVER "$REMOTE_SCRIPT stop_mongod"
 		    if [ "$workload" == "oltp_ro" ]; then
 			if [ $restored_datadir -eq 0 ]; then
@@ -39,8 +47,8 @@ for distribution in uniform pareto; do
 		    else
 			echo "restore_datadir"; ssh $SERVER "$REMOTE_SCRIPT restore_datadir $distribution $engine"
 		    fi # if workload is oltp_ro
-		    echo "start_mongod"; ssh $SERVER "$REMOTE_SCRIPT start_mongod $engine 210 0 $extraArgs" 
-		    tag=$engine-$fs-$configName-$distribution-$threads-$workload
+		    echo "start_mongod"; ssh $SERVER "$REMOTE_SCRIPT start_mongod $engine $cache $memory $extraArgs" 
+		    tag=mem$memory-$engine-$fs-$configName-$distribution-$threads-$workload
 		    current_test=$((current_test+1))
 		    if [ "$THREADS" != "1" ]; then
 			echo "sending SIGHUP to mongo-response-time-exporter and waiting 30 seconds"
@@ -48,8 +56,9 @@ for distribution in uniform pareto; do
 		    fi
 		    echo "Starting sysbench for test $current_test of $total_tests"
 		    ./run_sysbench.sh $test_duration $threads $SIZE $distribution $workload $tag run
-		done # for config in ...
-	    done # for threads in ... 
+		    memory=$((memory + MEMORY_INCREMENT))
+		done # while memory ...
+	    done # for config in ...
 	done # for workload in ...
     done # for engine in ...
 done # for distribution in ...
