@@ -2,7 +2,7 @@
 
 title: "Percona Xtrabackup: Compression and Encryption performance"
 author: "Percona Lab"
-generated on:May 26, 2016
+generated on:May 27, 2016
 output:
   md_document:
     variant: markdown_github
@@ -36,14 +36,14 @@ compressed, non encrypted) backup.
 
 The following graphs show tps for sysbench oltp (16 threads, 10M rows
 per table, 16 tables) while xtrabackup runs. Duration is not the same
-for all graphs as backups don't all last the same (which is why we
-can't facet on type/threads).
+for all graphs as backups don't all last the same, which is why the
+faceting by --parallel threads produces graphs with varying width.  
 
 In all cases, the experiment was run as follows :
 - sysbench oltp runs for 10 seconds
 - xtrabackup starts
 - sysbench oltp continues for 20 seconds after xtrabackup completes
 
-![plot of chunk tps](figure/tps-1.png)![plot of chunk tps](figure/tps-2.png)![plot of chunk tps](figure/tps-3.png)![plot of chunk tps](figure/tps-4.png)![plot of chunk tps](figure/tps-5.png)![plot of chunk tps](figure/tps-6.png)![plot of chunk tps](figure/tps-7.png)![plot of chunk tps](figure/tps-8.png)![plot of chunk tps](figure/tps-9.png)![plot of chunk tps](figure/tps-10.png)![plot of chunk tps](figure/tps-11.png)![plot of chunk tps](figure/tps-12.png)![plot of chunk tps](figure/tps-13.png)![plot of chunk tps](figure/tps-14.png)![plot of chunk tps](figure/tps-15.png)![plot of chunk tps](figure/tps-16.png)![plot of chunk tps](figure/tps-17.png)![plot of chunk tps](figure/tps-18.png)![plot of chunk tps](figure/tps-19.png)![plot of chunk tps](figure/tps-20.png)
+![plot of chunk tps](figure/tps-1.png)![plot of chunk tps](figure/tps-2.png)![plot of chunk tps](figure/tps-3.png)![plot of chunk tps](figure/tps-4.png)![plot of chunk tps](figure/tps-5.png)![plot of chunk tps](figure/tps-6.png)![plot of chunk tps](figure/tps-7.png)![plot of chunk tps](figure/tps-8.png)![plot of chunk tps](figure/tps-9.png)![plot of chunk tps](figure/tps-10.png)
 
 

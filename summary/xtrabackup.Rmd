@@ -86,8 +86,8 @@ detach(ssd)
 
 The following graphs show tps for sysbench oltp (16 threads, 10M rows
 per table, 16 tables) while xtrabackup runs. Duration is not the same
-for all graphs as backups don't all last the same (which is why we
-can't facet on type/threads).
+for all graphs as backups don't all last the same, which is why the
+faceting by --parallel threads produces graphs with varying width.  
 
 In all cases, the experiment was run as follows :
 - sysbench oltp runs for 10 seconds
@@ -96,45 +96,21 @@ In all cases, the experiment was run as follows :
 
 ```{r tps, fig.width=36, fig.height=16, warning=F, echo=F}
 for (y in types) {
-    for (d in disks) { 
-        for (t in nothreads) {
-            subdata <- subset(data, disk == d & type == y & user_provided_threads == t)
-            attach(subdata)
-            # print(paste(d, " ", y, " ", t))
-            # print(head(subdata))
-            p = ggplot(subdata, aes(x=ts, y=tps)) +
-            geom_jitter(size=8) +
-            theme_bw() +
-            labs(x="time in secs (10 sec incr)", y="throughput (tps)", title=paste("OLTP throughput during backup - ",d," - ",y," - ",t," threads")) + expand_limits(x=0,y=0) +
-            scale_y_continuous(breaks=extended_range_breaks()(rbind(0,tps))) +
-            theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
-            print(p)
-            detach(subdata)
-        }
-    }
+	for (t in nothreads) {
+		subdata <- subset(dataParallel, disk == "ssd" & type == y & user_provided_threads == t)
+		attach(subdata)
+		# print(head(subdata))
+		p = ggplot(subdata, aes(x=ts, y=tps)) +
+		facet_grid(. ~ parallel_threads) +
+		geom_jitter(size=8,width=0.2,height=0.2) +
+		theme_bw() +
+		labs(x="time in secs (10 sec incr)", y="throughput (tps)", title=paste("OLTP throughput during backup - ssd - ",y," - ",t," threads")) + expand_limits(x=0,y=0) +
+		scale_y_continuous(breaks=extended_range_breaks()(rbind(0,tps))) +
+		theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
+		print(p)
+		detach(subdata)
+	}
 }
-
-# hdd <- subset(data, disk == "hdd" & type != "baseline")
-# ssd <- subset(data, disk == "ssd" & type != "baseline")
-# attach(hdd)
-# ggplot(hdd, aes(x=ts, y=tps, color=as.factor(type))) + facet_grid(. ~ user_provided_threads) +
-# scale_colour_discrete(name = "type") +
-# geom_jitter(size=8) +
-# theme_bw() +
-# labs(x="time in secs (10 sec incr)", y="throughput (tps)", title="OLTP throughput during backup - hdd") + expand_limits(x=0,y=0) +
-# scale_y_continuous(breaks=extended_range_breaks()(rbind(0,tps))) +
-# theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
-#         
-# detach(hdd)
-# attach(ssd)
-# ggplot(ssd, aes(x=ts, y=tps, color=as.factor(type))) + facet_grid(. ~ user_provided_threads) +
-# scale_colour_discrete(name = "type") +
-# geom_jitter(size=8) +
-# theme_bw() +
-# labs(x="time in secs (10 sec incr)", y="throughput (tps)", title="OLTP throughput during backup - ssd") + expand_limits(x=0,y=0) +
-# scale_y_continuous(breaks=extended_range_breaks()(rbind(0,tps))) +
-# theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
-# detach(ssd)
 
 ```
 
