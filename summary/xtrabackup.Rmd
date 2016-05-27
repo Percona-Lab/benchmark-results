@@ -28,10 +28,14 @@ label_custom <- function(variable, value) {
 }
 
 data <- read.csv("../alldata.csv", header=T)
+dataParallel <- read.csv("../alldata-parallel.csv", header=T)
 durations <- read.csv("../durations.csv", header=T)
+durationsParallel <- read.csv("../durations-parallel.csv", header=T)
 diskstats <- read.csv("../diskstats.csv", header=T)
+diskstatsParallel <- read.csv("../diskstats-parallel.csv", header=T)
 
 nothreads <- c(1,4,8,16,32)
+noparthreads <- c(1,4,8,16)
 
 disks <- c("hdd","ssd")
 
@@ -53,33 +57,21 @@ types <- c("encryption","compression")
 
 ## Backup duration 
 
-Backup duration by type, number of threads, and disk type. The
+Backup duration by type, number of threads, and disk type, faceted by
+--parallel threads. The
 horizontal line on each graph shows the duration for the baseline (non
 compressed, non encrypted) backup. 
 
 ```{r global, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 
-
-
-baseline_hdd <- as.numeric(subset(durations, type=="baseline" & disk == "hdd")$backup_duration)
-baseline_ssd <- as.numeric(subset(durations, type=="baseline" & disk == "ssd")$backup_duration)
-hdd <- subset(durations,disk == "hdd" & type != "baseline")
-ssd <- subset(durations,disk == "ssd" & type != "baseline")
-attach(hdd)
-ggplot(hdd, aes(x=as.factor(threads),y=as.numeric(backup_duration),color=as.factor(type))) + 
-scale_colour_discrete(name = "type") +
-geom_hline(aes(yintercept=baseline_hdd)) + 
-geom_point(size=8) + 
-theme_bw() + 
-labs(x="threads",y="duration (secs)",title="Backup duration - hdd") + expand_limits(x=0, y=0) + 
-scale_y_continuous(breaks=extended_range_breaks()(rbind(0,backup_duration))) + 
-theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
-detach(hdd)
+baseline_ssd <- as.numeric(subset(durationsParallel, type=="baseline" & disk == "ssd")$backup_duration)
+ssd <- subset(durationsParallel,disk == "ssd" & type != "baseline")
 attach(ssd)
 ggplot(ssd, aes(x=as.factor(threads),y=as.numeric(backup_duration),color=as.factor(type))) + 
 scale_colour_discrete(name = "type") +
 geom_hline(aes(yintercept=baseline_ssd)) + 
-geom_point(size=8) + 
+geom_jitter(size=8,width=0.2,height=0.2) + 
+facet_grid(parallel_threads ~ .) +
 theme_bw() + 
 labs(x="threads",y="duration (secs)",title="Backup duration - ssd") + expand_limits(x=0,y=0) +
 scale_y_continuous(breaks=extended_range_breaks()(rbind(0,backup_duration))) + 

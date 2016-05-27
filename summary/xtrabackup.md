@@ -2,7 +2,7 @@
 
 title: "Percona Xtrabackup: Compression and Encryption performance"
 author: "Percona Lab"
-generated on:May 23, 2016
+generated on:May 26, 2016
 output:
   md_document:
     variant: markdown_github
@@ -25,11 +25,12 @@ output:
 
 ## Backup duration 
 
-Backup duration by type, number of threads, and disk type. The
+Backup duration by type, number of threads, and disk type, faceted by
+--parallel threads. The
 horizontal line on each graph shows the duration for the baseline (non
 compressed, non encrypted) backup. 
 
-![plot of chunk global](figure/global-1.png)![plot of chunk global](figure/global-2.png)
+![plot of chunk global](figure/global-1.png)
 
 ## Impact on throughput
 

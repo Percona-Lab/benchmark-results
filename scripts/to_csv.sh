@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 #This expects csv_from_sysbench and csv_to_png from https://github.com/Percona-Lab/benchmark_automation/ to be on the PATH 
 #It must be executed from within the scripts directory, as it uses relative paths
 # sample files for this benchmark:
@@ -55,25 +55,27 @@ for type in baseline compression encryption; do
 	baseline=0
 	for threads in $THREADS; do
 	            extra=1
-	            if [ "$type" == "baseline" ]; then
-		       [ $baseline -eq 0 ] && baseline=1 || continue	
+		    if [ "$type" == "baseline" ]; then
+			baseline=$((baseline+1))
 		    else
-                       extra="threads-$threads"
+			extra="threads-$threads"
 		    fi
 		    for pt in $PARALLEL_THREADS; do
+			[ "$type" == "baseline" -a $baseline -gt 1 ] && continue
+			[ "$type" == "baseline" -a $baseline -le 1 ] && baseline=$((baseline+1))
 			parallel="--parallel=$pt"
 			for f in ../raw/$disk/parallel/sysbench.$type-$extra$parallel.log; do
 			    [ -f $f ] || continue
 			    env _NOHEADER=1 csv_from_sysbench.sh $f xb 10000000 $threads | while read l; do
 												    echo "$disk,$type,$pt,$l" >> ../alldata-parallel.csv
-												    done
+												    done # while read l
 			    start_t=$(head -1 ../raw/$disk/parallel/timestamps.$type-$extra$parallel.log)
 			    end_t=$(tail -1 ../raw/$disk/parallel/timestamps.$type-$extra$parallel.log)
 			    echo "$disk,$type,$pt,$threads,$((end_t-start_t))" >> ../durations-parallel.csv
 			    dev=$(eval "echo \$$disk")
 			    grep $dev ../raw/$disk/parallel/diskstats.$type-$extra$parallel.log|awk '{print $15, $18, $19}' | tr -d '%' |tr ' ' ','|while read l; do
 														echo "$disk,$type,$pt,$threads,$l" >> ../diskstats-parallel.csv
-														done
+														done # while read l
 			done # for pt in ...
 	    done # for f in ../$disk/
 	done # for engine
