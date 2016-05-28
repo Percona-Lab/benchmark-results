@@ -15,7 +15,9 @@ export PID_DIR=/home/fipar/PERF-31/
 export IB="innobackupex --defaults-file=/home/fipar/PERF-31/my.cnf --host=127.0.0.1 --user=root" 
 export TIME=3600
 export SIZE=10000000
-export THREADS=16
+export SB_THREADS=16
+export XB_THREADS="1 4 8 16 32"
+export PARALLEL_THREADS="1 4 8 16"
 
 sysbench_cmd()
 {
@@ -25,7 +27,7 @@ sysbench_cmd()
 	--mysql-user=sbuser \
 	--mysql-password=sbuser \
 	--report-interval=1 \
-	--num-threads=$THREADS \
+	--num-threads=$SB_THREADS \
 	--mysql-db=sbtest \
 	--max-requests=999999999 \
 	--run-time=$TIME \
@@ -138,7 +140,7 @@ i=1
 # encrypted
 test_encrypted()
 {
-for t in 1 4 8 16 32; do
+for t in $XB_THREADS; do
     restore_datadir
     tag="encryption-threads-$t"
     [ $# -gt 0 ] && tag=$tag$(echo $*|tr ' ' '_')
@@ -159,7 +161,7 @@ for t in 1 4 8 16 32; do
 # compressed
 test_compressed()
 {
-for t in 1 4 8 16 32; do
+for t in $XB_THREADS; do
     restore_datadir
     tag="compression-threads-$t"
     [ $# -gt 0 ] && tag=$tag$(echo $*|tr ' ' '_')
@@ -182,7 +184,7 @@ for t in 1 4 8 16 32; do
 # we're using 8 tables in the sbtest database, and innodb_file_per_table
 test_parallel()
 {
-    for t in 1 4 8 16; do
+    for t in $PARALLEL_THREADS; do
 	arg="--parallel=$t"
 	test_baseline $arg
 	test_compressed $arg
