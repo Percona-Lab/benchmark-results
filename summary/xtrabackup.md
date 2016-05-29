@@ -2,7 +2,7 @@
 
 title: "Percona Xtrabackup: Compression and Encryption performance"
 author: "Percona Lab"
-generated on:May 27, 2016
+generated on:May 28, 2016
 output:
   md_document:
     variant: markdown_github
@@ -47,3 +47,6 @@ In all cases, the experiment was run as follows :
 ![plot of chunk tps](figure/tps-1.png)![plot of chunk tps](figure/tps-2.png)![plot of chunk tps](figure/tps-3.png)![plot of chunk tps](figure/tps-4.png)![plot of chunk tps](figure/tps-5.png)![plot of chunk tps](figure/tps-6.png)![plot of chunk tps](figure/tps-7.png)![plot of chunk tps](figure/tps-8.png)![plot of chunk tps](figure/tps-9.png)![plot of chunk tps](figure/tps-10.png)
 
 
+## CPU usage
+
+![plot of chunk cpu](figure/cpu-1.png)![plot of chunk cpu](figure/cpu-2.png)![plot of chunk cpu](figure/cpu-3.png)![plot of chunk cpu](figure/cpu-4.png)![plot of chunk cpu](figure/cpu-5.png)![plot of chunk cpu](figure/cpu-6.png)![plot of chunk cpu](figure/cpu-7.png)![plot of chunk cpu](figure/cpu-8.png)![plot of chunk cpu](figure/cpu-9.png)![plot of chunk cpu](figure/cpu-10.png)![plot of chunk cpu](figure/cpu-11.png)![plot of chunk cpu](figure/cpu-12.png)![plot of chunk cpu](figure/cpu-13.png)![plot of chunk cpu](figure/cpu-14.png)![plot of chunk cpu](figure/cpu-15.png)![plot of chunk cpu](figure/cpu-16.png)![plot of chunk cpu](figure/cpu-17.png)![plot of chunk cpu](figure/cpu-18.png)![plot of chunk cpu](figure/cpu-19.png)![plot of chunk cpu](figure/cpu-20.png)![plot of chunk cpu](figure/cpu-21.png)![plot of chunk cpu](figure/cpu-22.png)![plot of chunk cpu](figure/cpu-23.png)![plot of chunk cpu](figure/cpu-24.png)![plot of chunk cpu](figure/cpu-25.png)![plot of chunk cpu](figure/cpu-26.png)![plot of chunk cpu](figure/cpu-27.png)![plot of chunk cpu](figure/cpu-28.png)![plot of chunk cpu](figure/cpu-29.png)![plot of chunk cpu](figure/cpu-30.png)![plot of chunk cpu](figure/cpu-31.png)![plot of chunk cpu](figure/cpu-32.png)![plot of chunk cpu](figure/cpu-33.png)![plot of chunk cpu](figure/cpu-34.png)![plot of chunk cpu](figure/cpu-35.png)![plot of chunk cpu](figure/cpu-36.png)![plot of chunk cpu](figure/cpu-37.png)![plot of chunk cpu](figure/cpu-38.png)![plot of chunk cpu](figure/cpu-39.png)![plot of chunk cpu](figure/cpu-40.png)
