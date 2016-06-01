@@ -23,12 +23,14 @@ REMOTE_SCRIPT=/home/fipar/perf-32/32_thread_scalability_server.sh
 ulimit -n 4096
 total_tests=144
 current_test=0
-test_duration=300
+test_duration=180
+#test_duration=300
 threads=100
 fs=ext4
 for distribution in uniform pareto; do
-    for engine in wt rocks; do
-	for workload in oltp oltp_ro; do
+    for engine in rocks wt; do
+	#for workload in oltp oltp_ro; do
+	for workload in oltp_ro; do
 	    restored_datadir=0
 	    for config in "rocks0:" "wt0:--syncdelay=900 --wiredTigerJournalCompressor=none" "wt1:--syncdelay=900 --wiredTigerJournalCompressor=zlib" "wt2:--syncdelay=900 --wiredTigerJournalCompressor=snappy"; do
 		configName=$(echo $config|awk -F: '{print $1}')
@@ -47,15 +49,14 @@ for distribution in uniform pareto; do
 		    else
 			echo "restore_datadir"; ssh $SERVER "$REMOTE_SCRIPT restore_datadir $distribution $engine"
 		    fi # if workload is oltp_ro
-		    echo "start_mongod"; ssh $SERVER "$REMOTE_SCRIPT start_mongod $engine $cache $memory $extraArgs" 
 		    tag=mem$memory-$engine-$fs-$configName-$distribution-$threads-$workload
+		    echo "start dstat"; ssh $SERVER "$REMOTE_SCRIPT start_dstat /home/fipar/perf-32/dstat-$tag.log"
+		    echo "start_mongod"; ssh $SERVER "$REMOTE_SCRIPT start_mongod $engine $cache $memory $extraArgs" 
 		    current_test=$((current_test+1))
-		    if [ "$THREADS" != "1" ]; then
-			echo "sending SIGHUP to mongo-response-time-exporter and waiting 30 seconds"
-			sleep 30
-		    fi
+		    kill -s SIGHUP $(pidof mongo-response-time-exporter)
 		    echo "Starting sysbench for test $current_test of $total_tests"
 		    ./run_sysbench.sh $test_duration $threads $SIZE $distribution $workload $tag run
+		    echo "stop dstat"; ssh $SERVER "$REMOTE_SCRIPT stop_dstat"
 		    memory=$((memory + MEMORY_INCREMENT))
 		done # while memory ...
 	    done # for config in ...

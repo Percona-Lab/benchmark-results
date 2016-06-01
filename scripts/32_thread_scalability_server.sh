@@ -41,6 +41,16 @@ start_mongod()
     memory=$3
     shift 3
     sudo rm -f $DBPATH/journal/* # we remove the journal files so we can run benchmarks with and without journal compression
+    cat <<EOF>/tmp/script.$$
+sync
+sysctl -q -w vm.drop_caches=3
+echo 3 > /proc/sys/vm/drop_caches
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
+EOF
+	
+    chmod +x /tmp/script.$$
+    sudo /tmp/script.$$
+    rm -f /tmp/script.$$ # I am aware this is unnecessarily complex but it is the simplest way to add this at this stage. 
     sudo nohup ./start-$engine.sh $cache $* &> $engine.log &
     sleep 3
     if [ $memory -gt 0 ]; then
@@ -63,6 +73,20 @@ stop_mongod()
 	echo "Done"
 	[ $i -ge 20 ] && sudo kill -9 $(pidof mongod) && echo "Sleeping 120 seconds after SIGKILLing mongod" && sleep 120
     }
+}
+
+# only one dstat at a time for this benchmark, so no need to manage pid
+start_dstat()
+{
+    [ $# -eq 0 ] && echo "usage: start_dstat <target>">&2 && return 1
+    nohup dstat --output=$1 10 &> dstat.log &
+}
+
+stop_dstat()
+{
+    ps -ef|grep dstat|awk '{print $2}'|xargs kill
+    sleep 2
+    ps -ef|grep dstat|awk '{print $2}'|xargs kill -9 
 }
 
 restore_datadir()

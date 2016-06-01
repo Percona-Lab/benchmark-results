@@ -1,4 +1,5 @@
 #!/bin/bash
+cache_size=$1
 shift
 cat <<EOF>rocks.config
 #setParameter:
@@ -11,11 +12,12 @@ datadir=/data/sam/mongod
 
 export MONGO_PATH=mongo/percona-server-mongodb-3.2.4-1.0rc2
 [ -z "$MONGO_PATH" ] && echo "MONGO_PATH not set, exiting">&2 && exit 1
-
+ulimit -n 4096
 numactl --interleave=all ./${MONGO_PATH}/bin/mongod \
   $* \
   --dbpath=$datadir \
   --storageEngine=rocksdb \
+  --rocksdbCacheSizeGB=$cache_size \
   --config ./rocks.config # \
 #  --auth
 
