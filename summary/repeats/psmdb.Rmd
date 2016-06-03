@@ -119,12 +119,13 @@ for (dist in c("uniform","pareto")) {
                     strip.text=element_text(size=60))
                 print(p)
                 if (nrow(dstatData)>0) {
-                    p <- ggplot(dstatData, aes(x=rownames(dstatData), y=dsk.total, color=as.factor(engine))) +
+                    p <- ggplot(dstatData, aes(x=i, y=dsk.total, color=as.factor(engine))) +
                         facet_grid(configuration ~ .) +
                         geom_jitter(size=8,width=0.2,height=0.2) +
                         theme_bw() +
                         labs(x="time (secs)",y="throughput (tps)",title=paste("dstat/dsk.total per
                         engine and configuration (", dist, ",", wl, ",", fs, ", ", m,"GB)")) + expand_limits(x=0,y=0) +
+                        scale_y_discrete(breaks=extended_range_breaks()(rbind(0,dstatData$dsk.total))) +
                         theme(panel.grid = element_line(colour="#010101",size=1),
                         panel.background = element_rect(colour="#000000"),
                         plot.background = element_rect(colour="#000000"),

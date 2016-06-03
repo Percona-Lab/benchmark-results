@@ -3,7 +3,7 @@
 title: "Percona Server for MongoDB: CPU and I/O scalability for
 WiredTiger and RocksDB"
 author: "Percona Lab"
-generated on:May 30, 2016
+generated on:June 03, 2016
 output:
   md_document:
     variant: markdown_github
