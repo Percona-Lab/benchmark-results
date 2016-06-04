@@ -57,9 +57,9 @@ memorySizes <- c(4,12,20,28,36,44,52,60,68,76,84,92,100,108,116,124,132,140,148,
 attach(memScalabilityAggregated)
 print(
     ggplot(memScalabilityAggregated, aes(x=as.factor(Group.1),y=as.numeric(x),color=as.factor(Group.2),group=Group.2)) +
-    facet_grid(. ~ Group.4, labeller = label_custom) + geom_line() + geom_point(size=4) +
-    labs(x="threads",y="memory",title=".99 quantile throughput per threads and memory") + 
-    scale_color_tableau(name="Engine") +
+    facet_grid(. ~ Group.4, labeller = label_both) + geom_line() + geom_point(size=4) +
+    labs(x="threads",y="tps",title=".99 quantile throughput per threads and memory") + 
+    scale_color_tableau(name="memory") +
     scale_y_continuous(breaks=extended_range_breaks()(rbind(0,memScalability$x)),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60)) 
 )
 
