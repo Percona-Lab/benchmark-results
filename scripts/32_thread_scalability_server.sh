@@ -5,7 +5,7 @@
 # run sysbench mongodb OLTP and OLTP_RW
 
 DBPATH=/data/sam/mongod/
-BACKUPS_PATH=/home/fipar/PERF-22/backups_large/
+BACKUPS_PATH=/home/fipar/perf-32/backups_large/
 # actual data dir is under $BACKUPS_PATH/${distribution}_${version}-${engine}/$engine
 WORKSPACE=/home/fipar/perf-32/
 SIZE=60000000
@@ -51,6 +51,7 @@ EOF
     chmod +x /tmp/script.$$
     sudo /tmp/script.$$
     rm -f /tmp/script.$$ # I am aware this is unnecessarily complex but it is the simplest way to add this at this stage. 
+    sudo rm -f $engine.log
     sudo nohup ./start-$engine.sh $cache $* &> $engine.log &
     sleep 3
     if [ $memory -gt 0 ]; then
@@ -78,6 +79,7 @@ stop_mongod()
 # only one dstat at a time for this benchmark, so no need to manage pid
 start_dstat()
 {
+    stop_dstat
     [ $# -eq 0 ] && echo "usage: start_dstat <target>">&2 && return 1
     nohup dstat --output=$1 10 &> dstat.log &
 }
@@ -95,6 +97,19 @@ restore_datadir()
     distribution=$1; engine=$2
     sudo rm -rf $DBPATH/*
     sudo cp -rv $BACKUPS_PATH/${distribution}_3.2-${engine}/$engine/* $DBPATH/
+}
+
+cleanup_datadir()
+{
+    sudo rm -rf $DBPATH/*
+}
+
+save_datadir()
+{
+    [ $# -eq 0 ] && echo "usage: restore_datadir <distribution> <engine>">&2 && return 1
+    distribution=$1; engine=$2
+    sudo rm -rf $BACKUPS_PATH/${distribution}_3.2-${engine}/$engine/*
+    sudo cp -rv $DBPATH/* $BACKUPS_PATH/${distribution}_3.2-${engine}/$engine/
 }
 
 cd $WORKSPACE

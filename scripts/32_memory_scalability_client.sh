@@ -15,7 +15,7 @@ MONGO=/home/fipar/perf-32/mongo/percona-server-mongodb-3.2.4-1.0rc2/bin/mongo
 MEMORY_INCREMENT=10
 MEMORY_START=20
 MEMORY_MAX=210
-SERVER=smblade04
+SERVER=smblade01
 REMOTE_SCRIPT=/home/fipar/perf-32/32_thread_scalability_server.sh
 
 # testing only

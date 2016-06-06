@@ -11,7 +11,7 @@ PID_DIR=/home/fipar/perf-32/
 SIZE=60000000
 MONGO=/home/fipar/perf-32/mongo/percona-server-mongodb-3.2.4-1.0rc2/bin/mongo
 THREADS="1200 1000 870 630 430 300 210 145 100 68 46 31 20 13 8 5 3 1"
-SERVER=smblade04
+SERVER=smblade01
 REMOTE_SCRIPT=/home/fipar/perf-32/32_thread_scalability_server.sh
 
 # testing only

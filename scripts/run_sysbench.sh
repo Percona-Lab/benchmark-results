@@ -4,7 +4,7 @@ usage()
 {
     cat <<EOF>&2
 
-usage: run_sysbench <time> <threads> <size> <distribution> <workload> <tag> <command>
+usage: run_sysbench <time> <threads> <size> <distribution> <workload> <tag> <command> [ncols]
 
 where: 
  <time> is benchmark time in seconds 
@@ -14,6 +14,7 @@ where:
  <workload> is one of oltp or oltp_ro
  <tag> will be used to name the output file, i.e. sysbench-$tag.txt
  <command> is one of prepare, run or cleanup
+ [ncols], if provided, is the number of collections to create
 
 EOF
 
@@ -27,13 +28,15 @@ distribution=$4
 workload=$5
 tag=$6
 command=$7
+ncols=16
+[ -n "$8" ] && ncols=$8
 /home/fipar/bin/sysbench \
     --mongo-write-concern=1 \
-    --mongo-url="mongodb://smblade04" \
+    --mongo-url="mongodb://smblade01" \
     --mongo-database-name=sbtest \
     --test=sysbench-tests/mongodb/$workload.lua \
     --oltp_table_size=$size \
-    --oltp_tables_count=16 \
+    --oltp_tables_count=$ncols \
     --num-threads=$threads \
     --rand-type=$distribution \
     --report-interval=10 \
