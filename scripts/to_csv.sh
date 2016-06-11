@@ -1,7 +1,7 @@
 #!/bin/bash
 
 pushd ../raw/
-echo "profiler,$(env _ONLYHEADER=1 csv_from_sysbench.sh sysbench-oltp-16-run1-slowms-2.txt _file _bench _size _threads)" > ../alldata.csv
+echo "profiler,$(env _ONLYHEADER=1 csv_from_sysbench.sh sysbench-oltp-16-run1-profiler-2.txt _file _bench _size _threads)" > ../alldata.csv
 for f in sysbench-*txt; do
     threads=$(echo $f|awk -F'-' '{print $3}')
     profiler=$(echo $f|awk -F'-' '{print $6}'|sed 's/\.txt//')

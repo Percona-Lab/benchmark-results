@@ -34,34 +34,36 @@ profiler()
 
 start_collections()
 {
-    perf record -F 99 -a -g -- sleep $time
-    operf --system-wide &
-    echo $! > operf.pid
+for x in $(seq 1 1000)
+  do
+    ./quickstack -p $(pidof mongod)
+    sleep 0.1 
+  done | grep -v '^2016-' 
+}
+
+aggregate_stack_trackes()
+{
+ awk '
+   BEGIN { s = ""; } 
+   /^Thread/ { print s; s = ""; } 
+   /^\#/ { if (s != "" ) { s = s "," $4} else { s = $4 } } 
+   END { print s }' | \
+ sort | uniq -c | sort -r -n -k 1,1
 }
 
 stop_collections()
 {
-    kill $(cat operf.pid); rm -f operf.pid
-    sleep 3
-    perf script > perf-$1.perf
-    opreport > operf-$1.txt
+    :
 }
 
-for threads in 1 4 8 16; do
-    for workload in oltp; do
-	for profiler in 0 2; do
-            for run in $(seq $runs); do
-		profiler $profiler
-		prepare $workload
-                echo "running for $threads threads, profiler=$profiler"
-		tag=$workload-$threads-run$run-profiler-$profiler
-		start_collections &
-		run $workload $threads 2>&1 | tee sysbench-$tag.txt
-		stop_collections $tag
-		cleanup $workload
-            done
-	done
+for run in $(seq $runs); do
+    for profiler in 0 2; do
+	profiler $profiler
+	prepare oltp
+	tag=detailed_oltp-16-run$run-profiler-$profiler
+	(start_collections > stacks-$tag.txt) & 
+	run oltp 16 2>&1 | tee sysbench-$tag.txt
+	stop_collections $tag
+	cleanup oltp
     done
 done
-
-
