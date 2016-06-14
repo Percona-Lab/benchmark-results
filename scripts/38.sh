@@ -77,6 +77,7 @@ sysbench_cmd()
 	--report-interval=1 \
 	--num-threads=$2 \
 	--mysql-db=sbtest$3 \
+	--oltp_db_id=$3 \
 	--max-requests=999999999 \
 	--run-time=$TIME \
 	--test=/data/opt/alexey.s/sb2/tests/sysbench-standard/db/oltp$gt.lua \

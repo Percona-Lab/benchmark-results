@@ -21,7 +21,6 @@ function create_insert(table_id)
 
    print("Creating table 'sbtest" .. oltp_suffix .. i .. "'...")
    if (db_driver == "mysql") then
-      pre_query = "CREATE TABLESPACE ts" .. oltp_suffix .. i .. " ADD DATAFILE 'ts" .. oltp_suffix .. i .. "' Engine=InnoDB"
       query = [[
 CREATE TABLE sbtest]] .. oltp_suffix .. i .. [[ (
 id INTEGER UNSIGNED NOT NULL ]] ..
@@ -30,7 +29,7 @@ k INTEGER UNSIGNED DEFAULT '0' NOT NULL,
 c CHAR(120) DEFAULT '' NOT NULL,
 pad CHAR(60) DEFAULT '' NOT NULL,
 ]] .. index_name .. [[ (id)
-) TABLESPACE ts]] .. oltp_suffix .. i .. [[/*! ENGINE = ]] .. mysql_table_engine ..
+) TABLESPACE ts]] .. oltp_db_id .. "_" .. oltp_suffix .. i .. [[/*! ENGINE = ]] .. mysql_table_engine ..
 " MAX_ROWS = " .. myisam_max_rows .. " */"
 
    elseif (db_driver == "pgsql") then
@@ -76,6 +75,9 @@ pad CHAR(60) DEFAULT '' NOT NULL,
 
 
    if (gen_type == "db" ) then
+     if (db_driver == "mysql") then
+        db_query("CREATE TABLESPACE ts" .. oltp_db_id .. "_" .. oltp_suffix .. i .. " ADD DATAFILE 'ts" .. oltp_db_id .. "_" .. oltp_suffix .. i .. ".ibd' Engine=InnoDB")
+     end
      db_query(query)
      db_query("CREATE INDEX k_" .. i .. " on sbtest" .. oltp_suffix .. i .. "(k)")
    elseif (gen_type == "file" ) then 
@@ -172,6 +174,8 @@ function set_vars()
    oltp_distinct_ranges = oltp_distinct_ranges or 1
    oltp_index_updates = oltp_index_updates or 1
    oltp_non_index_updates = oltp_non_index_updates or 1
+   oltp_db_id = oltp_db_id or 0
+
    gen_type='db'
 
    oltp_high_prio = ''
