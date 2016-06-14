@@ -51,8 +51,8 @@ EOF
     chmod +x /tmp/script.$$
     sudo /tmp/script.$$
     rm -f /tmp/script.$$ # I am aware this is unnecessarily complex but it is the simplest way to add this at this stage. 
-    sudo rm -f $engine.log
-    sudo nohup ./start-$engine.sh $cache $* &> $engine.log &
+    ts=$(date "+%Y%m%d_%H%M") 
+    sudo nohup ./start-$engine.sh $cache $* &> $engine.$ts.log &
     sleep 3
     if [ $memory -gt 0 ]; then
 	set_cgroup $memory
@@ -81,14 +81,14 @@ start_dstat()
 {
     stop_dstat
     [ $# -eq 0 ] && echo "usage: start_dstat <target>">&2 && return 1
-    nohup dstat --output=$1 10 &> dstat.log &
+    sudo nohup dstat --output=$1 10 &> dstat-$1.log 
 }
 
 stop_dstat()
 {
-    ps -ef|grep dstat|awk '{print $2}'|xargs kill
+    ps -ef|grep dstat|awk '{print $2}'|grep -v $$|xargs sudo kill
     sleep 2
-    ps -ef|grep dstat|awk '{print $2}'|xargs kill -9 
+    ps -ef|grep dstat|awk '{print $2}'|grep -v $$|xargs sudo kill -9 
 }
 
 restore_datadir()

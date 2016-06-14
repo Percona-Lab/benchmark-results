@@ -26,7 +26,7 @@ for distribution in uniform pareto; do
 	for workload in oltp oltp_ro; do
 	    restored_datadir=0
 	    for threads in $THREADS; do
-		for config in "rocks0:" "wt0:--syncdelay=900 --wiredTigerJournalCompressor=none" "wt1:--syncdelay=900 --wiredTigerJournalCompressor=zlib" "wt2:--syncdelay=900 --wiredTigerJournalCompressor=snappy"; do
+		for config in "rocks0:--slowms=10000 --maxConns=1500" "wt0:--syncdelay=900 --wiredTigerJournalCompressor=none --slowms=10000 --maxConns=1500" "wt1:--syncdelay=900 --wiredTigerJournalCompressor=zlib --slowms=10000 --maxConns=1500" "wt2:--syncdelay=900 --wiredTigerJournalCompressor=snappy --slowms=10000 --maxConns=1500"; do
 		    configName=$(echo $config|awk -F: '{print $1}')
 		    echo $configName|grep $engine>/dev/null || continue 
 		    extraArgs=$(echo $config|awk -F: '{print $2}')

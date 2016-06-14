@@ -7,6 +7,8 @@ cache_size=$1; shift
 datadir=/data/sam/mongod/
 [ -n "$DATADIR" ] && datadir=$DATADIR
 
+ulimit -n 4096
+
 numactl --interleave=all ./${MONGO_PATH}/bin/mongod \
   $* \
   --dbpath=$datadir \

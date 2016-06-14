@@ -30,7 +30,7 @@ tag=$6
 command=$7
 ncols=16
 [ -n "$8" ] && ncols=$8
-/home/fipar/bin/sysbench \
+/home/fipar/src/sysbench/sysbench \
     --mongo-write-concern=1 \
     --mongo-url="mongodb://smblade01" \
     --mongo-database-name=sbtest \
