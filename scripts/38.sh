@@ -67,7 +67,9 @@ export MYSQL_BIN_DIR=$PID_DIR/mysql-5.7.13-linux-glibc2.5-x86_64/bin/
 sysbench_cmd()
 {
     table_size=$((RANDOM % SIZE + 1))
-    [ -z "$1" -o -z "$2" ] && echo "usage: sysbench_cmd <command> <threads> <i># where command is a valid sysbench command like prepare or run, threads is passed on to --num-threads, and i is an integer that is appended to sbtest as the database">&2 && return 1
+    [ -z "$1" -o -z "$2" ] && echo "usage: sysbench_cmd <command> <threads> <i> [gt]# where command is a valid sysbench command like prepare or run, threads is passed on to --num-threads, and i is an integer that is appended to sbtest as the database. If gt is present, the _gt lua scripts are used. ">&2 && return 1
+    gt=""
+    [ -n "$4" ] && gt="_gt"
     sysbench \
 	--mysql-host=127.0.0.1 \
 	--mysql-user=sbuser \
@@ -77,7 +79,7 @@ sysbench_cmd()
 	--mysql-db=sbtest$3 \
 	--max-requests=999999999 \
 	--run-time=$TIME \
-	--test=/data/opt/alexey.s/sb2/tests/sysbench-standard/db/oltp.lua \
+	--test=/data/opt/alexey.s/sb2/tests/sysbench-standard/db/oltp$gt.lua \
 	--mysql-table-engine=Innodb \
 	--oltp_tables_count=100 \
 	--oltp_table_size=$table_size $1 
@@ -125,9 +127,14 @@ wait_for_mysqld_to_shutdown()
 
 restore_datadir()
 {
+    [ -z "$1" ] && echo "usage: restore_datadir <test name>">&2 && return 1
+    test -d $BACKUP_DIR/"$1" || {
+	echo "Cannot find $BACKUP_DIR/$1">&2
+	return 1
+    }
     stop_mysqld
     rm -rf $DATADIR/* 
-    cp -rv $BACKUP_DIR/* $DATADIR 
+    cp -rv $BACKUP_DIR/"$1"/* $DATADIR 
     start_mysqld
     echo -n "Waiting for mysqld to come up ... "
     wait_for_mysqld
@@ -144,10 +151,12 @@ cleanup_datadir()
 
 backup_datadir()
 {
+    [ -z "$1" ] && echo "usage: backup_datadir <test name>">&2 && return 1
     stop_mysqld
     wait_for_mysqld_to_shutdown
-    rm -rf $BACKUP_DIR/*
-    cp -rv $DATADIR/* $BACKUP_DIR/
+    test -d $BACKUP_DIR || mkdir $BACKUP_DIR
+    rm -rf $BACKUP_DIR/"$1"; mkdir $BACKUP_DIR/"$1"
+    cp -rv $DATADIR/* $BACKUP_DIR/"$1"/
 }
 
 
@@ -168,6 +177,7 @@ ts()
 
 
 export SCHEMAS=40000
+export GT="" # set to gt for the General Tablespace lua scripts to be used
 prepare()
 {
     restart_mysqld
@@ -176,12 +186,11 @@ prepare()
     echo "Creating $SCHEMAS schemas ..."
     while [ $i -lt $SCHEMAS ]; do
 	mysql -e "create database sbtest$i; grant all on sbtest$i to 'sbuser'@'localhost' identified by 'sbuser'"
-	_worker_pool_start_worker_or_wait_for_slot sysbench_cmd prepare 1 $i
+	_worker_pool_start_worker_or_wait_for_slot sysbench_cmd prepare 1 $i $GT
 	i=$((i+1))
     done # while $i -lt $SCHEMAS
     echo "Done"
     
-   sysbench_cmd prepare
+#   sysbench_cmd prepare $GT
 }
-
 
