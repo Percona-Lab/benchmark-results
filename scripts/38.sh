@@ -59,7 +59,7 @@ _worker_pool_start_worker_or_wait_for_slot()
 export DATADIR=/mnt/i3600/perf-38
 export THREADS="8 16 32 48 64"
 export SIZE=1000
-export TIME=300
+export TIME=60
 export PID_DIR=/home/fipar/perf-38
 export BACKUP_DIR=/mnt/storage/perf-38
 export MYSQL_BIN_DIR=$PID_DIR/mysql-5.7.13-linux-glibc2.5-x86_64/bin/
@@ -135,7 +135,7 @@ restore_datadir()
     }
     stop_mysqld
     rm -rf $DATADIR/* 
-    cp -rv $BACKUP_DIR/"$1"/* $DATADIR 
+    for item in $BACKUP_DIR/"$1"/*; do cp -rv $item $DATADIR/; done
     start_mysqld
     echo -n "Waiting for mysqld to come up ... "
     wait_for_mysqld
@@ -157,7 +157,7 @@ backup_datadir()
     wait_for_mysqld_to_shutdown
     test -d $BACKUP_DIR || mkdir $BACKUP_DIR
     rm -rf $BACKUP_DIR/"$1"; mkdir $BACKUP_DIR/"$1"
-    cp -rv $DATADIR/* $BACKUP_DIR/"$1"/
+    for item in $DATADIR/*; do cp -rv $item $BACKUP_DIR/"$1"; done
 }
 
 
@@ -191,7 +191,55 @@ prepare()
 	i=$((i+1))
     done # while $i -lt $SCHEMAS
     echo "Done"
-    
-#   sysbench_cmd prepare $GT
 }
 
+wait_for_sysbench_to_complete()
+{
+    echo "Waiting for all sysbench instances to complete"
+    i=0
+    while [ -n "$(ps -ef|grep sysbench|grep -v grep)" ]; do
+	sleep $((RANDOM % 10 + 1))
+	[ $i -ge 1000 ] && {
+	    echo "Still waiting ..."
+	    i=0
+	} || i=$((i+1))
+    done
+}
+
+# what we want to measure is how does this scale when N number of schemas are active.
+# to test this, we'll start N sysbench instances, increasing N in a loop.  
+
+benchmark()
+{
+    benchmark_threads=1
+    for test in standard gt; do
+	restore_datadir $test # we're only restoring the datadir once per test set. it takes too long and I don't
+	# think the extra rows added by the oltp scripts will make much difference.
+	for active_schemas in 20 25 30 35 40 45; do
+	    active_schemas=$((active_schemas*1000))
+	    GT=""
+	    [ "$test" == "gt" ] && GT="gt"
+	    # this is the part that may kill the server ...
+	    for i in $(seq $active_schemas); do
+		(sysbench_cmd $benchmark_threads $i $GT &> sysbench-$test-$active_schemas-$i.txt) &
+	    done
+	    wait_for_sysbench_to_complete
+	done # for active_schemas in ...
+    done # for test in ...
+}
+
+# just a poc to see if the server can handle the load
+manual_test_benchmark()
+{
+test=gt
+for active_schemas in 20 25 30 35 40 45; do
+    active_schemas=$((active_schemas*1000))
+    GT=""
+    [ "$test" == "gt" ] && GT="gt"
+    # this is the part that may kill the server ...
+    for i in $(seq $active_schemas); do
+	(sysbench_cmd $benchmark_threads $i $GT &> sysbench-$test-$active_schemas-$i.txt) &
+    done
+    wait_for_sysbench_to_complete
+done # for active_schemas in ...
+}
