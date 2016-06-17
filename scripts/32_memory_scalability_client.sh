@@ -50,7 +50,7 @@ for distribution in uniform pareto; do
 			echo "restore_datadir"; ssh $SERVER "$REMOTE_SCRIPT restore_datadir $distribution $engine"
 		    fi # if workload is oltp_ro
 		    tag=mem$memory-$engine-$fs-$configName-$distribution-$threads-$workload
-		    echo "start dstat"; ssh $SERVER "$REMOTE_SCRIPT start_dstat /home/fipar/perf-32/dstat-$tag.log"
+		    echo "start dstat"; ssh $SERVER "$REMOTE_SCRIPT start_dstat $tag"
 		    echo "start_mongod"; ssh $SERVER "$REMOTE_SCRIPT start_mongod $engine $cache $memory $extraArgs" 
 		    current_test=$((current_test+1))
 		    kill -s SIGHUP $(pidof mongo-response-time-exporter)
