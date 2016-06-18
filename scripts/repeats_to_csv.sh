@@ -4,7 +4,7 @@
 # sample file name for this benchmark: 
 
 #i identifies the repeat number
-i=1
+i=2
 # raw/repeats/memory_scalability/$i/sysbench-mem200-wt-ext4-wt2-pareto-100-oltp_ro.txt
 echo "engine,memory,filesystem,configuration,distribution,test,$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/repeats/memory_scalability/$i/sysbench-mem200-wt-ext4-wt2-pareto-100-oltp_ro.txt _ _ _)" > ../repeats_memory_scalability.csv
 

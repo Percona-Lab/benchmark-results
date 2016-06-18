@@ -69,8 +69,9 @@ storage.rocksdb.configString:
 for (dist in c("uniform","pareto")) {
     for (wl in c("oltp","oltp_ro")) { 
         data <- subset(threadScalability, distribution == dist & test == wl)
+		data$thr <- factor(data$user_provided_threads, levels=nothreads)
         p <- ggplot(data, aes(x=ts, y=tps, color=as.factor(engine))) +
-            facet_grid(configuration ~ user_provided_threads) +
+            facet_grid(configuration ~ thr) +
             geom_jitter(size=8,width=0.2,height=0.2) +
             theme_bw() +
             labs(x="time (secs)",y="throughput (tps)",title=paste("Throughput per

@@ -81,7 +81,7 @@ start_dstat()
 {
     stop_dstat
     [ $# -eq 0 ] && echo "usage: start_dstat <target>">&2 && return 1
-    sudo nohup dstat --output=$1 10 &> dstat-$1.log 
+    sudo nohup dstat --output=$1 10 &> dstat-$1.log &
 }
 
 stop_dstat()

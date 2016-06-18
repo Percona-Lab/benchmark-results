@@ -30,11 +30,11 @@ tag=$6
 command=$7
 ncols=16
 [ -n "$8" ] && ncols=$8
-/home/fipar/src/sysbench/sysbench \
+/home/fipar/bin/sysbench \
     --mongo-write-concern=1 \
     --mongo-url="mongodb://smblade01" \
     --mongo-database-name=sbtest \
-    --test=sysbench-tests/mongodb/$workload.lua \
+    --test=/home/fipar/sysbench/sysbench/tests/mongodb/$workload.lua \
     --oltp_table_size=$size \
     --oltp_tables_count=$ncols \
     --num-threads=$threads \
