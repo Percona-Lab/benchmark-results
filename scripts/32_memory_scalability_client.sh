@@ -14,23 +14,23 @@ SIZE=60000000
 MONGO=/home/fipar/perf-32/mongo/percona-server-mongodb-3.2.4-1.0rc2/bin/mongo
 MEMORY_INCREMENT=10
 MEMORY_START=20
-MEMORY_MAX=210
+#MEMORY_MAX=210
+MEMORY_MAX=120
 SERVER=smblade01
 REMOTE_SCRIPT=/home/fipar/perf-32/32_thread_scalability_server.sh
 
 # testing only
 #THREADS=1
 ulimit -n 4096
-total_tests=144
+total_tests=352
 current_test=0
-test_duration=180
+test_duration=240
 #test_duration=300
 threads=100
 fs=ext4
 for distribution in uniform pareto; do
     for engine in rocks wt; do
-	#for workload in oltp oltp_ro; do
-	for workload in oltp_ro; do
+	for workload in oltp oltp_ro; do
 	    restored_datadir=0
 	    for config in "rocks0:" "wt0:--syncdelay=900 --wiredTigerJournalCompressor=none" "wt1:--syncdelay=900 --wiredTigerJournalCompressor=zlib" "wt2:--syncdelay=900 --wiredTigerJournalCompressor=snappy"; do
 		configName=$(echo $config|awk -F: '{print $1}')

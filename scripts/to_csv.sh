@@ -16,8 +16,8 @@ for f in ../raw/thread_scalability/sysbench*txt; do
 								     done
 done # for f in ..
 
-# raw/memory_scalability/sysbench-mem200-wt-ext4-wt1-pareto-100-oltp.txt
-echo "engine,memory,filesystem,configuration,distribution,test,$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/memory_scalability/sysbench-mem200-wt-ext4-wt2-pareto-100-oltp_ro.txt _ _ _)" > ../memory_scalability.csv
+# raw/memory_scalability/sysbench-mem20-wt-ext4-wt2-pareto-100-oltp_ro.txt
+echo "engine,memory,filesystem,configuration,distribution,test,$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/memory_scalability/sysbench-mem20-wt-ext4-wt2-pareto-100-oltp_ro.txt _ _ _)" > ../memory_scalability.csv
 
 for f in ../raw/memory_scalability/sysbench*txt; do
     memory=$(echo $f|awk -F'-' '{print $2}'|sed 's/mem//')

@@ -3,7 +3,7 @@
 title: "Percona Server for MongoDB: CPU and I/O scalability for
 WiredTiger and RocksDB"
 author: "Percona Lab"
-generated on:June 18, 2016
+generated on:June 20, 2016
 output:
   md_document:
     variant: markdown_github
@@ -45,12 +45,13 @@ storage.rocksdb.configString:
 The memory scalability tests were all done using 100 client threads.
 All graphs faceted by memory and configuration. 
 
+![plot of chunk mem](figure/mem-1.png)
 
 ```
 ## Error: Faceting variables must have at least one value
 ```
 
-![plot of chunk mem](figure/mem-1.png)
+![plot of chunk mem](figure/mem-2.png)
 
 ## Throughput detail 
 
@@ -60,10 +61,11 @@ All graphs faceted by memory and configuration.
 
 ### Memory scalability
 
+![plot of chunk tps_ms](figure/tps_ms-1.png)![plot of chunk tps_ms](figure/tps_ms-2.png)![plot of chunk tps_ms](figure/tps_ms-3.png)![plot of chunk tps_ms](figure/tps_ms-4.png)![plot of chunk tps_ms](figure/tps_ms-5.png)![plot of chunk tps_ms](figure/tps_ms-6.png)![plot of chunk tps_ms](figure/tps_ms-7.png)![plot of chunk tps_ms](figure/tps_ms-8.png)![plot of chunk tps_ms](figure/tps_ms-9.png)![plot of chunk tps_ms](figure/tps_ms-10.png)![plot of chunk tps_ms](figure/tps_ms-11.png)
 
 ```
 ## Error: Faceting variables must have at least one value
 ```
 
-![plot of chunk tps_ms](figure/tps_ms-1.png)
+![plot of chunk tps_ms](figure/tps_ms-12.png)
 

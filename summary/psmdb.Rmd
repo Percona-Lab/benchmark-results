@@ -152,7 +152,7 @@ for (dist in c("uniform","pareto")) {
 
 ```{r tps_ms, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 for (dist in c("uniform","pareto")) {
-    for (wl in c("oltp","oltp_ro")) { 
+    for (wl in c("oltp_ro","oltp")) { 
         for (fs in filesystems) {
             for (m in memorySizes) {
                 data <- subset(memScalability, distribution == dist & test == wl & filesystem == fs & memory == m)
