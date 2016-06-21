@@ -207,12 +207,14 @@ benchmark()
     for test in standard gt; do
 	restore_datadir $test # we're only restoring the datadir once per test set. it takes too long and I don't
 	# think the extra rows added by the oltp scripts will make much difference.
-	for active_schemas in 20 25 30 35 40 45; do
-	    active_schemas=$((active_schemas*1000))
-	    # we are always using the gt tests here, because the difference only matters in
-	    # table creation, not in workload
-	    sysbench_cmd run $benchmark_threads 1 $active_schemas gt &> sysbench-$test-$active_schemas.txt
-	done # for active_schemas in ...
+	for benchmark_threads in 100 350 500 850 1250; do
+	    for active_schemas in 20 25 30 35 40; do
+		active_schemas=$((active_schemas*1000))
+		# we are always using the gt tests here, because the difference only matters in
+		# table creation, not in workload
+		sysbench_cmd run $benchmark_threads 1 $active_schemas gt &> sysbench-$test-$benchmark_threads-$active_schemas-res.txt
+	    done # for active_schemas in ...
+	done #for benchmark_threads in ...
     done # for test in ...
 }
 
@@ -221,7 +223,7 @@ manual_test_benchmark()
 {
 test=gt
 benchmark_threads=20
-for active_schemas in 20 25 30 35 40 45; do
+for active_schemas in 20 25 30 35 40; do
     active_schemas=$((active_schemas*1000))
     GT=""
     [ "$test" == "gt" ] && GT="gt"
