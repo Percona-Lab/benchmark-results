@@ -1,0 +1,56 @@
+---
+
+title: "MySQL Community Server 5.7: General Tablespaces performance"
+author: "Percona Lab"
+generated on:`r format(Sys.Date(), "%B %d, %Y")`
+output:
+  md_document:
+    variant: markdown_github
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+library(plyr)
+
+# test,active_schemas,workload,size,threads,ts,writes,reads,response_time,tps,user_provided_threads
+data <- read.csv("../alldata.csv", header=T)
+
+```
+# MySQL Community Edition 5.7.13: General Tablespaces performance 
+
+## Setup
+
+* Client and server on the same machine 
+* Client sofwware is sysbench, 500 active threads, varying number of
+active (i.e. used) schemas. Total schemas on server are 40k. 
+* CPU: 48 logical CPU threads (Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz). 
+* Memory: 100GB Buffer Pool. 130GB RAM.  
+* Disk: Intel 3600 nvme
+* Standard test: innodb_file_per_table. 
+* GT test: one general tablespace per schema. 
+
+## Throughput per test and active_schemas 
+
+```{r global, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
+
+p <- ggplot(data, aes(x=ts, y=tps, color=as.factor(test))) + facet_grid(. ~ active_schemas, labeller=label_value) +
+           guides(col = guide_legend("test")) + 
+           geom_jitter(size=8,width=0.2,height=0.2) +
+            theme_bw() +
+            labs(x="time (secs)",y="throughput (tps)",title=paste("Throughput per
+            test type and active schemas")) + expand_limits(x=0,y=0) +
+            scale_y_continuous(breaks=extended_range_breaks()(rbind(0,data$tps))) +
+            theme(panel.grid = element_line(colour="#010101",size=1),
+            panel.background = element_rect(colour="#000000"),
+            plot.background = element_rect(colour="#000000"),
+            strip.background = element_rect(colour="#010101"),
+            text=element_text(size=50),
+            strip.text=element_text(size=60))    
+print(p)
+
+```

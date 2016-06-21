@@ -175,6 +175,7 @@ function set_vars()
    oltp_index_updates = oltp_index_updates or 1
    oltp_non_index_updates = oltp_non_index_updates or 1
    oltp_db_id = oltp_db_id or 0
+   oltp_db_count = oltp_db_count or 1
 
    gen_type='db'
 

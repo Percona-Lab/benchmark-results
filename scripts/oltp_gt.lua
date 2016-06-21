@@ -29,7 +29,7 @@ function event(thread_id)
    local pad_val
    local query
 
-   table_name = "sbtest" .. oltp_suffix .. sb_rand_uniform(1, oltp_tables_count)
+   table_name = "sbtest" .. sb_rand(1, oltp_db_count) .. ".sbtest" .. oltp_suffix .. sb_rand_uniform(1, oltp_tables_count)
 --   table_name = oltp_table_name
 
 

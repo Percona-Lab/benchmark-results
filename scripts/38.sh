@@ -59,6 +59,7 @@ _worker_pool_start_worker_or_wait_for_slot()
 export DATADIR=/mnt/i3600/perf-38
 export THREADS="8 16 32 48 64"
 export SIZE=1000
+export MAX_REQUESTS=100000
 export TIME=60
 export PID_DIR=/home/fipar/perf-38
 export BACKUP_DIR=/mnt/storage/perf-38
@@ -67,9 +68,9 @@ export MYSQL_BIN_DIR=$PID_DIR/mysql-5.7.13-linux-glibc2.5-x86_64/bin/
 sysbench_cmd()
 {
     table_size=$((RANDOM % SIZE + 1))
-    [ -z "$1" -o -z "$2" ] && echo "usage: sysbench_cmd <command> <threads> <i> [gt]# where command is a valid sysbench command like prepare or run, threads is passed on to --num-threads, and i is an integer that is appended to sbtest as the database. If gt is present, the _gt lua scripts are used. ">&2 && return 1
+    [ -z "$1" -o -z "$2" ] && echo "usage: sysbench_cmd <command> <threads> <i> <db count> [gt]# where command is a valid sysbench command like prepare or run, threads is passed on to --num-threads, i is an integer that is appended to sbtest as the database, and db count is the number of active schemas. If gt is present, the _gt lua scripts are used. ">&2 && return 1
     gt=""
-    [ -n "$4" ] && gt="_gt"
+    [ -n "$5" ] && gt="_gt"
     sysbench \
 	--mysql-host=127.0.0.1 \
 	--mysql-user=sbuser \
@@ -78,7 +79,8 @@ sysbench_cmd()
 	--num-threads=$2 \
 	--mysql-db=sbtest$3 \
 	--oltp_db_id=$3 \
-	--max-requests=999999999 \
+	--oltp_db_count=$4 \
+	--max-requests=$MAX_REQUESTS \
 	--run-time=$TIME \
 	--test=/data/opt/alexey.s/sb2/tests/sysbench-standard/db/oltp$gt.lua \
 	--mysql-table-engine=Innodb \
@@ -95,18 +97,6 @@ start_mysqld()
 {
     $MYSQL_BIN_DIR/mysqld_safe --defaults-file=/home/fipar/perf-38/my.cnf --datadir=$DATADIR --pid-file=/tmp/mysql.pid &> mysqld_safe.log &
     sleep 1
-}
-
-start_oltp()
-{
-    [ -z "$1" ] && echo "usage: start_oltp <tag>">&2 && return 1
-    sysbench_cmd run &> sysbench.$1.log &
-    echo $! > $PID_DIR/sysbench.pid
-}
-
-stop_oltp()
-{
-    kill $(cat $PID_DIR/sysbench.pid); rm -f $PID_DIR/sysbench.pid
 }
 
 
@@ -134,11 +124,13 @@ restore_datadir()
 	return 1
     }
     stop_mysqld
-    rm -rf $DATADIR/* 
-    for item in $BACKUP_DIR/"$1"/*; do cp -rv $item $DATADIR/; done
+    rm -rf $DATADIR/* ; mkdir $DATADIR
+    echo "restoring datadir"
+    for item in $BACKUP_DIR/"$1"/*; do cp -r $item $DATADIR/; done
+    echo "starting mysqld"; date > start_mysqld_$1.log
     start_mysqld
     echo -n "Waiting for mysqld to come up ... "
-    wait_for_mysqld
+    wait_for_mysqld; date > start_mysqld_$1.log
     echo "Done"
 }
 
@@ -187,7 +179,7 @@ prepare()
     echo "Creating $SCHEMAS schemas ..."
     while [ $i -lt $SCHEMAS ]; do
 	mysql -e "create database sbtest$i; grant all on sbtest$i to 'sbuser'@'localhost' identified by 'sbuser'"
-	_worker_pool_start_worker_or_wait_for_slot sysbench_cmd prepare 1 $i $GT
+	_worker_pool_start_worker_or_wait_for_slot sysbench_cmd prepare 1 $i $SCHEMAS $GT
 	i=$((i+1))
     done # while $i -lt $SCHEMAS
     echo "Done"
@@ -211,19 +203,15 @@ wait_for_sysbench_to_complete()
 
 benchmark()
 {
-    benchmark_threads=1
+    benchmark_threads=500
     for test in standard gt; do
 	restore_datadir $test # we're only restoring the datadir once per test set. it takes too long and I don't
 	# think the extra rows added by the oltp scripts will make much difference.
 	for active_schemas in 20 25 30 35 40 45; do
 	    active_schemas=$((active_schemas*1000))
-	    GT=""
-	    [ "$test" == "gt" ] && GT="gt"
-	    # this is the part that may kill the server ...
-	    for i in $(seq $active_schemas); do
-		(sysbench_cmd $benchmark_threads $i $GT &> sysbench-$test-$active_schemas-$i.txt) &
-	    done
-	    wait_for_sysbench_to_complete
+	    # we are always using the gt tests here, because the difference only matters in
+	    # table creation, not in workload
+	    sysbench_cmd run $benchmark_threads 1 $active_schemas gt &> sysbench-$test-$active_schemas.txt
 	done # for active_schemas in ...
     done # for test in ...
 }
@@ -232,14 +220,12 @@ benchmark()
 manual_test_benchmark()
 {
 test=gt
+benchmark_threads=20
 for active_schemas in 20 25 30 35 40 45; do
     active_schemas=$((active_schemas*1000))
     GT=""
     [ "$test" == "gt" ] && GT="gt"
-    # this is the part that may kill the server ...
-    for i in $(seq $active_schemas); do
-	(sysbench_cmd $benchmark_threads $i $GT &> sysbench-$test-$active_schemas-$i.txt) &
-    done
-    wait_for_sysbench_to_complete
+    echo "running test for $active_schemas active schemas"
+    sysbench_cmd run $benchmark_threads 1 $active_schemas $GT &> sysbench-$test-$active_schemas.txt 
 done # for active_schemas in ...
 }
