@@ -124,7 +124,9 @@ restore_datadir()
 	return 1
     }
     stop_mysqld
-    rm -rf $DATADIR/* ; mkdir $DATADIR
+    echo "cleaning up datadir"
+    for f in $DATADIR/*; do rm -f $f; done
+    mkdir $DATADIR
     echo "restoring datadir"
     for item in $BACKUP_DIR/"$1"/*; do cp -r $item $DATADIR/; done
     echo "starting mysqld"; date > start_mysqld_$1.log
