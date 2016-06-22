@@ -125,7 +125,7 @@ restore_datadir()
     }
     stop_mysqld
     echo "cleaning up datadir"
-    for f in $DATADIR/*; do rm -rf $f; done
+    rm -rf $DATADIR 
     mkdir $DATADIR
     echo "restoring datadir"
     for item in $BACKUP_DIR/"$1"/*; do cp -r $item $DATADIR/; done
@@ -138,7 +138,8 @@ restore_datadir()
 
 cleanup_datadir()
 {
-    rm -rf $DATADIR/*
+    rm -rf $DATADIR/
+    mkdir $DATADIR
     pushd $MYSQL_BIN_DIR/../
     $MYSQL_BIN_DIR/mysqld --defaults-file=$PID_DIR/my.cnf --initialize-insecure --datadir=$DATADIR #--user=mysql
     popd
