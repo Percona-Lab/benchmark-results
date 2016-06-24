@@ -29,7 +29,7 @@ k INTEGER UNSIGNED DEFAULT '0' NOT NULL,
 c CHAR(120) DEFAULT '' NOT NULL,
 pad CHAR(60) DEFAULT '' NOT NULL,
 ]] .. index_name .. [[ (id)
-) TABLESPACE ts]] .. oltp_db_id [[/*! ENGINE = ]] .. mysql_table_engine ..
+) TABLESPACE ts]] .. oltp_db_id .. [[/*! ENGINE = ]] .. mysql_table_engine ..
 " MAX_ROWS = " .. myisam_max_rows .. " */"
 
    elseif (db_driver == "pgsql") then
