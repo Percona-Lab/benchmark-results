@@ -201,9 +201,6 @@ wait_for_sysbench_to_complete()
     done
 }
 
-# what we want to measure is how does this scale when N number of schemas are active.
-# to test this, we'll start N sysbench instances, increasing N in a loop.  
-
 benchmark()
 {
     benchmark_threads=500

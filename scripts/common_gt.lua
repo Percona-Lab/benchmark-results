@@ -29,7 +29,7 @@ k INTEGER UNSIGNED DEFAULT '0' NOT NULL,
 c CHAR(120) DEFAULT '' NOT NULL,
 pad CHAR(60) DEFAULT '' NOT NULL,
 ]] .. index_name .. [[ (id)
-) TABLESPACE ts]] .. oltp_db_id .. "_" .. oltp_suffix .. i .. [[/*! ENGINE = ]] .. mysql_table_engine ..
+) TABLESPACE ts]] .. oltp_db_id [[/*! ENGINE = ]] .. mysql_table_engine ..
 " MAX_ROWS = " .. myisam_max_rows .. " */"
 
    elseif (db_driver == "pgsql") then
@@ -76,7 +76,7 @@ pad CHAR(60) DEFAULT '' NOT NULL,
 
    if (gen_type == "db" ) then
      if (db_driver == "mysql") then
-        db_query("CREATE TABLESPACE ts" .. oltp_db_id .. "_" .. oltp_suffix .. i .. " ADD DATAFILE 'ts" .. oltp_db_id .. "_" .. oltp_suffix .. i .. ".ibd' Engine=InnoDB")
+        db_query("CREATE TABLESPACE ts" .. oltp_db_id " ADD DATAFILE 'ts" .. oltp_db_id .. ".ibd' Engine=InnoDB")
      end
      db_query(query)
      db_query("CREATE INDEX k_" .. i .. " on sbtest" .. oltp_suffix .. i .. "(k)")
