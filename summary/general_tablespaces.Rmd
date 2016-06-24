@@ -38,12 +38,12 @@ active (i.e. used) schemas. Total schemas on server are 40k.
 
 ```{r global, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 
-p <- ggplot(data, aes(x=ts, y=tps, color=as.factor(test))) + facet_grid(. ~ active_schemas, labeller=label_value) +
+p <- ggplot(data, aes(x=ts, y=tps, color=as.factor(test))) + facet_grid(threads ~ active_schemas, labeller=label_value) +
            guides(col = guide_legend("test")) + 
            geom_jitter(size=8,width=0.2,height=0.2) +
             theme_bw() +
             labs(x="time (secs)",y="throughput (tps)",title=paste("Throughput per
-            test type and active schemas")) + expand_limits(x=0,y=0) +
+            test type, threads and active schemas")) + expand_limits(x=0,y=0) +
             scale_y_continuous(breaks=extended_range_breaks()(rbind(0,data$tps))) +
             theme(panel.grid = element_line(colour="#010101",size=1),
             panel.background = element_rect(colour="#000000"),
