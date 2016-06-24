@@ -76,7 +76,7 @@ pad CHAR(60) DEFAULT '' NOT NULL,
 
    if (gen_type == "db" ) then
      if (db_driver == "mysql") then
-        db_query("CREATE TABLESPACE ts" .. oltp_db_id " ADD DATAFILE 'ts" .. oltp_db_id .. ".ibd' Engine=InnoDB")
+        db_query("CREATE TABLESPACE ts" .. oltp_db_id .. " ADD DATAFILE 'ts" .. oltp_db_id .. ".ibd' Engine=InnoDB")
      end
      db_query(query)
      db_query("CREATE INDEX k_" .. i .. " on sbtest" .. oltp_suffix .. i .. "(k)")
