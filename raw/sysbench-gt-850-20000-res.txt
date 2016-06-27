@@ -8,4 +8,52 @@ Initializing random number generator from current time
 
 Initializing worker threads...
 
-FATAL: Worker threads failed to initialize within 30 seconds!
+Threads started!
+
+[   1s] threads: 850, tps: 1.00, reads: 14.00, writes: 4.00, response time: 7.00ms (95%), errors: 0.00, reconnects:  0.00
+[   2s] threads: 850, tps: 0.00, reads: 0.00, writes: 0.00, response time: 0.00ms (95%), errors: 0.00, reconnects:  0.00
+[   3s] threads: 850, tps: 1970.09, reads: 32232.46, writes: 8093.37, response time: 2690.94ms (95%), errors: 4.00, reconnects:  0.00
+[   4s] threads: 850, tps: 4068.02, reads: 57106.23, writes: 16269.06, response time: 339.99ms (95%), errors: 1.00, reconnects:  0.00
+[   5s] threads: 850, tps: 4263.99, reads: 59606.93, writes: 17074.98, response time: 337.25ms (95%), errors: 6.00, reconnects:  0.00
+[   6s] threads: 850, tps: 4031.97, reads: 56476.62, writes: 16087.89, response time: 367.40ms (95%), errors: 0.00, reconnects:  0.00
+[   7s] threads: 850, tps: 4732.01, reads: 66766.08, writes: 19009.02, response time: 318.32ms (95%), errors: 4.00, reconnects:  0.00
+[   8s] threads: 850, tps: 4841.98, reads: 68482.77, writes: 19389.94, response time: 296.25ms (95%), errors: 3.00, reconnects:  0.00
+[   9s] threads: 850, tps: 4901.03, reads: 68504.41, writes: 19591.12, response time: 293.69ms (95%), errors: 0.00, reconnects:  0.00
+[  10s] threads: 850, tps: 4876.98, reads: 66870.75, writes: 19436.93, response time: 291.07ms (95%), errors: 2.00, reconnects:  0.00
+[  11s] threads: 850, tps: 5286.02, reads: 75094.33, writes: 21231.09, response time: 280.29ms (95%), errors: 2.00, reconnects:  0.00
+[  12s] threads: 850, tps: 5131.97, reads: 71569.53, writes: 20515.87, response time: 285.80ms (95%), errors: 4.00, reconnects:  0.00
+[  13s] threads: 850, tps: 5488.04, reads: 76986.61, writes: 21915.17, response time: 269.60ms (95%), errors: 3.00, reconnects:  0.00
+[  14s] threads: 850, tps: 5316.99, reads: 74819.81, writes: 21304.95, response time: 268.79ms (95%), errors: 4.00, reconnects:  0.00
+[  15s] threads: 850, tps: 5555.02, reads: 77453.23, writes: 22237.07, response time: 278.70ms (95%), errors: 3.00, reconnects:  0.00
+[  16s] threads: 850, tps: 5729.97, reads: 80543.60, writes: 22942.88, response time: 266.71ms (95%), errors: 3.00, reconnects:  0.00
+[  17s] threads: 850, tps: 5918.04, reads: 82785.49, writes: 23653.14, response time: 256.99ms (95%), errors: 2.00, reconnects:  0.00
+[  18s] threads: 850, tps: 6132.99, reads: 84964.90, writes: 24545.97, response time: 244.24ms (95%), errors: 3.00, reconnects:  0.00
+[  19s] threads: 850, tps: 5808.01, reads: 81679.11, writes: 23226.03, response time: 252.79ms (95%), errors: 2.00, reconnects:  0.00
+[  20s] threads: 850, tps: 6016.96, reads: 85253.48, writes: 24117.85, response time: 250.91ms (95%), errors: 1.00, reconnects:  0.00
+[  21s] threads: 850, tps: 6363.04, reads: 88626.57, writes: 25410.16, response time: 242.27ms (95%), errors: 2.00, reconnects:  0.00
+OLTP test statistics:
+    queries performed:
+        read:                            1401582
+        write:                           400383
+        other:                           200175
+        total:                           2002140
+    transactions:                        100062 (4647.26 per sec.)
+    read/write requests:                 1801965 (83690.12 per sec.)
+    other operations:                    200175 (9296.89 per sec.)
+    ignored errors:                      51     (2.37 per sec.)
+    reconnects:                          0      (0.00 per sec.)
+
+General statistics:
+    total time:                          21.5314s
+    total number of events:              100062
+    total time taken by event execution: 18268.0890s
+    response time:
+         min:                                  1.37ms
+         avg:                                182.57ms
+         max:                               2923.42ms
+         approx.  95 percentile:             297.05ms
+
+Threads fairness:
+    events (avg/stddev):           117.7200/5.88
+    execution time (avg/stddev):   21.4919/0.02
+
