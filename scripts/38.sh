@@ -5,7 +5,7 @@
 # a lock file will consist of ${_worker_pool_LOCK_PREFIX}.${RANDOM}
 [ -z "$_worker_pool_LOCK_PREFIX" ] && _worker_pool_LOCK_PREFIX=/tmp/worker
 # the max number of workers to allow
-[ -z "$_worker_pool_WORKERS" ] && _worker_pool_WORKERS=48
+[ -z "$_worker_pool_WORKERS" ] && _worker_pool_WORKERS=500
 # we default to silent mode, only producing output on errors
 [ -z "$_worker_pool_VERBOSE" ] && _worker_pool_VERBOSE=0
 # when all worker slots are used, this marks how many seconds we should sleep
@@ -59,7 +59,7 @@ _worker_pool_start_worker_or_wait_for_slot()
 export DATADIR=/mnt/i3600/perf-38
 export THREADS="8 16 32 48 64"
 export SIZE=1000
-export MAX_REQUESTS=100000
+export MAX_REQUESTS=200000
 export TIME=60
 export PID_DIR=/home/fipar/perf-38
 export BACKUP_DIR=/mnt/storage/perf-38
@@ -82,6 +82,7 @@ sysbench_cmd()
 	--oltp_db_count=$4 \
 	--max-requests=$MAX_REQUESTS \
 	--run-time=$TIME \
+	--forced-shutdown=$((TIME + 10)) \
 	--test=/data/opt/alexey.s/sb2/tests/sysbench-standard/db/oltp$gt.lua \
 	--mysql-table-engine=Innodb \
 	--oltp_tables_count=100 \
@@ -179,7 +180,7 @@ prepare()
     restart_mysqld
     i=0
     mysql -e "grant all on *.* to 'sbuser'@'localhost' identified by 'sbuser'"
-    echo "Creating $SCHEMAS schemas ..."
+    echo "Creating $SCHEMAS schemas (GT is $GT)... "
     while [ $i -lt $SCHEMAS ]; do
 	mysql -e "create database sbtest$i; grant all on sbtest$i to 'sbuser'@'localhost' identified by 'sbuser'"
 	_worker_pool_start_worker_or_wait_for_slot sysbench_cmd prepare 1 $i $SCHEMAS $GT
