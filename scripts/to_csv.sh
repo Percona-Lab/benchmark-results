@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "test,threads,active_schemas,$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/sysbench-gt-20000.txt _ _ _)" > ../alldata.csv
+echo "test,threads,active_schemas,$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/sysbench-gt-850-20000-res.txt _ _ _)" > ../alldata.csv
 
 for f in ../raw/sys*res.txt; do
     test=$(echo $f|awk -F'-' '{print $2}')

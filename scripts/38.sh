@@ -135,6 +135,9 @@ restore_datadir()
     echo -n "Waiting for mysqld to come up ... "
     wait_for_mysqld; date > start_mysqld_$1.log
     echo "Done"
+    echo "Reinitializing mysqld exporters"
+    pmm-admin remove mysql sm-perf01
+    pmm-admin add mysql
 }
 
 cleanup_datadir()
@@ -210,10 +213,17 @@ benchmark()
 	# think the extra rows added by the oltp scripts will make much difference.
 	for benchmark_threads in 100 350 500 850 1250; do
 	    for active_schemas in 20 25 30 35 40; do
-		active_schemas=$((active_schemas*1000))
-		# we are always using the gt tests here, because the difference only matters in
-		# table creation, not in workload
-		sysbench_cmd run $benchmark_threads 1 $active_schemas gt &> sysbench-$test-$benchmark_threads-$active_schemas-res.txt
+		benchmark_complete=0
+	        benchmark_attempts=0
+		while [ $benchmark_complete -eq 0 ]; do
+		    benchmark_attempts=$((benchmark_attempts + 1))
+		    [ $benchmark_attempts -ge 5 ] && benchmark_complete=1
+		    [ $benchmark_attempts -eq 1 ] && active_schemas=$((active_schemas*1000))
+		    # we are always using the gt tests here, because the difference only matters in
+		    # table creation, not in workload
+		    sysbench_cmd run $benchmark_threads 1 $active_schemas gt &> sysbench-$test-$benchmark_threads-$active_schemas-res.txt
+		    grep 'Worker threads failed to initialize' sysbench-$test-$benchmark_threads-$active_schemas-res.txt >/dev/null || benchmark_complete=1
+		done # while $benchmark_complete is 0
 	    done # for active_schemas in ...
 	done #for benchmark_threads in ...
     done # for test in ...
