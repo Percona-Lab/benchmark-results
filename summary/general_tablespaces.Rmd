@@ -19,7 +19,7 @@ library(plyr)
 
 # test,active_schemas,workload,size,threads,ts,writes,reads,response_time,tps,user_provided_threads
 data <- read.csv("../alldata.csv", header=T)
-data <- subset(data, ts <= 60)
+data <- subset(data, ts <= 30)
 
 ```
 # MySQL Community Edition 5.7.13: General Tablespaces performance 

@@ -205,6 +205,29 @@ wait_for_sysbench_to_complete()
     done
 }
 
+start_collectors()
+{
+cat <<EOF>collectors.sh
+#!/bin/bash
+
+(
+while sleep 1; do
+   mysql -e 'show engine innodb status\G'
+done
+) &> $1-innodbstatus.log &
+
+vmstat 1 &> $1-vmstat.log &
+
+EOF
+chmod +x collectors.sh
+./collectors.sh &
+}
+
+stop_collectors()
+{
+    ps -ef|grep collectors.sh|awk '{print $2}'|xargs kill -9
+}
+
 benchmark()
 {
     benchmark_threads=500
@@ -221,7 +244,10 @@ benchmark()
 		    [ $benchmark_attempts -eq 1 ] && active_schemas=$((active_schemas*1000))
 		    # we are always using the gt tests here, because the difference only matters in
 		    # table creation, not in workload
-		    sysbench_cmd run $benchmark_threads 1 $active_schemas gt &> sysbench-$test-$benchmark_threads-$active_schemas-res.txt
+		    tag=$test-$benchmark_threads-$active_schemas
+		    start_collectors $tag 
+		    sysbench_cmd run $benchmark_threads 1 $active_schemas gt &> sysbench-$tag-res.txt
+		    stop_collectors
 		    grep 'Worker threads failed to initialize' sysbench-$test-$benchmark_threads-$active_schemas-res.txt >/dev/null || benchmark_complete=1
 		done # while $benchmark_complete is 0
 	    done # for active_schemas in ...
