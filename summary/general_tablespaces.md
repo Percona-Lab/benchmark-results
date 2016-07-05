@@ -2,7 +2,7 @@
 
 title: "MySQL Community Server 5.7: General Tablespaces performance"
 author: "Percona Lab"
-generated on:July 01, 2016
+generated on:July 05, 2016
 output:
   md_document:
     variant: markdown_github
@@ -25,4 +25,4 @@ active (i.e. used) schemas. Total schemas on server are 40k.
 
 ## Throughput per test and active_schemas 
 
-![plot of chunk global](figure/global-1.png)
+![plot of chunk global](figure/global-1.png)![plot of chunk global](figure/global-2.png)

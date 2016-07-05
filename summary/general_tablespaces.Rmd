@@ -53,5 +53,20 @@ p <- ggplot(data, aes(x=ts, y=tps, color=as.factor(test))) + facet_grid(threads 
             text=element_text(size=50),
             strip.text=element_text(size=60))    
 print(p)
+p <- ggplot(data, aes(x=ts, y=response_time, color=as.factor(test))) + facet_grid(threads ~ active_schemas, labeller=label_value) +
+           guides(col = guide_legend("test")) + 
+           geom_jitter(size=8,width=0.2,height=0.2) +
+            theme_bw() +
+            labs(x="time (secs)",y="response time
+			(ms)",title=paste("Response time per test type, threads and active schemas")) + expand_limits(x=0,y=0) +
+            scale_y_continuous(trans="log10") +
+            #scale_y_continuous(breaks=extended_range_breaks()(rbind(0,data$response_time)),trans="log10") +
+            theme(panel.grid = element_line(colour="#010101",size=1),
+            panel.background = element_rect(colour="#000000"),
+            plot.background = element_rect(colour="#000000"),
+            strip.background = element_rect(colour="#010101"),
+            text=element_text(size=50),
+            strip.text=element_text(size=60))    
+print(p)
 
 ```
