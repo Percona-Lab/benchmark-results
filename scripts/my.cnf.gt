@@ -1,70 +1,24 @@
-# Configuration name bm-cloud-db generated for aleksandr.kuzminsky@percona.com at 2013-10-23 16:55:34
-
 [client]
 
-# CLIENT #
 port                           = 3306
-#socket                         = /var/lib/mysql/mysql.sock
-#socket				= /tmp/mysql.sock
 socket = /var/run/mysqld/mysqld.sock
-
-
-[mysqld_safe]
-thp-setting=never
-thp-setting=never
-thp-setting=never
-thp-setting=never
-flush_caches                   = 1
-numa_interleave                = 1
 
 [mysqld]
 
-#basedir=/data/opt/vadim/ps/Percona-Server-5.7.10-1rc1-Linux.x86_64.ssl100
-
 # GENERAL #
 user                           = root
-#default-storage-engine         = TokuDB
 socket = /var/run/mysqld/mysqld.sock
-#socket                         = /var/lib/mysql/mysql.sock
 pid-file                       = /tmp/mysql.pid
 default_time_zone              = +00:00
-
-#tc-heuristic-recover=COMMIT
-
-# MyISAM #
-key-buffer-size                = 32M
 
 # SAFETY #
 max-allowed-packet             = 16M
 max-connect-errors             = 1000000
-#skip-name-resolve
+skip-name-resolve
 sysdate-is-now                 = 1
-#innodb                         = FORCE
-#read_only                      = 1
 
 # DATA STORAGE #
 datadir                        = /mnt/i3600/perf-38
-#datadir				= /mnt/storage/PERF-31
-#datadir                        = /mnt/m500/data
-#datadir                        = /mnt/logs/data/tokudb
-#tmpdir                         = /mnt/i3600/data
-#tmpdir                         = /mnt/m500/data
-
-# BINARY LOGGING #
-#log-bin                        = /mnt/logs/mylogs/binlogs/mysql-bin
-#relay-log                      = /mnt/logs/mylogs/relaylogs/mysql-relay-bin
-#expire-logs-days               = 3
-#binlog_format                  = ROW
-#binlog_row_image               = minimal
-#relay_log_purge                = 0
-#log-slave-updates
-skip-slave-start
-
-# REPLICATION #
-# server_id = 168429490
-# master-info-repository         = TABLE
-# relay-log-info-repository      = TABLE
-# slave-parallel-workers         = 16
 
 # CACHES AND LIMITS #
 tmp-table-size                 = 32M
@@ -117,18 +71,6 @@ table_open_cache=250000
 
 #innodb_spin_wait_delay=100
 innodb_thread_concurrency=128
-#innodb_thread_concurrency=64
-
-#tokudb_row_format = tokudb_quicklz
-#default-storage-engine=tokudb
-
-#tokudb_cache_size=1G
-#tokudb_directio=ON
-#tokudb_empty_scan=disabled
-#tokudb_read_block_size=16K
-#tokudb_commit_sync=ON
-#tokudb_checkpointing_period=900
-
 
 # LOGGING #
 log-error                      = mysql-error.log

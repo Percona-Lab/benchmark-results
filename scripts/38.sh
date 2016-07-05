@@ -232,6 +232,7 @@ benchmark()
 {
     benchmark_threads=500
     for test in standard gt; do
+	'cp' /home/fipar/perf-38/my.cnf.$test /home/fipar/perf-38/my.cnf
 	restore_datadir $test # we're only restoring the datadir once per test set. it takes too long and I don't
 	# think the extra rows added by the oltp scripts will make much difference.
 	for benchmark_threads in 100 350 500 850 1250; do

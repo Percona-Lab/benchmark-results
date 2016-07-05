@@ -1,0 +1,77 @@
+[client]
+
+port                           = 3306
+socket = /var/run/mysqld/mysqld.sock
+
+[mysqld]
+
+# GENERAL #
+user                           = root
+socket = /var/run/mysqld/mysqld.sock
+pid-file                       = /tmp/mysql.pid
+default_time_zone              = +00:00
+
+# SAFETY #
+max-allowed-packet             = 16M
+max-connect-errors             = 1000000
+skip-name-resolve
+sysdate-is-now                 = 1
+
+# DATA STORAGE #
+datadir                        = /mnt/i3600/perf-38
+
+# CACHES AND LIMITS #
+tmp-table-size                 = 32M
+max-heap-table-size            = 32M
+query-cache-type               = 0
+query-cache-size               = 0
+max-connections                = 1000
+thread-cache-size              = 1000
+open-files-limit               = 999999
+table-definition-cache         = 16384
+table-open-cache               = 16384
+
+performance-schema = OFF
+
+# INNODB #
+innodb-flush-method            = O_DIRECT
+innodb-log-files-in-group      = 2
+innodb-log-file-size           = 1G
+innodb-flush-log-at-trx-commit = 1
+innodb_log_compressed_pages     =0
+#innodb_log_checksum_algorithm  = crc32
+
+innodb-file-per-table          = 1
+innodb-buffer-pool-size        = 100G
+
+innodb_write_io_threads        = 8
+innodb_read_io_threads         = 32
+innodb_open_files              = 4294967295
+
+innodb_old_blocks_pct           =10
+innodb_old_blocks_time          =2000
+
+innodb_checksum_algorithm = crc32
+
+innodb_file_format		=Barracuda
+
+innodb_io_capacity=1000
+innodb_io_capacity_max=2000
+metadata_locks_hash_instances=256
+innodb_max_dirty_pages_pct=90
+innodb_flush_neighbors=0
+innodb_buffer_pool_instances=16
+innodb_lru_scan_depth=4096
+innodb_sync_spin_loops=30
+innodb-purge-threads=16
+table_open_cache=250000
+
+
+#innodb_spin_wait_delay=100
+innodb_thread_concurrency=128
+
+# LOGGING #
+log-error                      = mysql-error.log
+log-queries-not-using-indexes  = 0
+slow-query-log                 = 1
+slow-query-log-file            = /mnt/logs/mylogs/mysql-slow.log
