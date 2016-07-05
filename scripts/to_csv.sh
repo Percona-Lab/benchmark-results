@@ -30,3 +30,24 @@ for f in ../raw/memory_scalability/sysbench*txt; do
 								    echo "$engine,$memory,$fs,$config,$distribution,$workload,$l" >> ../memory_scalability.csv
 								done 
 done # for f in ..
+
+
+pushd ../raw/memory_scalability/
+rm -f mem*csv
+for f in mem*; do
+    cleanup_dstat.sh $f > $f.csv
+done # for f in mem* 
+popd
+
+echo "engine,memory,filesystem,configuration,distribution,test,$(head -1 ../raw/memory_scalability/mem60-rocks-ext4-rocks0-pareto-100-oltp_ro.csv)" > ../dstat.csv
+for f in ../raw/memory_scalability/mem*csv; do
+    memory=$(echo $f|awk -F'-' '{print $1}'|sed 's/.*mem//')
+    engine=$(echo $f|awk -F'-' '{print $2}')
+    fs=$(echo $f|awk -F'-' '{print $3}')
+    config=$(echo $f|awk -F'-' '{print $4}')
+    distribution=$(echo $f|awk -F'-' '{print $5}')
+    workload=$(echo $f|awk -F'-' '{print $7}'|sed 's/\.csv//')
+    grep -v total $f | while read l; do
+                           echo "$engine,$memory,$fs,$config,$distribution,$workload,$l" >> ../dstat.csv
+                       done
+done

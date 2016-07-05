@@ -42,6 +42,7 @@ ncols=16
     --report-interval=10 \
     --max-requests=0 \
     --max-time=$time \
+    --forced-shutdown=$((time + 10)) \
     --oltp-point-selects=10 \
     --oltp-simple-ranges=1 \
     --oltp-sum-ranges=1 \

@@ -81,7 +81,7 @@ start_dstat()
 {
     stop_dstat
     [ $# -eq 0 ] && echo "usage: start_dstat <target>">&2 && return 1
-    sudo nohup dstat --output=$1 10 &> dstat-$1.log &
+    sudo nohup dstat --output=dstat-$1.csv 10 &> dstat-$1.log &
 }
 
 stop_dstat()
@@ -97,6 +97,20 @@ restore_datadir()
     distribution=$1; engine=$2
     sudo rm -rf $DBPATH/*
     sudo cp -rv $BACKUPS_PATH/${distribution}_3.2-${engine}/$engine/* $DBPATH/
+}
+
+format_datadir()
+{
+    [ -z "$1" ] && echo "usage: format_datadir <filesystem name>">&2 && return 1
+    fs=$1
+    dbroot=$(echo $DBPATH|sed 's/\/mongod.*//')
+    dev=$(mount|grep $dbroot|awk '{print $1}'|sed 's/\/$//')
+    sudo umount $dbroot
+    flags="-F"
+    [ "$fs" == "xfs" ] && flags="-f"
+    sudo mkfs.$fs $flags $dev
+    sudo mount -o noatime $dev $dbroot
+    sudo mkdir $DBPATH
 }
 
 cleanup_datadir()
