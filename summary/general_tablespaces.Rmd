@@ -16,8 +16,11 @@ library(ggthemes)
 library(reshape2)
 library(knitr)
 library(plyr)
+library(RMySQL)
 
 # test,active_schemas,workload,size,threads,ts,writes,reads,response_time,tps,user_provided_threads
+con <- dbConnect(MySQL(), user="lab", dbname="perf39", host="127.0.0.1")
+mydata <- dbGetQuery(con, "select avg(tps) as tps, stddev(tps) as setps, avg(response_time) as rt, stddev(response_time) as sert, test, active_schemas, threads from alldata where active_schemas > 0 and ts <= 30 group by test, threads, active_schemas")
 data <- read.csv("../alldata.csv", header=T)
 data <- subset(data, ts <= 30)
 
@@ -34,6 +37,43 @@ active (i.e. used) schemas. Total schemas on server are 40k.
 * Disk: Intel 3600 nvme
 * Standard test: innodb_file_per_table. 
 * GT test: one general tablespace per schema. 
+
+## Throughput summary
+
+```{r summary, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
+
+p <- ggplot(mydata, aes(x=as.factor(threads), y=tps, group=test)) +
+            facet_grid(test ~ active_schemas) +
+            geom_line() +
+            geom_errorbar(aes(ymin=tps-setps, ymax=tps+
+           setps),width=0.15) +
+            labs(x="Threads", y="Throughput (tps)", title="Throughput per threads, test and active schemas") +
+            theme_bw() +
+            theme(panel.grid = element_line(colour="#010101",size=1),
+            panel.background = element_rect(colour="#000000"),
+            plot.background = element_rect(colour="#000000"),
+            strip.background = element_rect(colour="#010101"),
+            text=element_text(size=50),
+            strip.text=element_text(size=60))    
+print(p)
+
+
+p <- ggplot(mydata, aes(x=as.factor(threads), y=rt, group=test)) +
+            facet_grid(test ~ active_schemas) +
+            geom_line() +
+            geom_errorbar(aes(ymin=rt-sert, ymax=rt+
+           sert),width=0.15) +
+            labs(x="Threads", y="Response Time (ms)", title="Response time per threads, test and active schemas") +
+            theme_bw() +
+            theme(panel.grid = element_line(colour="#010101",size=1),
+            panel.background = element_rect(colour="#000000"),
+            plot.background = element_rect(colour="#000000"),
+            strip.background = element_rect(colour="#010101"),
+            text=element_text(size=50),
+            strip.text=element_text(size=60))    
+print(p)
+
+```
 
 ## Throughput per test and active_schemas 
 

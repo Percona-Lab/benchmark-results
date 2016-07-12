@@ -91,7 +91,7 @@ sysbench_cmd()
 
 stop_mysqld()
 {
-    mysqladmin -h127.0.0.1 shutdown
+    mysqladmin shutdown
 }
 
 start_mysqld()
@@ -105,7 +105,7 @@ wait_for_mysqld()
 {
     running=1
     while [ $running -eq 1 ]; do
-	mysql -h127.0.0.1 -e 'select @@version' 2>/dev/null && running=0 || sleep 0.3
+	mysql -e 'select @@version' 2>/dev/null && running=0 || sleep 0.3
     done # while $running -eq 1
 }
 

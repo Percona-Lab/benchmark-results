@@ -2,7 +2,7 @@
 
 title: "MySQL Community Server 5.7: General Tablespaces performance"
 author: "Percona Lab"
-generated on:July 05, 2016
+generated on:July 12, 2016
 output:
   md_document:
     variant: markdown_github
@@ -22,6 +22,10 @@ active (i.e. used) schemas. Total schemas on server are 40k.
 * Disk: Intel 3600 nvme
 * Standard test: innodb_file_per_table. 
 * GT test: one general tablespace per schema. 
+
+## Throughput summary
+
+![plot of chunk summary](figure/summary-1.png)![plot of chunk summary](figure/summary-2.png)
 
 ## Throughput per test and active_schemas 
 
