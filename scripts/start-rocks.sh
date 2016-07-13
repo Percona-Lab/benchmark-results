@@ -10,7 +10,7 @@ EOF
 datadir=/data/sam/mongod
 [ -n "$DATADIR" ] && datadir=$DATADIR
 
-export MONGO_PATH=mongo/percona-server-mongodb-3.2.4-1.0rc2
+export MONGO_PATH=mongo/percona-server-mongodb-3.2.7-1.1
 [ -z "$MONGO_PATH" ] && echo "MONGO_PATH not set, exiting">&2 && exit 1
 ulimit -n 4096
 numactl --interleave=all ./${MONGO_PATH}/bin/mongod \

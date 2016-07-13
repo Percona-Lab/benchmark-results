@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 #This expects csv_from_sysbench from https://github.com/Percona-Lab/benchmark_automation/ to be on the PATH 
 #It must be executed from within the scripts directory, as it uses relative paths
 # sample file name for this benchmark: 

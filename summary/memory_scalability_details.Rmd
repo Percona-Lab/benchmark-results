@@ -1,0 +1,91 @@
+---
+
+title: "Percona Server for MongoDB: CPU and I/O scalability for
+WiredTiger and RocksDB"
+author: "Percona Lab"
+generated on:`r format(Sys.Date(), "%B %d, %Y")`
+output:
+  md_document:
+    variant: markdown_github
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+library(plyr)
+
+label_custom <- function(variable, value) {
+    if (variable=="version") {
+       return(sub("upstream","M",sub("psmdb","P",value)))
+    } else if (variable=="range_size" | variable=="Group.4") {
+		return(paste("rs: ",value/1000,"k"))
+    }else {
+      return (as.character(value))
+    }
+}
+
+threadScalability <- read.csv("../thread_scalability.csv", header=T)
+memScalability <- read.csv("../memory_scalability.csv", header=T)
+dstat <- read.csv("../dstat.csv", header=T)
+
+nothreads <- c(1,3,5,8,13,20,31,46,68,100,145,210,300,430,630,870,1000,1200)
+memorySizes <- c(20,30,40,50,60,70,80,90,100,110,120)
+#memorySizes <- c(20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210)
+#filesystems <- c("ext4")
+filesystems <- c("ext4","xfs")
+configurations <- c("rocks0","wt0","wt1","wt2")
+
+```
+# Percona Server for MongoDB 3.2.4-1.rc2 - CPU and I/O scalability 
+
+## Throughput detail 
+
+### Memory scalability
+
+```{r tps_ms, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
+for (dist in c("uniform","pareto")) {
+    for (wl in c("oltp_ro","oltp")) { 
+        for (fs in filesystems) {
+            for (m in memorySizes) {
+                data <- subset(memScalability, distribution == dist & test == wl & filesystem == fs & memory == m)
+                dstatData <- subset(dstat, distribution == dist & test == wl & filesystem == fs & memory == m)
+                p <- ggplot(data, aes(x=ts, y=tps, color=as.factor(engine))) +
+                    facet_grid(configuration ~ .) +
+                    geom_jitter(size=8,width=0.2,height=0.2) +
+                    theme_bw() +
+                    labs(x="time (secs)",y="throughput (tps)",title=paste("Throughput per
+                    engine and configuration (", dist, ",", wl, ",", fs, ", ", m,"GB)")) + expand_limits(x=0,y=0) +
+                    scale_y_continuous(breaks=extended_range_breaks()(rbind(0,data$tps))) +
+                    theme(panel.grid = element_line(colour="#010101",size=1),
+                    panel.background = element_rect(colour="#000000"),
+                    plot.background = element_rect(colour="#000000"),
+                    strip.background = element_rect(colour="#010101"),
+                    text=element_text(size=50),
+                    strip.text=element_text(size=60))
+                print(p)
+                if (nrow(dstatData)>0) {
+                    p <- ggplot(dstatData, aes(x=i, y=dsk.total, color=as.factor(engine))) +
+                        facet_grid(configuration ~ .) +
+                        geom_jitter(size=8,width=0.2,height=0.2) +
+                        theme_bw() +
+                        labs(x="seq",y="dsk.total",title=paste("dstat/dsk.total per
+                        engine and configuration (", dist, ",", wl, ",", fs, ", ", m,"GB)")) + expand_limits(x=0,y=0) +
+                        scale_y_discrete(breaks=extended_range_breaks()(rbind(0,dstatData$dsk.total))) +
+                        theme(panel.grid = element_line(colour="#010101",size=1),
+                        panel.background = element_rect(colour="#000000"),
+                        plot.background = element_rect(colour="#000000"),
+                        strip.background = element_rect(colour="#010101"),
+                        text=element_text(size=50),
+                        strip.text=element_text(size=60))
+                    print(p)
+                } 
+            }
+        }
+    }
+}
+```
+
