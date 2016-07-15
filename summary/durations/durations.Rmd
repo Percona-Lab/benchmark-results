@@ -19,6 +19,7 @@ library(ggthemes)
 library(reshape2)
 library(knitr)
 library(plyr)
+library(gridExtra)
 
 label_custom <- function(variable, value) {
     if (value=="compression") {
@@ -30,13 +31,13 @@ label_custom <- function(variable, value) {
     }
 }
 
-data <- read.csv("../alldata.csv", header=T)
-dataParallel <- read.csv("../alldata-parallel.csv", header=T)
-durations <- read.csv("../durations.csv", header=T)
-durationsParallel <- read.csv("../durations-parallel.csv", header=T)
-diskstats <- read.csv("../diskstats.csv", header=T)
-diskstatsParallel <- read.csv("../diskstats-parallel.csv", header=T)
-vmstatParallel <- read.csv("../vmstat-parallel.csv", header=T)
+data <- read.csv("../../alldata.csv", header=T)
+dataParallel <- read.csv("../../alldata-parallel.csv", header=T)
+durations <- read.csv("../../durations.csv", header=T)
+durationsParallel <- read.csv("../../durations-parallel.csv", header=T)
+diskstats <- read.csv("../../diskstats.csv", header=T)
+diskstatsParallel <- read.csv("../../diskstats-parallel.csv", header=T)
+vmstatParallel <- read.csv("../../vmstat-parallel.csv", header=T)
 
 nothreads <- c(1,4,8,16,32,48,62)
 noparthreads <- c(1,4,8,16,32)
@@ -86,7 +87,8 @@ theme(panel.grid = element_line(colour="#010101",size=1),
       strip.background = element_rect(colour="#010101"),
       text=element_text(size=50),
       strip.text=element_text(size=60))
-detach(ssd)
+
+print(ssd[order(ssd$backup_duration),])
 
 #
 
