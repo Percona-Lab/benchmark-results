@@ -19,7 +19,7 @@ ssd=nvme0n1
 #echo "disk,type,threads,backup_duration" > ../durations.csv
 #echo "disk,type,threads,busy,qtime,stime" > ../diskstats.csv
 
-echo "disk,type,parallel_threads,$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/ssd/parallel/sysbench.baseline-1--parallel=1.log xb 10000000 1)" > ../alldata-parallel.csv
+echo "disk,type,parallel_threads,$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/ssd/sysbench.baseline-1--parallel=1.log xb 10000000 1)" > ../alldata-parallel.csv
 echo "disk,type,parallel_threads,threads,backup_duration" > ../durations-parallel.csv
 echo "disk,type,parallel_threads,threads,busy,qtime,stime" > ../diskstats-parallel.csv
 echo "disk,type,parallel_threads,threads,time,r,b,swpd,free,buff,cache,si,so,bi,bo,in,cs,us,sy,id,wa,st" > ../vmstat-parallel.csv
@@ -52,7 +52,7 @@ echo "disk,type,parallel_threads,threads,time,r,b,swpd,free,buff,cache,si,so,bi,
 #     done # for distribution
 # done #for workload
 
-for type in baseline compression encryption; do
+for type in baseline compression encryption xbstream_compressed xbstream_qpress; do
     for disk in ssd; do
 	baseline=0
 	for threads in $THREADS; do
@@ -66,19 +66,19 @@ for type in baseline compression encryption; do
 			[ "$type" == "baseline" -a $baseline -gt 1 ] && continue
 			[ "$type" == "baseline" -a $baseline -le 1 ] && baseline=$((baseline+1))
 			parallel="--parallel=$pt"
-			for f in ../raw/$disk/parallel/sysbench.$type-$extra$parallel.log; do
+			for f in ../raw/$disk/sysbench.$type-$extra$parallel.log; do
 			    [ -f $f ] || continue
 			    env _NOHEADER=1 csv_from_sysbench.sh $f xb 10000000 $threads | while read l; do
 												    echo "$disk,$type,$pt,$l" >> ../alldata-parallel.csv
 												    done # while read l
-			    start_t=$(head -1 ../raw/$disk/parallel/timestamps.$type-$extra$parallel.log)
-			    end_t=$(tail -1 ../raw/$disk/parallel/timestamps.$type-$extra$parallel.log)
+			    start_t=$(head -1 ../raw/$disk/timestamps.$type-$extra$parallel.log)
+			    end_t=$(tail -1 ../raw/$disk/timestamps.$type-$extra$parallel.log)
 			    echo "$disk,$type,$pt,$threads,$((end_t-start_t))" >> ../durations-parallel.csv
 			    dev=$(eval "echo \$$disk")
-			    grep $dev ../raw/$disk/parallel/diskstats.$type-$extra$parallel.log|awk '{print $15, $18, $19}' | tr -d '%' |tr ' ' ','|while read l; do
+			    grep $dev ../raw/$disk/diskstats.$type-$extra$parallel.log|awk '{print $15, $18, $19}' | tr -d '%' |tr ' ' ','|while read l; do
 														echo "$disk,$type,$pt,$threads,$l" >> ../diskstats-parallel.csv
 														done # while read l
-			    for f in ../raw/$disk/parallel/vmstat.$type-threads-$threads--parallel=$pt.log; do
+			    for f in ../raw/$disk/vmstat.$type-threads-$threads--parallel=$pt.log; do
 				[ -f $f ] || continue
 				secs=1
 			 	grep -v '[a-z]' $f | sed 's/  */,/g' | while read l; do

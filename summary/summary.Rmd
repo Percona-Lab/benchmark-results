@@ -1,0 +1,94 @@
+---
+
+title: "Percona Xtrabackup: Compression and Encryption performance"
+author: "Percona Lab"
+generated on:`r format(Sys.Date(), "%B %d, %Y")`
+output:
+  html_document:
+    self_contained: false 
+    lib_dir: libs
+<!--  md_document:
+    variant: markdown_github -->
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+library(plyr)
+
+label_custom <- function(variable, value) {
+    if (value=="compression") {
+        return("C")
+    } else if (value=="encryption") {
+        return("E")
+    } else {
+        return(as.character(value))
+    }
+}
+
+data <- read.csv("../alldata.csv", header=T)
+dataParallel <- read.csv("../alldata-parallel.csv", header=T)
+durations <- read.csv("../durations.csv", header=T)
+durationsParallel <- read.csv("../durations-parallel.csv", header=T)
+diskstats <- read.csv("../diskstats.csv", header=T)
+diskstatsParallel <- read.csv("../diskstats-parallel.csv", header=T)
+vmstatParallel <- read.csv("../vmstat-parallel.csv", header=T)
+
+nothreads <- c(1,4,8,16,32,48,62)
+noparthreads <- c(1,4,8,16,32)
+
+disks <- c("hdd","ssd")
+
+types <- c("encryption","compression", "xbstream_compressed", "xbstream_qpress")
+
+```
+# Percona Xtrabackup 2.3.4 - Encryption and Compression performance 
+
+## Setup
+
+* Client and server on the same machine 
+* Sysbench oltp workload running during all tests
+* 21GB datadir (restored between tests)
+* CPU: 48 logical CPU threads (Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz). 
+* Memory: 120GB. 
+* Disk: hdd (HGST HUH728080ALE600), ssd (Intel 3600 nvme) 
+* Encryption (E) and Compression (C) tested with 1, 4, 8, 16 and 32 threads
+
+
+## Backup duration 
+
+Backup duration by type, number of threads, and disk type, faceted by
+--parallel threads. The
+horizontal line on each graph shows the duration for the baseline (non
+compressed, non encrypted) backup. 
+
+```{r global, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
+
+baseline_ssd <- as.numeric(subset(durationsParallel, type=="baseline" & disk == "ssd")$backup_duration)
+ssd <- subset(durationsParallel,disk == "ssd" & type != "baseline")
+attach(ssd)
+ggplot(ssd, aes(x=as.factor(threads),y=as.numeric(backup_duration),color=as.factor(type),label=backup_duration)) + 
+scale_colour_discrete(name = "type") +
+geom_hline(aes(yintercept=baseline_ssd)) + 
+#geom_jitter(size=8,width=0.2,height=0.2) + 
+geom_text(size=18) +
+facet_grid(parallel_threads ~ .) +
+theme_bw() + 
+labs(x="threads",y="duration (secs)",title="Backup duration - ssd") + expand_limits(x=0,y=0) +
+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,backup_duration))) + 
+theme(panel.grid = element_line(colour="#010101",size=1),
+      panel.background = element_rect(colour="#000000"),
+      plot.background = element_rect(colour="#000000"),
+      strip.background = element_rect(colour="#010101"),
+      text=element_text(size=50),
+      strip.text=element_text(size=60))
+detach(ssd)
+
+#
+
+```
+

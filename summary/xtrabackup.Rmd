@@ -4,8 +4,11 @@ title: "Percona Xtrabackup: Compression and Encryption performance"
 author: "Percona Lab"
 generated on:`r format(Sys.Date(), "%B %d, %Y")`
 output:
-  md_document:
-    variant: markdown_github
+  html_document:
+    self_contained: false 
+    lib_dir: libs
+<!--  md_document:
+    variant: markdown_github -->
 
 ---
 
@@ -35,12 +38,12 @@ diskstats <- read.csv("../diskstats.csv", header=T)
 diskstatsParallel <- read.csv("../diskstats-parallel.csv", header=T)
 vmstatParallel <- read.csv("../vmstat-parallel.csv", header=T)
 
-nothreads <- c(1,4,8,16,32)
-noparthreads <- c(1,4,8,16)
+nothreads <- c(1,4,8,16,32,48,62)
+noparthreads <- c(1,4,8,16,32)
 
 disks <- c("hdd","ssd")
 
-types <- c("encryption","compression")
+types <- c("encryption","compression", "xbstream_compressed", "xbstream_qpress")
 
 ```
 # Percona Xtrabackup 2.3.4 - Encryption and Compression performance 
@@ -68,15 +71,21 @@ compressed, non encrypted) backup.
 baseline_ssd <- as.numeric(subset(durationsParallel, type=="baseline" & disk == "ssd")$backup_duration)
 ssd <- subset(durationsParallel,disk == "ssd" & type != "baseline")
 attach(ssd)
-ggplot(ssd, aes(x=as.factor(threads),y=as.numeric(backup_duration),color=as.factor(type))) + 
+ggplot(ssd, aes(x=as.factor(threads),y=as.numeric(backup_duration),color=as.factor(type),label=backup_duration)) + 
 scale_colour_discrete(name = "type") +
 geom_hline(aes(yintercept=baseline_ssd)) + 
-geom_jitter(size=8,width=0.2,height=0.2) + 
+#geom_jitter(size=8,width=0.2,height=0.2) + 
+geom_text(size=18) +
 facet_grid(parallel_threads ~ .) +
 theme_bw() + 
 labs(x="threads",y="duration (secs)",title="Backup duration - ssd") + expand_limits(x=0,y=0) +
 scale_y_continuous(breaks=extended_range_breaks()(rbind(0,backup_duration))) + 
-theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
+theme(panel.grid = element_line(colour="#010101",size=1),
+      panel.background = element_rect(colour="#000000"),
+      plot.background = element_rect(colour="#000000"),
+      strip.background = element_rect(colour="#010101"),
+      text=element_text(size=50),
+      strip.text=element_text(size=60))
 detach(ssd)
 
 #

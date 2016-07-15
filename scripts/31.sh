@@ -18,6 +18,7 @@ export SIZE=10000000
 export SB_THREADS=16
 export XB_THREADS="1 4 8 16 32"
 export PARALLEL_THREADS="1 4 8 16"
+export TRACE=0
 
 sysbench_cmd()
 {
@@ -114,6 +115,21 @@ prepare()
    sysbench_cmd prepare
 }
 
+test_file_copy()
+{
+    mkdir $BACKUP_DIR/manual_test
+    cp -rv $SSD_DATADIR $BACKUP_DIR
+}
+
+deferred_pmp()
+{
+    sleep 40
+    for i in $(seq 4); do
+	pt-pmp -p $(pidof innobackupex) &> ${1}-$i.pmp &
+	sleep 10
+    done
+}
+
 # baseline. full, uncompressed, unencrypted backup
 test_baseline()
 {
@@ -127,8 +143,14 @@ i=1
     start_collectors $tag
     echo -n "Sleep 20 seconds before starting backup ..."; sleep 20; echo "Done"
     ts > timestamps.$tag.log
-    $IB $* $XB_DIR
+    trace_cmd=""
+    [ $TRACE -eq 1 ] && trace_cmd="perf record -F 99 -a -g -- "
+    [ $TRACE -eq 2 ] && trace_cmd="operf "
+    [ $TRACE -eq 3 ] && deferred_pmp $tag & 
+    $trace_cmd$IB $* $XB_DIR
     ts >> timestamps.$tag.log
+    [ $TRACE -eq 1 ] && perf script > $tag.perf
+    [ $TRACE -eq 2 ] && opreport > $tag.opreport
     echo "Sleeping 10 seconds before stopping collectors ..."; sleep 20
     stop_oltp
     stop_collectors
@@ -149,8 +171,14 @@ for t in $XB_THREADS; do
     start_collectors $tag
     echo -n "Sleep 20 seconds before starting backup ..."; sleep 20; echo "Done"
     ts > timestamps.$tag.log
-    $IB --encryption=AES256 --encrypt-key-file=/home/fipar/PERF-31/key.256 --encrypt-threads=$t $* $XB_DIR 
+    trace_cmd=""
+    [ $TRACE -eq 1 ] && trace_cmd="perf record -F 99 -a -g -- "
+    [ $TRACE -eq 2 ] && trace_cmd="operf "    
+    [ $TRACE -eq 3 ] && deferred_pmp $tag & 
+    $trace_cmd$IB --encryption=AES256 --encrypt-key-file=/home/fipar/PERF-31/key.256 --encrypt-threads=$t $* $XB_DIR 
     ts >> timestamps.$tag.log
+    [ $TRACE -eq 1 ] && perf script > $tag.perf
+    [ $TRACE -eq 2 ] && opreport > $tag.opreport
     echo "Sleeping 10 seconds before stopping collectors ..."; sleep 20
     stop_oltp
     stop_collectors
@@ -170,8 +198,14 @@ for t in $XB_THREADS; do
     start_collectors $tag
     echo -n "Sleep 20 seconds before starting backup ..."; sleep 20; echo "Done"
     ts > timestamps.$tag.log
-    $IB --compress --compress-threads=$t $* $XB_DIR
+    trace_cmd=""
+    [ $TRACE -eq 1 ] && trace_cmd="perf record -F 99 -a -g -- "
+    [ $TRACE -eq 2 ] && opreport > $tag.opreport
+    [ $TRACE -eq 3 ] && deferred_pmp $tag &
+    $trace_cmd$IB --compress --compress-threads=$t $* $XB_DIR
     ts >> timestamps.$tag.log
+    [ $TRACE -eq 1 ] && perf script > $tag.perf
+    [ $TRACE -eq 2 ] && opreport > $tag.opreport
     echo "Sleeping 10 seconds before stopping collectors ..."; sleep 20
     stop_oltp
     stop_collectors
@@ -179,15 +213,93 @@ for t in $XB_THREADS; do
  done # for t in ...
 }
 
+test_xbstream_compressed()
+{
+    for t in $XB_THREADS; do
+	restore_datadir
+	tag="xbstream_compressed-threads-$t"
+	[ $# -gt 0 ] && tag=$tag$(echo $*|tr ' ' '_')
+	echo -n "Sleeping 5 seconds before starting collectors ... "; sleep 5; echo "Done"
+	start_oltp $tag
+	start_collectors $tag
+	echo -n "Sleep 20 seconds before starting backup ..."; sleep 20; echo "Done"
+	ts > timestamps.$tag.log
+	[ $TRACE -eq 1 ] && trace_cmd="perf record -F 99 -a -g -- "
+	[ $TRACE -eq 2 ] && opreport > $tag.opreport
+	[ $TRACE -eq 3 ] && deferred_pmp $tag &
+	$trace_cmd$IB --compress --compress-threads=$t --stream=xbstream $* ./ > $XB_DIR/backup.$tag.xbstream
+	ts >> timestamps.$tag.log
+	echo "Sleeping 10 seconds before stopping collectors ..."; sleep 20
+	stop_oltp
+	stop_collectors
+	echo "Done"
+    done
+}
+
+test_xbstream_qpress()
+{
+    for t in $XB_THREADS; do
+	restore_datadir
+	tag="xbstream_qpress-threads-$t"
+	[ $# -gt 0 ] && tag=$tag$(echo $*|tr ' ' '_')
+	echo -n "Sleeping 5 seconds before starting collectors ... "; sleep 5; echo "Done"
+	start_oltp $tag
+	start_collectors $tag
+	echo -n "Sleep 20 seconds before starting backup ..."; sleep 20; echo "Done"
+	ts > timestamps.$tag.log
+	[ $TRACE -eq 1 ] && trace_cmd="perf record -F 99 -a -g -- "
+	[ $TRACE -eq 2 ] && opreport > $tag.opreport
+	[ $TRACE -eq 3 ] && deferred_pmp $tag &
+	$trace_cmd$IB --stream=xbstream $* ./ | qpress -io -T$t > $XB_DIR/backup.$tag.xbstream
+	ts >> timestamps.$tag.log
+	echo "Sleeping 10 seconds before stopping collectors ..."; sleep 20
+	stop_oltp
+	stop_collectors
+	echo "Done"
+    done
+}
 
 # --parallel
 # we're using 8 tables in the sbtest database, and innodb_file_per_table
 test_parallel()
 {
+    rm -rf $XB_DIR/*
     for t in $PARALLEL_THREADS; do
 	arg="--parallel=$t"
 	test_baseline $arg
 	test_compressed $arg
 	test_encrypted $arg
+	test_xbstream_qpress $arg
+	test_xbstream_compressed $arg
     done # for t in ...
+}
+
+test_parallel_only_xbstream()
+{
+    for t in $PARALLEL_THREADS; do
+	arg="--parallel=$t"
+	test_xbstream_qpress $arg
+	test_xbstream_compressed $arg
+    done # for t in ...
+}
+
+test_parallel_only_xbstream_qpress()
+{
+    for t in $PARALLEL_THREADS; do
+	arg="--parallel=$t"
+	test_xbstream_qpress $arg
+    done # for t in ...
+}
+
+# based on results, trace tests not using --parallel, and for threads between 1 and 4
+test_trace()
+{
+    SAVED_THREADS=$XB_THREADS
+    export XB_THREADS="1 2 3 4"
+    export TRACE=3
+    test_baseline
+    test_compressed
+    test_encrypted
+    export TRACE=0
+    export XB_THREADS="$SAVED_THREADS"
 }
