@@ -42,10 +42,8 @@ restart_mongod()
     while [ $(echo 'db.isMaster()' | $mongoc 2>/dev/null|grep ismaster|grep -c true) -eq 0 ]; do
 	sleep 0.3
     done
-    echo "Done. SIGHUPing mongo-response-time-exporter and waiting 30 seconds"
+    echo "Done"
     [ $memory -eq 20 ] && cgclassify -g memory:PERF22_20 $(pidof mongod)
-    kill -s SIGHUP $(pidof mongo-response-time-exporter)
-    sleep 30
 }
 
 run_benchmark()
@@ -84,7 +82,7 @@ time=300
 
 for engine in rocks wt; do
     for workload in iobound iobound_heavy cpubound; do
-        colsize=10000000
+        colsize=60000000
 	memory=0
         [ "$workload" == "iobound_heavy" -o "$workload" == "iobound" ] && colsize=60000000
         [ "$workload" == "ibound_heavy" ] && memory=20 

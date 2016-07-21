@@ -49,7 +49,7 @@ restart_mongod()
     distribution=$6
     cache=64
     [ $memory -eq 20 ] && cache=10
-    [ "$engine" == "ft" ] && /home/fipar/PERF-22/transparent_huge_pages.sh disable || /home/fipar/PERF-22/transparent_huge_pages.sh enable
+    [ "$engine" == "ft" -o "$engine" == "wt" ] && /home/fipar/PERF-22/transparent_huge_pages.sh disable || /home/fipar/PERF-22/transparent_huge_pages.sh enable
     export MONGO_PATH=$mongopath
     export DBPATH=$dbpath/data/$engine-$size-$distribution/$engine
     stop_mongod
@@ -121,7 +121,7 @@ for engine in rocks wt; do
 	done
     done
 done
-restore_datadir $mongopath $datapath $dbpath $engine 
+#restore_datadir $mongopath $datapath $dbpath $engine 
 
 for engine in rocks wt; do
     for workload in iobound iobound_heavy cpubound; do
@@ -129,7 +129,7 @@ for engine in rocks wt; do
 	memory=0
         [ "$workload" == "iobound_heavy" -o "$workload" == "iobound" ] && size=60000000
         [ "$workload" == "ibound_heavy" ] && memory=20 
-	for range_size in 1000 10000 100000; do
+	for range_size in 1000 10000; do
 	    for threads in 512 128 48 32 16 4 1; do
 		for distribution in uniform pareto; do
 		    for dev in $hdd $slowssd $fastssd; do

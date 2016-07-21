@@ -1,0 +1,88 @@
+---
+
+title: "Percona Server for MongoDB: Range Queries performance on RocksDB and WiredTiger"
+author: "Percona Lab"
+generated on:`r format(Sys.Date(), "%B %d, %Y")`
+output:
+  md_document:
+    variant: markdown_github
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+library(plyr)
+
+label_custom <- function(variable, value) {
+    if (variable=="version") {
+       return(sub("upstream","M",sub("psmdb","P",value)))
+    } else if (variable=="range_size" | variable=="Group.4") {
+		return(paste("rs: ",value/1000,"k"))
+    }else {
+      return (as.character(value))
+    }
+}
+
+data <- read.csv("../../alldata.csv", header=T)
+
+data_uniform <- subset(data, distribution == "uniform")
+data_pareto <- subset(data, distribution == "pareto") 
+
+data_wt <- subset(data, engine == "wt") 
+data_rocks <- subset(data, engine == "rocks") 
+
+
+nothreads <- c(1,4,16,32,48,128,512)
+disks <- c("hdd","slowssd","fastssd")
+#ranges <- c(1000,10000,100000)
+ranges <- c(1000,10000)
+
+```
+# Percona Server for MongoDB 3.2.0-1.0 - Range queries performance 
+
+## Setup
+
+* Client and server on the same machine 
+* Client sofwware is sysbench (https://github.com/Percona-Lab/sysbench/tree/dev-mongodb-support).
+* CPU: 48 logical CPU threads (Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz). 
+* Memory: 120GB or 20GB (the latter limited via cgroup).
+* Disk: hdd (HGST HUH728080ALE600), slowssd (Crucial CT960M500SSD1), fastssd (Intel 3600 nvme) 
+* sysbench with mongodb support, 16 collections x 10M or 60M documents (~35GB or ~200G uncompressed), uniform and pareto distributions. 
+* Workloads are labeled as:
+- cpubound (10M documents per collection, fastssd storage)
+- iobound (60M documents per collection, fastssd and slowssd storage, 120GB RAM)
+- iobound_heavy (same as previous, but with 20GB RAM)
+
+## Throughput per threads and workload for range size 1k documents
+
+```{r global, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
+
+# > head(aggdata_pareto)
+#   Group.1 Group.2 Group.3 Group.4 Group.5         x
+# 1   rocks       1 iobound    10000 fastssd  3135.991
+
+for (d in disks) {
+    subdata <- subset(data_pareto, disk == d & range_size == 1000)
+    aggdata_pareto <- aggregate(subdata$tps, by=list(subdata$engine, subdata$user_provided_threads, subdata$workload), FUN=function(x) quantile(x, probs=0.99))
+    attach(aggdata_pareto)
+    gtitle <- paste("sysbench Ranges - Pareto (",d,")")
+    print(ggplot(aggdata_pareto, aes(x=as.factor(Group.2),y=as.numeric(x),color=as.factor(Group.1),group=Group.1)) + facet_grid(. ~ Group.3, labeller=label_custom) +geom_line()+geom_point(size=4) + labs(x="Threads",y="Throughput,tps",title=gtitle)+scale_color_tableau(name="Engine")+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,x)),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60)))
+
+  
+    detach(aggdata_pareto)
+    subdata <- subset(data_uniform, disk == d & range_size == 1000)
+    aggdata_uniform <- aggregate(subdata$tps, by=list(subdata$engine, subdata$user_provided_threads, subdata$workload), FUN=function(x) quantile(x, probs=0.99))
+    attach(aggdata_uniform)
+    gtitle <- paste("sysbench Ranges - Uniform (",d,")")
+    print(ggplot(aggdata_uniform, aes(x=as.factor(Group.2),y=as.numeric(x),color=as.factor(Group.1),group=Group.1))+geom_line()+geom_point(size=4) + facet_grid(. ~ Group.3, labeller=label_custom) +labs(x="Threads",y="Throughput,tps",title=gtitle)+scale_color_tableau(name="Engine")+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,x)),labels = scales::comma)+theme(axis.text.x  = element_text(angle=45, vjust=0.5))+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60)))
+    detach(aggdata_uniform)
+
+}
+
+
+```
+
