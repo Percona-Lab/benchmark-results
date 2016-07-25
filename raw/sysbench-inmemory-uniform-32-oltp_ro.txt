@@ -1,0 +1,45 @@
+sysbench 1.0:  multi-threaded system evaluation benchmark
+
+Running the test with following options:
+Number of threads: 32
+Report intermediate results every 10 second(s)
+Initializing random number generator from current time
+
+
+setting write concern to 1
+Initializing worker threads...
+
+Threads started!
+
+[  10s] threads: 32, tps: 16432.18, reads: 139702.10, writes: 0.00, response time: 2.88ms (95%), errors: 0.00, reconnects:  0.00
+[  20s] threads: 32, tps: 16516.60, reads: 140409.98, writes: 0.00, response time: 2.87ms (95%), errors: 0.00, reconnects:  0.00
+[  30s] threads: 32, tps: 16516.80, reads: 140372.41, writes: 0.00, response time: 2.87ms (95%), errors: 0.00, reconnects:  0.00
+[  40s] threads: 32, tps: 16505.02, reads: 140264.33, writes: 0.00, response time: 2.87ms (95%), errors: 0.00, reconnects:  0.00
+[  50s] threads: 32, tps: 16539.60, reads: 140569.19, writes: 0.00, response time: 2.86ms (95%), errors: 0.00, reconnects:  0.00
+[  60s] threads: 32, tps: 16490.89, reads: 140191.14, writes: 0.00, response time: 2.86ms (95%), errors: 0.00, reconnects:  0.00
+OLTP test statistics:
+    queries performed:
+        read:                            8415228
+        write:                           0
+        other:                           990042
+        total:                           9405270
+    transactions:                        990042 (16500.10 per sec.)
+    read/write requests:                 8415228 (140248.73 per sec.)
+    other operations:                    990042 (16500.10 per sec.)
+    ignored errors:                      0      (0.00 per sec.)
+    reconnects:                          0      (0.00 per sec.)
+
+General statistics:
+    total time:                          60.0022s
+    total number of events:              990042
+    total time taken by event execution: 1918.7857s
+    response time:
+         min:                                  0.72ms
+         avg:                                  1.94ms
+         max:                                 22.67ms
+         approx.  95 percentile:               2.87ms
+
+Threads fairness:
+    events (avg/stddev):           30938.8125/500.58
+    execution time (avg/stddev):   59.9621/0.00
+
