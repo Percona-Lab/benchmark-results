@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export TIME=300
-export COLSIZE=2000000
+export TIME=120
+export COLSIZE=6000000
 export COLNUM=8
 export DBPATH_ROOT=/mnt/i3600/PERF-42
 export MONGOPATH_WT=percona-server-mongodb-3.2.7-1.1
@@ -78,6 +78,8 @@ run_sysbench()
 generate_data()
 {
     for distribution in uniform pareto; do
+	stop_mongod
+	rm -rf $DBPATH_ROOT/$distribution/*
 	restart_mongod $distribution $MONGOPATH_WT wt 
 	/home/fipar/bin/sysbench \
 	    --mongo-write-concern=1 \
@@ -90,6 +92,7 @@ generate_data()
 	    --max-requests=$COLNUM \
 	    --num-threads=$COLNUM run | tee sysbench-prepare-$distribution.txt
 	stop_mongod
+	rm -rf $BACKUPS_PATH/$distribution/*
 	cp -rv $DBPATH_ROOT/$distribution/* $BACKUPS_PATH/$distribution/
     done
 }
@@ -110,6 +113,7 @@ create_dumps_for_inmemory()
 	restore_wt_datadir $distribution
 	restart_mongod $distribution $MONGOPATH_WT wt
 	test -d $BACKUPS_PATH/inmemory-$distribution || mkdir $BACKUPS_PATH/inmemory-$distribution
+	rm -rf $BACKUPS_PATH/inmemory-$distribution/*
 	mongodump -o $BACKUPS_PATH/inmemory-$distribution/
     done
 }
@@ -135,18 +139,25 @@ benchmark()
 			restart_as_inmemory $distribution
 		    fi
 		    tag=$engine-$distribution-$threads-$workload
-		    run_sysbench 60 $threads $COLSIZE $workload $distribution $tag
+		    run_sysbench $TIME $threads $COLSIZE $workload $distribution $tag
 		done # for threads in ...
 	    done # for distribution in ...
 	done # for engine in ...
     done # for workload in ...
 }
 
+repeat_uniform_32_oltp_inmemory()
+{
+    tag=inmemory-uniform-32-oltp
+    restart_as_inmemory uniform
+    run_sysbench $TIME 32 $COLSIZE oltp uniform $tag
+}
+
 long_benchmark()
 {
     for engine in wt inmemory; do
 	for distribution in uniform pareto; do
-	    for threads in 512 128; do
+	    for threads in 128; do
 		stop_mongod
 		    if [ "$engine" == "wt" ]; then
 			restore_wt_datadir $distribution
