@@ -10,30 +10,30 @@ Initializing worker threads...
 setting write concern to 1
 Threads started!
 
-thread prepare5
-thread prepare3
-thread prepare4
+thread prepare4thread prepare0
+thread prepare2
 thread prepare1
-thread prepare6
-thread prepare0thread prepare2thread prepare7
 
-Creating index on sbtest5(k)Creating index on sbtest4(k)Creating index on sbtest6(k)
+thread prepare5thread prepare7
 
+thread prepare3Creating index on sbtest1(k)thread prepare6
 
 
 Creating index on sbtest2(k)
+Creating index on sbtest5(k)
+Creating index on sbtest8(k)Creating index on sbtest6(k)
 Creating index on sbtest7(k)
-Creating index on sbtest1(k)Creating index on sbtest8(k)
-Creating index on sbtest3(k)
 
-Inserting 2000000 documents into 'sbtest5'
-Inserting 2000000 documents into 'sbtest2'
-Inserting 2000000 documents into 'sbtest8'
-Inserting 2000000 documents into 'sbtest1'
-Inserting 2000000 documents into 'sbtest7'
-Inserting 2000000 documents into 'sbtest3'
-Inserting 2000000 documents into 'sbtest6'
-Inserting 2000000 documents into 'sbtest4'
+Creating index on sbtest4(k)
+Creating index on sbtest3(k)
+Inserting 6000000 documents into 'sbtest5'
+Inserting 6000000 documents into 'sbtest8'
+Inserting 6000000 documents into 'sbtest3'
+Inserting 6000000 documents into 'sbtest6'
+Inserting 6000000 documents into 'sbtest4'
+Inserting 6000000 documents into 'sbtest2'
+Inserting 6000000 documents into 'sbtest7'
+Inserting 6000000 documents into 'sbtest1'
 OLTP test statistics:
     queries performed:
         read:                            0
@@ -47,16 +47,16 @@ OLTP test statistics:
     reconnects:                          0      (0.00 per sec.)
 
 General statistics:
-    total time:                          155.0372s
+    total time:                          464.7060s
     total number of events:              8
-    total time taken by event execution: 1214.4681s
+    total time taken by event execution: 3688.8374s
     response time:
-         min:                             149872.67ms
-         avg:                             151808.51ms
-         max:                             155037.07ms
-         approx.  95 percentile:          155017.92ms
+         min:                             455639.00ms
+         avg:                             461104.67ms
+         max:                             464705.95ms
+         approx.  95 percentile:          464757.78ms
 
 Threads fairness:
     events (avg/stddev):           1.0000/0.00
-    execution time (avg/stddev):   151.8085/1.77
+    execution time (avg/stddev):   461.1047/3.16
 

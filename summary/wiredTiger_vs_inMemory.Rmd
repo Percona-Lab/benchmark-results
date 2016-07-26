@@ -1,0 +1,108 @@
+---
+
+title: "Percona Server for MongoDB 3.2.7: WiredTiger vs InMemory sysbench oltp performance"
+
+author: "Percona Lab"
+generated on:`r format(Sys.Date(), "%B %d, %Y")`
+output:
+  md_document:
+    variant: markdown_github
+
+---
+
+```{r setup, include=FALSE, warning=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+library(plyr)
+
+label_custom <- function(variable, value) {
+    if (variable=="engine") {
+       return (ifelse(value=="inmemory","inMemory","wiredTiger"))
+    } else {
+      return (as.character(value))
+    }
+}
+
+shortBenchmarks <- read.csv("../data-short-benchmarks.csv", header=T)
+longBenchmarks <- read.csv("../data-long-benchmarks.csv", header=T)
+
+nothreads <- c(512,128,48,32)
+
+```
+
+# Percona Server for MongoDB 3.2.7-1.1 - WiredTiger vs InMemory sysbench oltp performance
+
+## Setup
+
+* WiredTiger: psmdb 3.2.7-1.1 
+* InMemory: built from source, v3.2 percona-server-mongodb branch
+* sysbench with mongodb support, oltp and oltp_ro scripts
+* inMemorySizeGB / wiredTigerCacheSizeGB set to 128GB
+* Data set: 8 collections, 6M documents per collection (12GB compressed)
+
+## Benchmark procedure
+
+* For WiredTiger: restore the datadir from binary backup before each experiment
+* For InMemory: restore the datadir with mongorestore (taken with mongodump from the same data set used to create the binary backup for WiredTiger) before each experiment
+
+## Short benchmarks
+
+Sysbench runs of 60 seconds
+
+```{r short, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
+
+for (d in c("uniform","pareto")) {
+
+    subdata <- subset(shortBenchmarks, distribution == d)
+    attach(subdata)
+
+    p <- ggplot(subdata, aes(x=ts, y=tps, color=as.factor(engine))) +
+        facet_grid(user_provided_threads ~ workload, labeller = label_custom) +
+        geom_jitter(size=8,width=0.2,height=0.2) +
+        theme_bw () +
+        labs(x="time (secs)", y="throughput (tps)", title=paste("WiredTiger vs InMemory throughput - ",d))
+        scale_y_continuous(breaks=extended_range_breaks()(rbind(0,subdata$tps))) +
+        theme(panel.grid = element_line(colour="#010101",size=1),
+        panel.background = element_rect(colour="#000000"),
+        plot.background = element_rect(colour="#000000"),
+        strip.background = element_rect(colour="#010101"))
+        print(p) 
+
+    detach(subdata)
+
+}
+
+```
+
+
+## Long benchmarks
+
+Sysbench runs of 1 hour
+
+
+```{r long, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
+
+for (d in c("uniform","pareto")) {
+
+    subdata <- subset(longBenchmarks, distribution == d)
+    attach(subdata)
+
+    p <- ggplot(subdata, aes(x=ts, y=tps, color=as.factor(engine))) +
+        geom_jitter(size=8,width=0.2,height=0.2) +
+        theme_bw () +
+        labs(x="time (secs)", y="throughput (tps)", title=paste("WiredTiger vs InMemory throughput - 128 threads, oltp",d))
+        scale_y_continuous(breaks=extended_range_breaks()(rbind(0,subdata$tps))) +
+        theme(panel.grid = element_line(colour="#010101",size=1),
+        panel.background = element_rect(colour="#000000"),
+        plot.background = element_rect(colour="#000000"),
+        strip.background = element_rect(colour="#010101"))
+        print(p) 
+
+    detach(subdata)
+
+}
+
+```
