@@ -161,7 +161,7 @@ first_benchmark()
 
 
 second_benchmark(){
-    for workload in oltp; do # write_only was cancelled as WT_CACHE_FULL is hit 
+    for workload in oltp write_only; do 
 	for engine in inmemory wt; do
 	    for distribution in uniform pareto; do
 		for threads in 256 128 48; do
@@ -248,12 +248,14 @@ repeat_all_wt()
     done # for workload in ...
 }
 
-# sysbench-inmemory-pareto-512-oltp.txt
+# sysbench-wt-uniform-128-write_only.txt 
 current_repeat()
 {
-    tag=inmemory-pareto-512-oltp
-    restart_as_inmemory pareto
-    run_sysbench $TIME 512 $COLSIZE oltp uniform $tag
+    tag=wt-uniform-128-write_only
+    stop_mongod
+    restore_wt_datadir uniform
+    restart_mongod uniform $MONGOPATH_WT wt
+    run_sysbench $TIME 128 $COLSIZE write_only uniform $tag
 }
 
 long_benchmark()

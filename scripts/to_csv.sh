@@ -5,7 +5,7 @@
 echo "engine,distribution,"$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/sysbench-inmemory-uniform-512-oltp_ro.txt wt_vs_im 20000000 512) > ../data-short-benchmarks.csv
 
 for engine in inmemory wt; do
-    for workload in oltp insert; do # maybe add insert too
+    for workload in oltp insert write_only; do # maybe add insert too
 	for distribution in uniform pareto; do
 	    for threads in 256 128 48; do
 		env _NOHEADER=1 csv_from_sysbench.sh ../raw/sysbench-$engine-$distribution-$threads-$workload.txt $workload 20000000 $threads | while read l; do

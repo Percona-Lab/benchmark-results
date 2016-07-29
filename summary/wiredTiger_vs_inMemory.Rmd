@@ -53,11 +53,12 @@ nothreads <- c(512,128,48,32)
 ```{r short, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 
 for (d in c("uniform","pareto")) {
-    for (wl in c("oltp", "insert")) {
+    for (wl in c("oltp", "insert", "write_only")) {
 
     subdata <- subset(shortBenchmarks, distribution == d & workload == wl)
 
     p <- ggplot(subdata, aes(x=ts, y=tps, color=as.factor(engine))) +
+        scale_color_discrete(name = "Engine") +
         facet_grid(. ~ user_provided_threads, labeller = label_custom) +
         geom_jitter(size=8,width=0.2,height=0.2) +
         theme_bw () + theme(text = element_text(size=60)) + 
