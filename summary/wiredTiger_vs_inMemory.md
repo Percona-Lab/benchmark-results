@@ -3,7 +3,7 @@
 title: "Percona Server for MongoDB 3.2.7: WiredTiger vs InMemory sysbench oltp performance"
 
 author: "Percona Lab"
-generated on:July 27, 2016
+generated on:July 28, 2016
 output:
   md_document:
     variant: markdown_github
@@ -26,17 +26,9 @@ output:
 
 * For WiredTiger: restore the datadir from binary backup before each experiment
 * For InMemory: restore the datadir with mongorestore (taken with mongodump from the same data set used to create the binary backup for WiredTiger) before each experiment
+* Sysbench runs of 60 seconds
 
-## Short benchmarks
-
-Sysbench runs of 60 seconds
 
 ![plot of chunk short](figure/short-1.png)![plot of chunk short](figure/short-2.png)![plot of chunk short](figure/short-3.png)![plot of chunk short](figure/short-4.png)
 
 
-## Long benchmarks
-
-Sysbench runs of 1 hour
-
-
-![plot of chunk long](figure/long-1.png)![plot of chunk long](figure/long-2.png)

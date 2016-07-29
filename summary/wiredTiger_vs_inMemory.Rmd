@@ -47,15 +47,13 @@ nothreads <- c(512,128,48,32)
 
 * For WiredTiger: restore the datadir from binary backup before each experiment
 * For InMemory: restore the datadir with mongorestore (taken with mongodump from the same data set used to create the binary backup for WiredTiger) before each experiment
+* Sysbench runs of 60 seconds
 
-## Short benchmarks
-
-Sysbench runs of 60 seconds
 
 ```{r short, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 
 for (d in c("uniform","pareto")) {
-    for (wl in c("oltp", "write_only")) {
+    for (wl in c("oltp", "insert")) {
 
     subdata <- subset(shortBenchmarks, distribution == d & workload == wl)
 
@@ -77,28 +75,3 @@ for (d in c("uniform","pareto")) {
 ```
 
 
-## Long benchmarks
-
-Sysbench runs of 1 hour
-
-
-```{r long, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
-
-for (d in c("uniform","pareto")) {
-
-    subdata <- subset(longBenchmarks, distribution == d)
-
-    p <- ggplot(subdata, aes(x=ts, y=tps, color=as.factor(engine))) +
-        geom_jitter(size=8,width=0.2,height=0.2) +
-        theme_bw () + theme(text = element_text(size=60)) +
-        labs(x="time (secs)", y="throughput (tps)", title=paste("WiredTiger vs InMemory throughput - 128 threads, oltp",d)) +
-        scale_y_continuous(breaks=extended_range_breaks()(rbind(0,subdata$tps))) +
-        theme(panel.grid = element_line(colour="#010101",size=1),
-        panel.background = element_rect(colour="#000000"),
-        plot.background = element_rect(colour="#000000"),
-        strip.background = element_rect(colour="#010101"))
-        print(p) 
-
-}
-
-```

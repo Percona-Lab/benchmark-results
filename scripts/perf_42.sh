@@ -72,9 +72,9 @@ run_sysbench()
         --oltp-sum-ranges=1 \
         --oltp-order-ranges=1 \
         --oltp-distinct-ranges=1 \
-        --oltp-index-updates=1 \
-        --oltp-non-index-updates=1 \
-        --oltp-inserts=1 run 2>&1 | tee sysbench-$tag.txt
+        --oltp-index-updates=8 \
+        --oltp-non-index-updates=8 \
+        --oltp-inserts=4 run 2>&1 | tee sysbench-$tag.txt
 }
 
 generate_data()
@@ -108,6 +108,14 @@ restore_wt_datadir()
     du -hcd1 $DBPATH_ROOT
 }
 
+
+cleanup_wt_datadir()
+{
+    [ -z "$1" ] && echo "usage: cleanup_wt_datadir <uniform|pareto>">&2 && return 1
+    distribution=$1
+    rm -rf $DBPATH_ROOT/$distribution/*
+}
+
 create_dumps_for_inmemory()
 {
     stop_mongod
@@ -122,12 +130,12 @@ create_dumps_for_inmemory()
 
 restart_as_inmemory()
 {
-    [ -z "$1" ] && echo "usage: restore_inmemory_datadir <uniform|pareto>">&2 && return 1
+    [ -z "$1" ] && echo "usage: restore_inmemory_datadir <uniform|pareto> [noload]">&2 && return 1
+    noload=0
+    [ "$2" == "noload" ] && noload=1 
     restart_mongod $distribution $MONGOPATH_INMEMORY inmemory 
-    for i in $(seq $COLNUM); do
-	$MONGOC localhost/sbtest --eval "db.createCollection(\"sbtest$i\",{storageEngine: {wiredTiger: {configString: 'cache_resident=1'}}})"
-    done
-    mongorestore -j $COLNUM --noOptionsRestore --numInsertionWorkersPerCollection 4 $BACKUPS_PATH/inmemory-$1/ 
+    cgclassify -g memory:DBLimitedGroup `pidof mongod`
+    [ $noload -eq 0 ] && mongorestore -j $COLNUM --noOptionsRestore --numInsertionWorkersPerCollection 4 $BACKUPS_PATH/inmemory-$1/ 
 }
 
 first_benchmark()
@@ -153,8 +161,55 @@ first_benchmark()
 
 
 second_benchmark(){
-    for workload in oltp write_only; do # insert too
-	for engine in wt inmemory; do
+    for workload in oltp; do # write_only was cancelled as WT_CACHE_FULL is hit 
+	for engine in inmemory wt; do
+	    for distribution in uniform pareto; do
+		for threads in 256 128 48; do
+		    stop_mongod # then it will be stopped again by restart_mongod ... 
+		    echo $(( $MEMORY * 1024 * 1024 * 1024 * 2 )) > /sys/fs/cgroup/memory/DBLimitedGroup/memory.limit_in_bytes
+		    cat /sys/fs/cgroup/memory/DBLimitedGroup/memory.limit_in_bytes
+		    if [ "$engine" == "wt" ]; then
+			restore_wt_datadir $distribution
+			restart_mongod $distribution $MONGOPATH_WT $engine
+			cgclassify -g memory:DBLimitedGroup `pidof mongod`
+		    else
+			restart_as_inmemory $distribution
+		    fi
+		    tag=$engine-$distribution-$threads-$workload
+		    run_sysbench $TIME $threads $COLSIZE $workload $distribution $tag
+		done # for threads in ...
+	    done # for distribution in ...
+	done # for engine in ...
+    done # for workload in ...
+}
+
+inserts_second_benchmark(){
+    for workload in insert; do # insert too
+	for engine in inmemory wt; do
+	    for distribution in uniform pareto; do
+		for threads in 256 128 48; do
+		    stop_mongod # then it will be stopped again by restart_mongod ... 
+		    echo $(( $MEMORY * 1024 * 1024 * 1024 * 2 )) > /sys/fs/cgroup/memory/DBLimitedGroup/memory.limit_in_bytes
+		    cat /sys/fs/cgroup/memory/DBLimitedGroup/memory.limit_in_bytes
+		    if [ "$engine" == "wt" ]; then
+			cleanup_wt_datadir $distribution
+			restart_mongod $distribution $MONGOPATH_WT $engine
+			cgclassify -g memory:DBLimitedGroup `pidof mongod`
+		    else
+			restart_as_inmemory $distribution noload
+		    fi
+		    tag=$engine-$distribution-$threads-$workload
+		    run_sysbench $TIME $threads $COLSIZE $workload $distribution $tag
+		done # for threads in ...
+	    done # for distribution in ...
+	done # for engine in ...
+    done # for workload in ...
+}
+
+repeat_all_inmemory()
+{
+    for workload in oltp write_only; do
+	for engine in inmemory; do
 	    for distribution in uniform pareto; do
 		for threads in 256 128 48; do
 		    stop_mongod # then it will be stopped again by restart_mongod ... 
@@ -172,33 +227,12 @@ second_benchmark(){
     done # for workload in ...
 }
 
-repeat_all_inmemory()
-{
-    for workload in oltp oltp_ro; do
-	for engine in inmemory; do
-	    for distribution in uniform pareto; do
-		for threads in 512 128 48 32; do
-		    stop_mongod # then it will be stopped again by restart_mongod ... 
-		    if [ "$engine" == "wt" ]; then
-			restore_wt_datadir $distribution
-			restart_mongod $distribution $MONGOPATH_WT $engine
-		    else
-			restart_as_inmemory $distribution
-		    fi
-		    tag=$engine-$distribution-$threads-$workload
-		    run_sysbench $TIME $threads $COLSIZE $workload $distribution $tag
-		done # for threads in ...
-	    done # for distribution in ...
-	done # for engine in ...
-    done # for workload in ...
-}
-
 repeat_all_wt()
 {
-    for workload in oltp oltp_ro; do
+    for workload in oltp write_only; do
 	for engine in wt; do
 	    for distribution in uniform pareto; do
-		for threads in 512 128 48 32; do
+		for threads in 256 128 48; do
 		    stop_mongod # then it will be stopped again by restart_mongod ... 
 		    if [ "$engine" == "wt" ]; then
 			restore_wt_datadir $distribution
@@ -224,21 +258,45 @@ current_repeat()
 
 long_benchmark()
 {
-    for workload in oltp write_only; do
-	for engine in wt inmemory; do
-	    for distribution in uniform pareto; do # insert too
-		for threads in 128; do
-		    stop_mongod
-			if [ "$engine" == "wt" ]; then
-			    restore_wt_datadir $distribution
-			    restart_mongod $distribution $MONGOPATH_WT $engine
-			else
-			    restart_as_inmemory $distribution
-			fi
-			tag=long-$engine-$distribution-$threads-$workload
-			run_sysbench 3600 $threads $COLSIZE oltp $distribution $tag
-		done # for threads in ...
-	    done # for distribution in ...
-	done # for engine in ...
-    done # for workload in ...
+    workload=oltp 
+    for engine in wt inmemory; do
+	for distribution in uniform pareto; do # insert too
+	    for threads in 128; do
+		stop_mongod
+		    if [ "$engine" == "wt" ]; then
+			restore_wt_datadir $distribution
+			restart_mongod $distribution $MONGOPATH_WT $engine
+		    else
+			restart_as_inmemory $distribution
+		    fi
+		    tag=long-$engine-$distribution-$threads-$workload
+		    run_sysbench 3600 $threads $COLSIZE oltp $distribution $tag
+	    done # for threads in ...
+	done # for distribution in ...
+    done # for engine in ...
+}
+
+inserts_long_benchmark()
+{
+    workload=insert 
+    for engine in wt inmemory; do
+	for distribution in uniform pareto; do # insert too
+	    for threads in 128; do
+		stop_mongod
+		    if [ "$engine" == "wt" ]; then
+			restore_wt_datadir $distribution
+			restart_mongod $distribution $MONGOPATH_WT $engine
+		    else
+			restart_as_inmemory $distribution
+		    fi
+		    tag=long-$engine-$distribution-$threads-$workload
+		    run_sysbench 3600 $threads $COLSIZE oltp $distribution $tag
+	    done # for threads in ...
+	done # for distribution in ...
+    done # for engine in ...
+}
+
+create_cgroup()
+{
+    cgcreate -g memory:DBLimitedGroup
 }
