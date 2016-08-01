@@ -70,10 +70,10 @@ compressed, non encrypted) backup.
 ```{r global, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 
 baseline_ssd <- as.numeric(subset(durationsParallel, type=="baseline" & disk == "ssd")$backup_duration)
-ssd <- subset(durationsParallel,disk == "ssd" & type != "baseline")
+ssd <- subset(durationsParallel,disk == "ssd" & type != "baseline" & threads <= 32 & parallel_threads <= 16)
 attach(ssd)
 ggplot(ssd, aes(x=as.factor(threads),y=as.numeric(backup_duration),color=as.factor(type),label=backup_duration)) + 
-scale_colour_discrete(name = "type") +
+scale_colour_discrete(name = "Type") +
 geom_hline(aes(yintercept=baseline_ssd)) + 
 #geom_jitter(size=8,width=0.2,height=0.2) + 
 geom_text(size=18) +
@@ -88,7 +88,19 @@ theme(panel.grid = element_line(colour="#010101",size=1),
       text=element_text(size=50),
       strip.text=element_text(size=60))
 
-print(ssd[order(ssd$backup_duration),])
+ggplot(ssd, aes(x=as.factor(threads), y=as.numeric(backup_duration))) +
+geom_bar(stat="identity",position="dodge",aes(fill=factor(type))) +
+facet_grid(parallel_threads ~ .) +
+scale_fill_discrete(name="Type") +
+xlab("") + ylab("duration (secs)") +
+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,backup_duration))) +
+theme_bw() +
+theme(panel.grid = element_line(colour="#010101",size=1),
+      panel.background = element_rect(colour="#000000"),
+      plot.background = element_rect(colour="#000000"),
+      strip.background = element_rect(colour="#010101"),
+      text=element_text(size=50),
+      strip.text=element_text(size=60))
 
 #
 
