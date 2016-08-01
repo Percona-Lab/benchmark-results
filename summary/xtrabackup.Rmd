@@ -38,8 +38,8 @@ diskstats <- read.csv("../diskstats.csv", header=T)
 diskstatsParallel <- read.csv("../diskstats-parallel.csv", header=T)
 vmstatParallel <- read.csv("../vmstat-parallel.csv", header=T)
 
-nothreads <- c(1,4,8,16,32,48,62)
-noparthreads <- c(1,4,8,16,32)
+nothreads <- c(1,4,8,16,32)
+noparthreads <- c(1,4,8,16)
 
 disks <- c("hdd","ssd")
 
@@ -69,23 +69,23 @@ compressed, non encrypted) backup.
 ```{r global, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 
 baseline_ssd <- as.numeric(subset(durationsParallel, type=="baseline" & disk == "ssd")$backup_duration)
-ssd <- subset(durationsParallel,disk == "ssd" & type != "baseline")
+ssd <- subset(durationsParallel,disk == "ssd" & type != "baseline" & threads <= 32 & parallel_threads <= 16)
 attach(ssd)
-ggplot(ssd, aes(x=as.factor(threads),y=as.numeric(backup_duration),color=as.factor(type),label=backup_duration)) + 
-scale_colour_discrete(name = "type") +
-geom_hline(aes(yintercept=baseline_ssd)) + 
-#geom_jitter(size=8,width=0.2,height=0.2) + 
-geom_text(size=18) +
+
+ggplot(ssd, aes(x=as.factor(threads), y=as.numeric(backup_duration))) +
+geom_bar(stat="identity",position="dodge",aes(fill=factor(type))) +
 facet_grid(parallel_threads ~ .) +
-theme_bw() + 
-labs(x="threads",y="duration (secs)",title="Backup duration - ssd") + expand_limits(x=0,y=0) +
-scale_y_continuous(breaks=extended_range_breaks()(rbind(0,backup_duration))) + 
+scale_fill_discrete(name="Type") +
+xlab("") + ylab("duration (secs)") +
+scale_y_continuous(breaks=extended_range_breaks()(rbind(0,backup_duration))) +
+theme_bw() +
 theme(panel.grid = element_line(colour="#010101",size=1),
       panel.background = element_rect(colour="#000000"),
       plot.background = element_rect(colour="#000000"),
       strip.background = element_rect(colour="#010101"),
       text=element_text(size=50),
       strip.text=element_text(size=60))
+
 detach(ssd)
 
 #
@@ -124,28 +124,3 @@ for (y in types) {
 
 ```
 
-
-## CPU usage
-
-```{r cpu, fig.width=36, fig.height=16, warning=F, echo=F}
-
-for (y in types) {
-	for (t in nothreads) {
-		for (p in noparthreads) {
-			dataMelted <- melt(subset(vmstatParallel, type==y & disk == "ssd" & threads == t & parallel_threads == p),
-			id=c("time"), measure=c("us","sy","wa"))
-			attach(dataMelted)
-			p = ggplot(dataMelted, aes(x=time, y=value, color=variable)) +
-			geom_jitter(size=8,width=0.2,height=0.2) + theme_bw() +
-			labs(x="time (secs)", y="cpu time", title=paste("Backup CPU usage - ssd, ", t, " threads, ", p, " --parallel threads")) +
-			expand_limits(x=0,y=0) +
-			scale_y_continuous(breaks=extended_range_breaks()(rbind(0,value))) +
-			theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
-			print(p)
-            detach(dataMelted)
-		}
-	}
-} 
-
-
-```
