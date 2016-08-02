@@ -4,6 +4,9 @@ export TIME=120
 export COLSIZE=6000000
 export COLNUM=8
 export DBPATH_ROOT=/mnt/i3600/PERF-42
+export DBPATH_ROOT_SLOW=/mnt/storage/PERF-42/
+export DBPATH_RSET_WT=/mnt/i3600/rset-perf-42/wt
+export DBPATH_RSET_INMEMORY=/mnt/i3600/rset-perf-42/inmemory
 export MONGOPATH_WT=percona-server-mongodb-3.2.7-1.1
 export MONGOC=/home/fipar/PERF-22/percona-server-mongodb-3.2.7-1.1/bin/mongo
 export MONGOPATH_INMEMORY=psmdb-inmemory
@@ -31,14 +34,20 @@ restart_mongod()
     distribution=$1
     mongo_path=$2
     engine=$3
+    mongo_port=27017
+    [ -n "$4" ] && mongo_port=$4
     /home/fipar/PERF-22/transparent_huge_pages.sh disable
     export MONGO_PATH=$mongo_path
     export DBPATH=$DBPATH_ROOT/$distribution/
+    [ -n "$BENCH_HDD" ] && export DBPATH=$DBPATH_ROOT_SLOW/$distribution/
+    export MONGO_PORT=$mongo_port
     stop_mongod
     memory=16
     [ -n "$MEMORY" ] && memory=$MEMORY
+    
     [ "$engine" == "inmemory" ] && export DBPATH=$DBPATH_ROOT/im/
-    nohup /home/fipar/PERF-22/start-$engine-42.sh $memory &> $engine.log &
+    [ "$engine" == "inmemory" -a -n "$BENCH_HDD" ] && export DBPATH=$DBPATH_ROOT_SLOW/im/
+    nohup /home/fipar/PERF-22/start-$engine-42.sh $memory --slowms=10000 &> $engine.log &
     echo -n "Waiting for mongod ($engine) to become ready ..."
     while [ $(echo 'db.isMaster()' | $MONGOC 2>/dev/null|grep ismaster|grep -c true) -eq 0 ]; do
 	sleep 0.3
@@ -55,26 +64,34 @@ run_sysbench()
     workload=$4
     distribution=$5
     tag=$6
-    /home/fipar/bin/sysbench \
-        --mongo-write-concern=1 \
-        --mongo-url="mongodb://localhost" \
-        --mongo-database-name=sbtest \
-        --test=sysbench/sysbench/tests/mongodb/$workload.lua \
-        --oltp_table_size=$size \
-        --oltp_tables_count=16 \
-        --num-threads=$threads \
-        --rand-type=$distribution \
-        --report-interval=2 \
-        --max-requests=0 \
-        --max-time=$time \
-        --oltp-point-selects=10 \
-        --oltp-simple-ranges=1 \
-        --oltp-sum-ranges=1 \
-        --oltp-order-ranges=1 \
-        --oltp-distinct-ranges=1 \
-        --oltp-index-updates=8 \
-        --oltp-non-index-updates=8 \
-        --oltp-inserts=4 run 2>&1 | tee sysbench-$tag.txt
+    write_concern=1
+    benchmark_ok=0
+    benchmark_attempts=1
+    while [ $benchmark_ok -eq 0 -a $benchmark_attempts -le 5 ]; do
+	[ -n "$WRITE_CONCERN" ] && write_concern=$WRITE_CONCERN
+	benchmark_attempts=$((benchmark_attempts+1))
+	/home/fipar/bin/sysbench \
+	    --mongo-write-concern=$write_concern \
+	    --mongo-url="mongodb://localhost" \
+	    --mongo-database-name=sbtest \
+	    --test=sysbench/sysbench/tests/mongodb/$workload.lua \
+	    --oltp_table_size=$size \
+	    --oltp_tables_count=16 \
+	    --num-threads=$threads \
+	    --rand-type=$distribution \
+	    --report-interval=2 \
+	    --max-requests=0 \
+	    --max-time=$time \
+	    --oltp-point-selects=10 \
+	    --oltp-simple-ranges=1 \
+	    --oltp-sum-ranges=1 \
+	    --oltp-order-ranges=1 \
+	    --oltp-distinct-ranges=1 \
+	    --oltp-index-updates=8 \
+	    --oltp-non-index-updates=8 \
+	    --oltp-inserts=4 run 2>&1 | tee sysbench-$tag.txt
+	[ $(grep -c FATAL sysbench-$tag.txt) -le 100 ] && benchmark_ok=1 
+    done
 }
 
 generate_data()
@@ -175,12 +192,41 @@ second_benchmark(){
 		    else
 			restart_as_inmemory $distribution
 		    fi
-		    tag=$engine-$distribution-$threads-$workload
+		    drive=ssd
+		    [ -n "$BENCH_HDD" ] && drive=hdd
+		    tag=$drive-$engine-$distribution-$threads-$workload
 		    run_sysbench $TIME $threads $COLSIZE $workload $distribution $tag
 		done # for threads in ...
 	    done # for distribution in ...
 	done # for engine in ...
     done # for workload in ...
+}
+
+ssd_and_hdd_second_benchmark()
+{
+    unset BENCH_HDD
+    second_benchmark
+    export BENCH_HDD=1
+    second_benchmark
+    unset BENCH_HDD
+}
+
+ssd_and_hdd_inserts_second_benchmark()
+{
+    unset BENCH_HDD
+    inserts_second_benchmark
+    export BENCH_HDD=1
+    inserts_second_benchmark
+    unset BENCH_HDD
+}
+
+ssd_and_hdd_short_benchmarks()
+{
+    unset BENCH_HDD
+    second_benchmark; inserts_second_benchmark
+    export BENCH_HDD=1
+    second_benchmark; inserts_second_benchmark
+    unset BENCH_HDD
 }
 
 inserts_second_benchmark(){
@@ -198,7 +244,9 @@ inserts_second_benchmark(){
 		    else
 			restart_as_inmemory $distribution noload
 		    fi
-		    tag=$engine-$distribution-$threads-$workload
+		    drive=ssd
+		    [ -n "$BENCH_HDD" ] && drive=hdd
+		    tag=$drive-$engine-$distribution-$threads-$workload
 		    run_sysbench $TIME $threads $COLSIZE $workload $distribution $tag
 		done # for threads in ...
 	    done # for distribution in ...
@@ -208,7 +256,7 @@ inserts_second_benchmark(){
 
 repeat_all_inmemory()
 {
-    for workload in oltp write_only; do
+    for workload in write_only oltp; do
 	for engine in inmemory; do
 	    for distribution in uniform pareto; do
 		for threads in 256 128 48; do
@@ -301,4 +349,18 @@ inserts_long_benchmark()
 create_cgroup()
 {
     cgcreate -g memory:DBLimitedGroup
+}
+
+
+start_rset_env()
+{
+    memory=24
+    [ -n  "$MEMORY" ] && memory=$MEMORY
+    env MONGO_PATH=$MONGOPATH_INMEMORY DBPATH=$DBPATH_RSET_INMEMORY ./start-inmemory-42.sh $memory --replSet sysbench &> rset_inmemory.log & 
+    env MONGO_PATH=$MONGOPATH_WT DBPATH=$DBPATH_RSET_WT MONGO_PORT=27018 ./start-wt-42.sh $memory --replSet sysbench &> rset_wt.log & 
+}
+
+sigterm_all_mongo()
+{
+ps -ef|grep mongod|awk '{print $2}'|xargs kill
 }

@@ -59,7 +59,7 @@ for (d in c("uniform","pareto")) {
 
     p <- ggplot(subdata, aes(x=ts, y=tps, color=as.factor(engine))) +
         scale_color_discrete(name = "Engine") +
-        facet_grid(. ~ user_provided_threads, labeller = label_custom) +
+        facet_grid(disk ~ user_provided_threads, labeller = label_custom) +
         geom_jitter(size=8,width=0.2,height=0.2) +
         theme_bw () + theme(text = element_text(size=60)) + 
         labs(x="time (secs)", y="throughput (tps)", title=paste("WiredTiger vs InMemory throughput - ",d," - ",wl)) +
