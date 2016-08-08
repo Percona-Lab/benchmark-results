@@ -3,7 +3,7 @@
 title: "Percona Server for MongoDB 3.2.7: WiredTiger vs InMemory sysbench oltp performance"
 
 author: "Percona Lab"
-generated on:August 02, 2016
+generated on:August 08, 2016
 output:
   md_document:
     variant: markdown_github
