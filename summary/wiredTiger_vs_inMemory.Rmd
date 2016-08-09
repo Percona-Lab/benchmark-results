@@ -27,6 +27,7 @@ label_custom <- function(variable, value) {
 }
 
 shortBenchmarks <- read.csv("../data-short-benchmarks.csv", header=T)
+sysbenchMongodb <- read.csv("../data-sysbench-mongodb-benchmarks.csv", header=T)
 longBenchmarks <- read.csv("../data-long-benchmarks.csv", header=T)
 
 nothreads <- c(512,128,48,32)
@@ -70,8 +71,41 @@ for (d in c("uniform","pareto")) {
         strip.background = element_rect(colour="#010101"))
         print(p) 
 
-    }
+	}
+
+	subdata <- subset(sysbenchMongodb, distribution == d)
+
+    p <- ggplot(subdata, aes(x=ts, y=tps, color=as.factor(engine))) +
+        scale_color_discrete(name = "Engine") +
+        facet_grid(workload ~ user_provided_threads, labeller = label_custom) +
+        geom_jitter(size=8,width=0.2,height=0.2) +
+        theme_bw () + theme(text = element_text(size=60)) + 
+        labs(x="time (secs)", y="throughput (tps)", title=paste("WiredTiger vs InMemory throughput - ",d)) +
+        scale_y_continuous(breaks=extended_range_breaks()(rbind(0,subdata$tps))) +
+        theme(panel.grid = element_line(colour="#010101",size=1),
+        panel.background = element_rect(colour="#000000"),
+        plot.background = element_rect(colour="#000000"),
+        strip.background = element_rect(colour="#010101"))
+        print(p) 
+
 }
+
+# subdata <- subset(longBenchmarks, workload == "oltp")
+# p <- ggplot(subdata, aes(x=ts, y=tps, color=as.factor(engine))) +
+# 	scale_color_discrete(name = "Engine") +
+# 	facet_grid(. ~ distribution, labeller = label_custom) +
+# 	geom_jitter(size=8,width=0.2,height=0.2) +
+# 	theme_bw () + theme(text = element_text(size=60)) + 
+# 	labs(x="time (secs)", y="throughput (tps)",
+# 	title=paste("WiredTiger vs InMemory throughput - long benchmarks")) +
+# 	scale_y_continuous(breaks=extended_range_breaks()(rbind(0,subdata$tps))) +
+# 	theme(panel.grid = element_line(colour="#010101",size=1),
+# 	panel.background = element_rect(colour="#000000"),
+# 	plot.background = element_rect(colour="#000000"),
+# 	strip.background = element_rect(colour="#010101"))
+# 	print(p) 
+
+
 
 ```
 

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export TIME=120
+export THREADS="128 64 32 16"
 export COLSIZE=6000000
 export COLNUM=8
 export DBPATH_ROOT=/mnt/i3600/PERF-42
@@ -206,7 +207,7 @@ second_benchmark(){
     for workload in oltp write_only; do 
 	for engine in inmemory wt; do
 	    for distribution in uniform pareto; do
-		for threads in 256 128 48; do
+		for threads in $THREADS; do
 		    stop_mongod # then it will be stopped again by restart_mongod ... 
 		    echo $(( $MEMORY * 1024 * 1024 * 1024 * 2 )) > /sys/fs/cgroup/memory/DBLimitedGroup/memory.limit_in_bytes
 		    cat /sys/fs/cgroup/memory/DBLimitedGroup/memory.limit_in_bytes
@@ -258,7 +259,7 @@ inserts_second_benchmark(){
     for workload in insert; do # insert too
 	for engine in inmemory wt; do
 	    for distribution in uniform pareto; do
-		for threads in 256 128 48; do
+		for threads in $THREADS; do
 		    stop_mongod # then it will be stopped again by restart_mongod ... 
 		    echo $(( $MEMORY * 1024 * 1024 * 1024 * 2 )) > /sys/fs/cgroup/memory/DBLimitedGroup/memory.limit_in_bytes
 		    cat /sys/fs/cgroup/memory/DBLimitedGroup/memory.limit_in_bytes
@@ -337,13 +338,13 @@ long_benchmark()
     for workload in oltp insert; do
 	for engine in wt inmemory; do
 	    for distribution in uniform pareto; do # insert too
-		for threads in 128; do
+		for threads in 24; do
 		    stop_mongod
 			if [ "$engine" == "wt" ]; then
 			    if [ "$workload" == "insert" ]; then
 				cleanup_wt_datadir $distribution
 				restart_mongod $distribution $MONGOPATH_WT $engine
-				cgclassify -g memory:DBLimitedGroup `pidof mongod`
+				#cgclassify -g memory:DBLimitedGroup `pidof mongod`
 			    else
 				restore_wt_datadir $distribution
 				restart_mongod $distribution $MONGOPATH_WT $engine
@@ -352,7 +353,7 @@ long_benchmark()
 			    [ "$workload" == "insert" ] && restart_as_inmemory $distribution noload || restart_as_inmemory $distribution
 			fi
 			tag=long-$engine-$distribution-$threads-$workload
-			run_sysbench 1800 $threads $COLSIZE oltp $distribution $tag
+			run_sysbench 1200 $threads $COLSIZE oltp $distribution $tag
 		done # for threads in ...
 	    done # for distribution in ...
 	done # for engine in ...

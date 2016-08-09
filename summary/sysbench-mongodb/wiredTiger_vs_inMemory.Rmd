@@ -1,0 +1,57 @@
+---
+
+title: "Percona Server for MongoDB 3.2.7: WiredTiger vs InMemory sysbench oltp performance"
+
+author: "Percona Lab"
+generated on:`r format(Sys.Date(), "%B %d, %Y")`
+output:
+  md_document:
+    variant: markdown_github
+
+---
+
+```{r setup, include=FALSE, warning=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+library(plyr)
+
+label_custom <- function(variable, value) {
+    if (variable=="engine") {
+       return (ifelse(value=="inmemory","inMemory","wiredTiger"))
+    } else {
+      return (as.character(value))
+    }
+}
+
+sysbenchMongodb <- read.csv("../../data-sysbench-mongodb-benchmarks.csv", header=T)
+
+```
+
+```{r short, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
+
+for (d in c("uniform","pareto")) {
+	subdata <- subset(sysbenchMongodb, distribution == d)
+
+    p <- ggplot(subdata, aes(x=ts, y=tps, color=as.factor(engine))) +
+        scale_color_discrete(name = "Engine") +
+        facet_grid(workload ~ user_provided_threads, labeller = label_custom) +
+        geom_jitter(size=8,width=0.2,height=0.2) +
+        theme_bw () + theme(text = element_text(size=60)) + 
+        labs(x="time (secs)", y="throughput (tps)", title=paste("WiredTiger vs InMemory throughput - ",d)) +
+        scale_y_continuous(breaks=extended_range_breaks()(rbind(0,subdata$tps))) +
+        theme(panel.grid = element_line(colour="#010101",size=1),
+        panel.background = element_rect(colour="#000000"),
+        plot.background = element_rect(colour="#000000"),
+        strip.background = element_rect(colour="#010101"))
+        print(p) 
+
+}
+
+
+
+```
+
+

@@ -3,7 +3,7 @@
 title: "Percona Server for MongoDB 3.2.7: WiredTiger vs InMemory sysbench oltp performance"
 
 author: "Percona Lab"
-generated on:August 08, 2016
+generated on:August 09, 2016
 output:
   md_document:
     variant: markdown_github
@@ -29,6 +29,6 @@ output:
 * Sysbench runs of 60 seconds
 
 
-![plot of chunk short](figure/short-1.png)![plot of chunk short](figure/short-2.png)![plot of chunk short](figure/short-3.png)![plot of chunk short](figure/short-4.png)![plot of chunk short](figure/short-5.png)![plot of chunk short](figure/short-6.png)
+![plot of chunk short](figure/short-1.png)![plot of chunk short](figure/short-2.png)![plot of chunk short](figure/short-3.png)![plot of chunk short](figure/short-4.png)![plot of chunk short](figure/short-5.png)![plot of chunk short](figure/short-6.png)![plot of chunk short](figure/short-7.png)![plot of chunk short](figure/short-8.png)![plot of chunk short](figure/short-9.png)
 
 
