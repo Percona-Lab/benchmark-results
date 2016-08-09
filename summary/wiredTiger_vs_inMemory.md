@@ -29,6 +29,6 @@ output:
 * Sysbench runs of 60 seconds
 
 
-![plot of chunk short](figure/short-1.png)![plot of chunk short](figure/short-2.png)![plot of chunk short](figure/short-3.png)![plot of chunk short](figure/short-4.png)![plot of chunk short](figure/short-5.png)![plot of chunk short](figure/short-6.png)![plot of chunk short](figure/short-7.png)![plot of chunk short](figure/short-8.png)![plot of chunk short](figure/short-9.png)
+![plot of chunk short](figure/short-1.png)![plot of chunk short](figure/short-2.png)![plot of chunk short](figure/short-3.png)![plot of chunk short](figure/short-4.png)![plot of chunk short](figure/short-5.png)![plot of chunk short](figure/short-6.png)![plot of chunk short](figure/short-7.png)![plot of chunk short](figure/short-8.png)![plot of chunk short](figure/short-9.png)![plot of chunk short](figure/short-10.png)![plot of chunk short](figure/short-11.png)![plot of chunk short](figure/short-12.png)
 
 

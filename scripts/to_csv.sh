@@ -33,13 +33,27 @@ done # for engine in ...
 
 # files for the long benchmarks: sysbench-long-inmemory-pareto-128-oltp.txt
 
-echo "engine,distribution,"$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/sysbench-long-inmemory-pareto-128-oltp.txt wt_vs_im 20000000 512) > ../data-long-benchmarks.csv
+# echo "engine,distribution,"$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/sysbench-long-inmemory-pareto-128-oltp.txt wt_vs_im 20000000 512) > ../data-long-benchmarks.csv
+# 
+# for engine in inmemory wt; do
+# 	for distribution in uniform pareto; do
+# 	        threads=128; workload=oltp
+# 		env _NOHEADER=1 csv_from_sysbench.sh ../raw/sysbench-long-$engine-$distribution-$threads-$workload.txt $workload 20000000 $threads | while read l; do
+# 																		    echo $engine,$distribution,$l
+# 																		     done >> ../data-long-benchmarks.csv
+# 	done # for distribution in ...
+# done # for engine in ...
+
+
+echo "engine,distribution,"$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/sysbench-ssd-inmemory-pareto-24-oltp.txt wt_vs_im 20000000 24) > ../data-long-benchmarks.csv
 
 for engine in inmemory wt; do
 	for distribution in uniform pareto; do
-	        threads=128; workload=oltp
-		env _NOHEADER=1 csv_from_sysbench.sh ../raw/sysbench-long-$engine-$distribution-$threads-$workload.txt $workload 20000000 $threads | while read l; do
+	    for workload in oltp insert write_only; do
+	        threads=24
+		env _NOHEADER=1 csv_from_sysbench.sh ../raw/sysbench-ssd-$engine-$distribution-$threads-$workload.txt $workload 20000000 $threads | while read l; do
 																		    echo $engine,$distribution,$l
 																		     done >> ../data-long-benchmarks.csv
+	    done # for workload in ...
 	done # for distribution in ...
 done # for engine in ...
