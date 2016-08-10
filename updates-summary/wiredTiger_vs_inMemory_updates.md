@@ -21,7 +21,7 @@ output:
 * sysbench with mongodb support, updates scripts (indexed and non
 indexed updates) 
 * inMemorySizeGB / wiredTigerCacheSizeGB set to 150GB
-* Data set: 8 collections, 8M documents per collection 
+* Data set: 8 collections, 10M documents per collection 
 
 ## Benchmark procedure
 
