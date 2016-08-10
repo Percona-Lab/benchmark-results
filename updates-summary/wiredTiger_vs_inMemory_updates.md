@@ -21,7 +21,7 @@ output:
 * sysbench with mongodb support, updates scripts (indexed and non
 indexed updates) 
 * inMemorySizeGB / wiredTigerCacheSizeGB set to 150GB
-* Data set: 8 collections, 10M documents per collection 
+* Data set: 40 collections, 10M documents per collection 
 
 ## Benchmark procedure
 
@@ -30,6 +30,6 @@ indexed updates)
 * Sysbench runs of 1 hour
 
 
-![plot of chunk short](figure/short-1.png)
+![plot of chunk short](figure/short-1.png)![plot of chunk short](figure/short-2.png)
 
 

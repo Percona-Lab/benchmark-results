@@ -39,7 +39,7 @@ updatesBenchmarks <- read.csv("../data-updates.csv", header=T)
 * sysbench with mongodb support, updates scripts (indexed and non
 indexed updates) 
 * inMemorySizeGB / wiredTigerCacheSizeGB set to 150GB
-* Data set: 8 collections, 10M documents per collection 
+* Data set: 40 collections, 10M documents per collection 
 
 ## Benchmark procedure
 
@@ -62,6 +62,18 @@ indexed updates)
             strip.background = element_rect(colour="#010101"))
             print(p) 
 
+        p <- ggplot(updatesBenchmarks, aes(x=ts, y=response_time, color=as.factor(engine))) +
+            scale_color_discrete(name = "Engine") +
+            geom_jitter(size=8,width=0.2,height=0.2) +
+            theme_bw () + theme(text = element_text(size=60)) + 
+            labs(x="time (secs)", y="throughput (tps)", title="WiredTiger vs InMemory updates response time (99%) ") +
+            scale_y_continuous(breaks=extended_range_breaks()(rbind(0,updatesBenchmarks$response_time))) +
+            theme(panel.grid = element_line(colour="#010101",size=1),
+            panel.background = element_rect(colour="#000000"),
+            plot.background = element_rect(colour="#000000"),
+            strip.background = element_rect(colour="#010101"))
+            print(p) 
+        
 
 
 ```
