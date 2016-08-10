@@ -1,0 +1,69 @@
+---
+
+title: "Percona Server for MongoDB 3.2.7: WiredTiger vs InMemory sysbench updates performance"
+
+author: "Percona Lab"
+generated on:`r format(Sys.Date(), "%B %d, %Y")`
+output:
+  md_document:
+    variant: markdown_github
+
+---
+
+```{r setup, include=FALSE, warning=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+library(plyr)
+
+label_custom <- function(variable, value) {
+    if (variable=="engine") {
+       return (ifelse(value=="inmemory","inMemory","wiredTiger"))
+    } else {
+      return (as.character(value))
+    }
+}
+
+updatesBenchmarks <- read.csv("../data-updates.csv", header=T)
+
+```
+
+# Percona Server for MongoDB 3.2.7-1.1 - WiredTiger vs InMemory sysbench updates performance
+
+## Setup
+
+* WiredTiger: psmdb 3.2.7-1.1 
+* InMemory: built from source, v3.2 percona-server-mongodb branch
+* sysbench with mongodb support, updates scripts (indexed and non
+indexed updates) 
+* inMemorySizeGB / wiredTigerCacheSizeGB set to 150GB
+* Data set: 8 collections, 8M documents per collection 
+
+## Benchmark procedure
+
+* For WiredTiger: restore the datadir from binary backup before each experiment
+* For InMemory: restore the datadir with mongorestore (taken with mongodump from the same data set used to create the binary backup for WiredTiger) before each experiment
+* Sysbench runs of 1 hour
+
+
+```{r short, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
+
+        p <- ggplot(updatesBenchmarks, aes(x=ts, y=tps, color=as.factor(engine))) +
+            scale_color_discrete(name = "Engine") +
+            geom_jitter(size=8,width=0.2,height=0.2) +
+            theme_bw () + theme(text = element_text(size=60)) + 
+            labs(x="time (secs)", y="throughput (tps)", title="WiredTiger vs InMemory updates throughput ") +
+            scale_y_continuous(breaks=extended_range_breaks()(rbind(0,updatesBenchmarks$tps))) +
+            theme(panel.grid = element_line(colour="#010101",size=1),
+            panel.background = element_rect(colour="#000000"),
+            plot.background = element_rect(colour="#000000"),
+            strip.background = element_rect(colour="#010101"))
+            print(p) 
+
+
+
+```
+
+

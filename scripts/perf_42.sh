@@ -228,6 +228,27 @@ second_benchmark(){
     done # for workload in ...
 }
 
+
+oltp_flamegraphs(){
+    threads=128; distribution=uniform; workload=oltp
+    saved_time=$TIME; export TIME=60
+    for engine in inmemory wt; do
+	stop_mongod
+	echo $(( $MEMORY * 1024 * 1024 * 1024 * 2 )) > /sys/fs/cgroup/memory/DBLimitedGroup/memory.limit_in_bytes
+	if [ "$engine" == "wt" ]; then
+	    restore_wt_datadir $distribution
+	    restart_mongod $distribution $MONGOPATH_WT $engine
+	    cgclassify -g memory:DBLimitedGroup `pidof mongod`
+	else
+	    restart_as_inmemory $distribution
+	fi
+	(perf record -F 99 -a -g -- sleep 60; perf script > $tag.perf) &
+	tag=fg-$engine-$distribution-$threads-$workload
+	run_sysbench $TIME $threads $COLSIZE $workload $distribution $tag
+    done # for engine in ...
+    export TIME=$saved_time
+}
+
 ssd_and_hdd_second_benchmark()
 {
     unset BENCH_HDD
