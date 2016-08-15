@@ -21,7 +21,7 @@ ssd=nvme0n1
 
 echo "disk,type,parallel_threads,$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw/ssd/sysbench.baseline-1--parallel=1.log xb 10000000 1)" > ../alldata-parallel.csv
 echo "disk,type,parallel_threads,threads,backup_duration" > ../durations-parallel.csv
-echo "disk,type,parallel_threads,threads,busy,qtime,stime" > ../diskstats-parallel.csv
+echo "counter,disk,type,parallel_threads,threads,busy,qtime,stime" > ../diskstats-parallel.csv
 echo "disk,type,parallel_threads,threads,time,r,b,swpd,free,buff,cache,si,so,bi,bo,in,cs,us,sy,id,wa,st" > ../vmstat-parallel.csv
 
 
@@ -74,10 +74,15 @@ for type in baseline compression encryption xbstream_compressed xbstream_qpress;
 			    start_t=$(head -1 ../raw/$disk/timestamps.$type-$extra$parallel.log)
 			    end_t=$(tail -1 ../raw/$disk/timestamps.$type-$extra$parallel.log)
 			    echo "$disk,$type,$pt,$threads,$((end_t-start_t))" >> ../durations-parallel.csv
-			    dev=$(eval "echo \$$disk")
-			    grep $dev ../raw/$disk/diskstats.$type-$extra$parallel.log|awk '{print $15, $18, $19}' | tr -d '%' |tr ' ' ','|while read l; do
-														echo "$disk,$type,$pt,$threads,$l" >> ../diskstats-parallel.csv
-														done # while read l
+			    # dev=$(eval "echo \$$disk") # no longer used because we're not publishing the hdd to hdd results
+			    # backups are always ssd to hdd 
+			    for dev in $ssd $hdd; do 
+				counter=1
+				grep $dev ../raw/$disk/diskstats.$type-$extra$parallel.log|awk '{print $15, $18, $19}' | tr -d '%' |tr ' ' ','|while read l; do
+														    echo "$counter,$dev,$type,$pt,$threads,$l" >> ../diskstats-parallel.csv
+														    counter=$((counter+1))
+																	    done # while read l
+			    done # for dev in ...
 			    for f in ../raw/$disk/vmstat.$type-threads-$threads--parallel=$pt.log; do
 				[ -f $f ] || continue
 				secs=1

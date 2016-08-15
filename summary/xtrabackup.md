@@ -2,7 +2,7 @@
 
 title: "Percona Xtrabackup: Compression and Encryption performance"
 author: "Percona Lab"
-generated on:August 01, 2016
+generated on:August 15, 2016
 output:
   html_document:
     self_contained: false 
@@ -47,5 +47,14 @@ In all cases, the experiment was run as follows :
 - xtrabackup starts
 - sysbench oltp continues for 20 seconds after xtrabackup completes
 
-![plot of chunk tps](figure/tps-1.png)![plot of chunk tps](figure/tps-2.png)![plot of chunk tps](figure/tps-3.png)![plot of chunk tps](figure/tps-4.png)![plot of chunk tps](figure/tps-5.png)![plot of chunk tps](figure/tps-6.png)![plot of chunk tps](figure/tps-7.png)![plot of chunk tps](figure/tps-8.png)![plot of chunk tps](figure/tps-9.png)![plot of chunk tps](figure/tps-10.png)![plot of chunk tps](figure/tps-11.png)![plot of chunk tps](figure/tps-12.png)![plot of chunk tps](figure/tps-13.png)![plot of chunk tps](figure/tps-14.png)![plot of chunk tps](figure/tps-15.png)![plot of chunk tps](figure/tps-16.png)![plot of chunk tps](figure/tps-17.png)![plot of chunk tps](figure/tps-18.png)![plot of chunk tps](figure/tps-19.png)![plot of chunk tps](figure/tps-20.png)
+![plot of chunk tps](figure/tps-1.png)![plot of chunk tps](figure/tps-2.png)![plot of chunk tps](figure/tps-3.png)![plot of chunk tps](figure/tps-4.png)![plot of chunk tps](figure/tps-5.png)![plot of chunk tps](figure/tps-6.png)![plot of chunk tps](figure/tps-7.png)![plot of chunk tps](figure/tps-8.png)![plot of chunk tps](figure/tps-9.png)![plot of chunk tps](figure/tps-10.png)![plot of chunk tps](figure/tps-11.png)![plot of chunk tps](figure/tps-12.png)![plot of chunk tps](figure/tps-13.png)![plot of chunk tps](figure/tps-14.png)![plot of chunk tps](figure/tps-15.png)
 
+### Disk activity
+
+The following graph shows disk busy percentage (as reported by
+pt-diskstats) per parallel threads, by backup type and threads.
+In all cases, ssd is the drive hosting MySQL's datadir, and hdd is the
+backup destination drive. 
+
+
+![plot of chunk diskstats](figure/diskstats-1.png)![plot of chunk diskstats](figure/diskstats-2.png)![plot of chunk diskstats](figure/diskstats-3.png)

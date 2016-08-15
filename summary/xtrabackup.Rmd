@@ -44,6 +44,7 @@ noparthreads <- c(1,4,8,16)
 disks <- c("hdd","ssd")
 
 types <- c("encryption","compression", "xbstream_compressed", "xbstream_qpress")
+reduced_types <- c("encryption","compression", "xbstream_compressed")
 
 ```
 # Percona Xtrabackup 2.3.4 - Encryption and Compression performance 
@@ -105,7 +106,7 @@ In all cases, the experiment was run as follows :
 - sysbench oltp continues for 20 seconds after xtrabackup completes
 
 ```{r tps, fig.width=36, fig.height=16, warning=F, echo=F}
-for (y in types) {
+for (y in reduced_types) {
 	for (t in nothreads) {
 		subdata <- subset(dataParallel, disk == "ssd" & type == y & user_provided_threads == t)
 		attach(subdata)
@@ -124,3 +125,27 @@ for (y in types) {
 
 ```
 
+### Disk activity
+
+The following graph shows disk busy percentage (as reported by
+pt-diskstats) per parallel threads, by backup type and threads.
+In all cases, ssd is the drive hosting MySQL's datadir, and hdd is the
+backup destination drive. 
+
+
+```{r diskstats, fig.width=36, fig.height=16, warning=F, echo=F}
+for (y in reduced_types) {
+            subdata <- subset(diskstatsParallel, type == y)
+            attach(subdata)
+            # print(head(subdata))
+            p = ggplot(subdata, aes(x=counter, y=busy,color=disk)) +
+            facet_grid(parallel_threads ~ threads) +
+            geom_jitter(size=8,width=0.2,height=0.2) +
+            theme_bw() +
+            labs(x="time", y="disk utilization (%)", title=paste("Disk utilization during backup - ",y," - ",t," threads")) + expand_limits(x=0,y=0) +
+            scale_y_continuous(breaks=extended_range_breaks()(rbind(0,busy))) +
+            theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
+            print(p)
+            detach(subdata)
+}
+```

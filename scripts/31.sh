@@ -291,15 +291,20 @@ test_parallel_only_xbstream_qpress()
     done # for t in ...
 }
 
-# based on results, trace tests not using --parallel, and for threads between 1 and 4
+# based on results, trace tests not using --parallel, and for threads 2 and 4 
 test_trace()
 {
     SAVED_THREADS=$XB_THREADS
-    export XB_THREADS="1 2 3 4"
+    export PARALLEL_THREADS="1"
+    export XB_THREADS="1 2 4"
     export TRACE=3
-    test_baseline
-    test_compressed
-    test_encrypted
+#    test_baseline
+    for t in $PARALLEL_THREADS; do
+	arg="--parallel=$t"
+	test_compressed $arg
+    done
+#    test_encrypted
     export TRACE=0
     export XB_THREADS="$SAVED_THREADS"
 }
+
