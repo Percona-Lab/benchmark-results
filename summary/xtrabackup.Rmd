@@ -75,6 +75,7 @@ attach(ssd)
 
 ggplot(ssd, aes(x=as.factor(threads), y=as.numeric(backup_duration))) +
 geom_bar(stat="identity",position="dodge",aes(fill=factor(type))) +
+geom_hline(aes(yintercept=baseline_ssd)) +
 facet_grid(parallel_threads ~ .) +
 scale_fill_discrete(name="Type") +
 xlab("") + ylab("duration (secs)") +
