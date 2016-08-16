@@ -130,6 +130,22 @@ deferred_pmp()
     done
 }
 
+# test sysbench with no backup running
+test_sysbench_nobackup()
+{
+    restore_datadir
+    tag="nobackup"
+    echo "Sleeping 5 seconds before starting collectors"
+    sleep 5
+    start_oltp $tag
+    start_collectors $tag
+    echo "Sleeping 150 seconds to simulate a backup"
+    sleep 150
+    stop_oltp
+    stop_collectors
+    echo "Done"
+}
+
 # baseline. full, uncompressed, unencrypted backup
 test_baseline()
 {
@@ -158,6 +174,33 @@ i=1
 #done
 }
 # for the next two cases, play with threads, for t in 1 4 8 16 etc
+
+# encrypted and compressed with xbstream
+test_encrypted_compressed_xbstream()
+{
+for t in $XB_THREADS; do
+    restore_datadir
+    tag="encryption-xbstream_compressed-threads-$t"
+    [ $# -gt 0 ] && tag=$tag$(echo $*|tr ' ' '_')
+    echo -n "Sleeping 5 seconds before starting collectors ... "; sleep 5; echo "Done"
+    start_oltp $tag
+    start_collectors $tag
+    echo -n "Sleep 20 seconds before starting backup ..."; sleep 20; echo "Done"
+    ts > timestamps.$tag.log
+    trace_cmd=""
+    [ $TRACE -eq 1 ] && trace_cmd="perf record -F 99 -a -g -- "
+    [ $TRACE -eq 2 ] && trace_cmd="operf "    
+    [ $TRACE -eq 3 ] && deferred_pmp $tag & 
+    $trace_cmd$IB --compress --compress-threads=$t --stream=xbstream --encryption=AES256 --encrypt-key-file=/home/fipar/PERF-31/key.256 --encrypt-threads=$t $* ./ > $XB_DIR/backup.$tag.xbstream
+    ts >> timestamps.$tag.log
+    [ $TRACE -eq 1 ] && perf script > $tag.perf
+    [ $TRACE -eq 2 ] && opreport > $tag.opreport
+    echo "Sleeping 10 seconds before stopping collectors ..."; sleep 20
+    stop_oltp
+    stop_collectors
+    echo "Done"
+ done # for t in ...
+}
 
 # encrypted
 test_encrypted()
@@ -269,8 +312,18 @@ test_parallel()
 	test_baseline $arg
 	test_compressed $arg
 	test_encrypted $arg
+	test_encrypted_compressed_xbstream $arg
 	test_xbstream_qpress $arg
 	test_xbstream_compressed $arg
+    done # for t in ...
+}
+
+test_parallel_only_encrypted_compressed()
+{
+    rm -rf $XB_DIR/*
+    for t in $PARALLEL_THREADS; do
+	arg="--parallel=$t"
+	test_encrypted_compressed_xbstream $arg
     done # for t in ...
 }
 
@@ -308,3 +361,15 @@ test_trace()
     export XB_THREADS="$SAVED_THREADS"
 }
 
+test_du()
+{
+    SAVED_THREADS=$XB_THREADS
+    export PARALLEL_THREADS=1
+    export XB_THREADS=1
+    export TRACE=0
+    test_compressed
+    du -hc $XB_DIR
+    sleep 5
+    test_encrypted
+    du -hc $XB_DIR
+}

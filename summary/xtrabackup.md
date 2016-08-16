@@ -47,7 +47,7 @@ In all cases, the experiment was run as follows :
 - xtrabackup starts
 - sysbench oltp continues for 20 seconds after xtrabackup completes
 
-![plot of chunk tps](figure/tps-1.png)![plot of chunk tps](figure/tps-2.png)![plot of chunk tps](figure/tps-3.png)![plot of chunk tps](figure/tps-4.png)![plot of chunk tps](figure/tps-5.png)![plot of chunk tps](figure/tps-6.png)![plot of chunk tps](figure/tps-7.png)![plot of chunk tps](figure/tps-8.png)![plot of chunk tps](figure/tps-9.png)![plot of chunk tps](figure/tps-10.png)![plot of chunk tps](figure/tps-11.png)![plot of chunk tps](figure/tps-12.png)![plot of chunk tps](figure/tps-13.png)![plot of chunk tps](figure/tps-14.png)![plot of chunk tps](figure/tps-15.png)
+![plot of chunk tps](figure/tps-1.png)![plot of chunk tps](figure/tps-2.png)![plot of chunk tps](figure/tps-3.png)![plot of chunk tps](figure/tps-4.png)![plot of chunk tps](figure/tps-5.png)![plot of chunk tps](figure/tps-6.png)![plot of chunk tps](figure/tps-7.png)![plot of chunk tps](figure/tps-8.png)![plot of chunk tps](figure/tps-9.png)![plot of chunk tps](figure/tps-10.png)![plot of chunk tps](figure/tps-11.png)![plot of chunk tps](figure/tps-12.png)![plot of chunk tps](figure/tps-13.png)![plot of chunk tps](figure/tps-14.png)![plot of chunk tps](figure/tps-15.png)![plot of chunk tps](figure/tps-16.png)
 
 ### Disk activity
 

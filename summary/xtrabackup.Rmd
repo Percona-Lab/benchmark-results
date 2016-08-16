@@ -124,6 +124,19 @@ for (y in reduced_types) {
 	}
 }
 
+
+stableData <- subset(dataParallel, disk == "ssd" & ts >= 100 & ts <= 150 & type != "baseline" & user_provided_threads <= 32)
+baselineData <- subset(dataParallel, disk == "ssd" & ts >= 100 & ts <= 150 & type == "baseline" & user_provided_threads <= 32)
+baseline_tps <- mean(baselineData$tps)
+attach(stableData)
+aggdata <- aggregate(stableData, by=list(type, user_provided_threads, parallel_threads), FUN=mean, na.rm=T)
+detach(stableData)
+m <- ggplot(aggdata, aes(x=as.factor(Group.2),y=as.numeric(tps),color=as.factor(Group.2),group=Group.3)) +
+geom_line()+geom_point(size=8)+geom_hline(aes(yintercept=baseline_tps)) + facet_grid(. ~ Group.1) + labs(x="Threads",y="Throughput,tps",title="OLTP throughput during backup - ssd")+scale_color_tableau(name="parallel_threads")+scale_y_continuous(labels = scales::comma)+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=30), strip.text=element_text(size=50))
+
+print(m)
+# print(aggdata)
+
 ```
 
 ### Disk activity
@@ -143,7 +156,7 @@ for (y in reduced_types) {
             facet_grid(parallel_threads ~ threads) +
             geom_jitter(size=8,width=0.2,height=0.2) +
             theme_bw() +
-            labs(x="time", y="disk utilization (%)", title=paste("Disk utilization during backup - ",y," - ",t," threads")) + expand_limits(x=0,y=0) +
+            labs(x="time", y="disk utilization (%)", title=paste("Disk utilization during backup - ",y)) + expand_limits(x=0,y=0) +
             scale_y_continuous(breaks=extended_range_breaks()(rbind(0,busy))) +
             theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
             print(p)
