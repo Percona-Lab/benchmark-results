@@ -21,13 +21,17 @@ library(knitr)
 library(plyr)
 
 label_custom <- function(variable, value) {
-    if (value=="compression") {
-        return("C")
-    } else if (value=="encryption") {
-        return("E")
-    } else {
-        return(as.character(value))
-    }
+	if (variable=="threads") {
+		return(paste("t:",value))
+	} else if (value=="parallel_threads") {
+		return(paste("pt:",value))
+	} else { 
+		return(as.character(value))
+	}
+}
+
+label_type <- function(variable, value) {
+	gsub("compression","comp",gsub("encryption","enc",gsub("xbstream","xbs",gsub("compressed","comp",value))))
 }
 
 data <- read.csv("../alldata.csv", header=T)
@@ -37,14 +41,15 @@ durationsParallel <- read.csv("../durations-parallel.csv", header=T)
 diskstats <- read.csv("../diskstats.csv", header=T)
 diskstatsParallel <- read.csv("../diskstats-parallel.csv", header=T)
 vmstatParallel <- read.csv("../vmstat-parallel.csv", header=T)
+nobackup <- read.csv("../sysbench-nobackup.csv", header=T)
 
-nothreads <- c(1,4,8,16,32)
-noparthreads <- c(1,4,8,16)
+nothreads <- c(1,4,8)
+noparthreads <- c(1,4,8)
 
 disks <- c("hdd","ssd")
 
-types <- c("encryption","compression", "xbstream_compressed", "xbstream_qpress")
-reduced_types <- c("encryption","compression", "xbstream_compressed")
+types <- c("encryption","compression", "xbstream_compressed", "xbstream_qpress", "encryption-xbstream_compressed")
+reduced_types <- c("encryption","compression", "xbstream_compressed", "encryption-xbstream_compressed")
 
 ```
 # Percona Xtrabackup 2.3.4 - Encryption and Compression performance 
@@ -56,29 +61,40 @@ reduced_types <- c("encryption","compression", "xbstream_compressed")
 * 21GB datadir (restored between tests)
 * CPU: 48 logical CPU threads (Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz). 
 * Memory: 120GB. 
-* Disk: hdd (HGST HUH728080ALE600), ssd (Intel 3600 nvme) 
+* Disk: Intel 3600 nvme 
 * Encryption (E) and Compression (C) tested with 1, 4, 8, 16 and 32 threads
 
+In all cases, the experiment was run as follows :
+- sysbench oltp runs for 10 seconds
+- xtrabackup starts
+- sysbench oltp continues for 20 seconds after xtrabackup completes
+- Streamed backups are sent to /dev/null
+- Local backups are written to the same ssd where MySQL's datadir
+  lives. 
+
+In all the graphs presented here, threads is the argument to
+--compress-threads or --encrypt-threads, and parallel_threads is the
+argument to --parallel
 
 ## Backup duration 
 
-Backup duration by type, number of threads, and disk type, faceted by
---parallel threads. The
+Backup duration by type and number of threads, faceted by
+parallel_threads. The
 horizontal line on each graph shows the duration for the baseline (non
 compressed, non encrypted) backup. 
 
 ```{r global, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
 
 baseline_ssd <- as.numeric(subset(durationsParallel, type=="baseline" & disk == "ssd")$backup_duration)
-ssd <- subset(durationsParallel,disk == "ssd" & type != "baseline" & threads <= 32 & parallel_threads <= 16)
+ssd <- subset(durationsParallel,disk == "ssd" & type != "baseline" & threads <= 8 & parallel_threads <= 8)
 attach(ssd)
 
 ggplot(ssd, aes(x=as.factor(threads), y=as.numeric(backup_duration))) +
 geom_bar(stat="identity",position="dodge",aes(fill=factor(type))) +
-geom_hline(aes(yintercept=baseline_ssd)) +
+geom_hline(aes(yintercept=baseline_ssd,size=2)) +
 facet_grid(parallel_threads ~ .) +
 scale_fill_discrete(name="Type") +
-xlab("") + ylab("duration (secs)") +
+xlab("threads") + ylab("duration (secs)") +
 scale_y_continuous(breaks=extended_range_breaks()(rbind(0,backup_duration))) +
 theme_bw() +
 theme(panel.grid = element_line(colour="#010101",size=1),
@@ -89,53 +105,54 @@ theme(panel.grid = element_line(colour="#010101",size=1),
       strip.text=element_text(size=60))
 
 detach(ssd)
-
+ 
 #
 
 ```
 
 ## Impact on throughput
 
-The following graphs show tps for sysbench oltp (16 threads, 10M rows
-per table, 16 tables) while xtrabackup runs. Duration is not the same
-for all graphs as backups don't all last the same, which is why the
-faceting by --parallel threads produces graphs with varying width.  
-
-In all cases, the experiment was run as follows :
-- sysbench oltp runs for 10 seconds
-- xtrabackup starts
-- sysbench oltp continues for 20 seconds after xtrabackup completes
+The following chart shows the .99 percentile throughput for each
+experiment, by backup type, threads and parallel threads. The
+horizontal lines show the .99 percentile of throughput for a
+sysbench run with no concurrent backup and for the
+baseline backup. 
 
 ```{r tps, fig.width=36, fig.height=16, warning=F, echo=F}
-for (y in reduced_types) {
-	for (t in nothreads) {
-		subdata <- subset(dataParallel, disk == "ssd" & type == y & user_provided_threads == t)
-		attach(subdata)
-		# print(head(subdata))
-		p = ggplot(subdata, aes(x=ts, y=tps)) +
-		facet_grid(. ~ parallel_threads) +
-		geom_jitter(size=8,width=0.2,height=0.2) +
-		theme_bw() +
-		labs(x="time in secs (10 sec incr)", y="throughput (tps)", title=paste("OLTP throughput during backup - ssd - ",y," - ",t," threads")) + expand_limits(x=0,y=0) +
-		scale_y_continuous(breaks=extended_range_breaks()(rbind(0,tps))) +
-		theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
-		print(p)
-		detach(subdata)
-	}
-}
 
+stableData <- subset(dataParallel,
+   disk == "ssd" & type != "baseline" &
+   user_provided_threads <= 8 & parallel_threads <= 8,
+   c("type","parallel_threads","ts","response_time","tps","user_provided_threads"))
+nobackup_tps <- quantile(nobackup$tps, probs=0.99)
 
-stableData <- subset(dataParallel, disk == "ssd" & ts >= 100 & ts <= 150 & type != "baseline" & user_provided_threads <= 32)
-baselineData <- subset(dataParallel, disk == "ssd" & ts >= 100 & ts <= 150 & type == "baseline" & user_provided_threads <= 32)
-baseline_tps <- mean(baselineData$tps)
+baseline_data <- subset(dataParallel, type == "baseline")
+baseline_tps <- quantile(baseline_data$tps, probs=0.99)
+
+# print(nobackup_tps)
+# print(baseline_tps)
+
 attach(stableData)
-aggdata <- aggregate(stableData, by=list(type, user_provided_threads, parallel_threads), FUN=mean, na.rm=T)
-detach(stableData)
-m <- ggplot(aggdata, aes(x=as.factor(Group.2),y=as.numeric(tps),color=as.factor(Group.2),group=Group.3)) +
-geom_line()+geom_point(size=8)+geom_hline(aes(yintercept=baseline_tps)) + facet_grid(. ~ Group.1) + labs(x="Threads",y="Throughput,tps",title="OLTP throughput during backup - ssd")+scale_color_tableau(name="parallel_threads")+scale_y_continuous(labels = scales::comma)+theme_bw() + theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=30), strip.text=element_text(size=50))
+aggdata <- aggregate(stableData$tps, by=list(type, user_provided_threads, parallel_threads), FUN=function(x) quantile(x, probs=0.95))
+attach(aggdata)
+# print(subset(aggdata, Group.1 == "xbstream_qpress"))
+m <- ggplot(aggdata, aes(x=as.factor(Group.2),y=x,color=as.factor(Group.3))) +
+geom_point(size=8) +
+geom_hline(aes(yintercept=nobackup_tps)) +
+annotate("text", x = 2, y = nobackup_tps + 15 , label = "no backup", size=18) +
+scale_y_continuous(breaks=extended_range_breaks()(rbind(aggdata$x,nobackup_tps))) + 
+geom_hline(aes(yintercept=baseline_tps)) +
+annotate("text", x = 2, y = baseline_tps + 15 , label = "baseline backup", size=18) +
+facet_grid(. ~ Group.1, labeller = label_type) +  
+labs(x="Threads",y="Throughput,tps",title="OLTP throughput during backup - ssd") +
+scale_color_tableau(name="parallel_threads") +
+theme_bw() +
+theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=30), strip.text=element_text(size=50))
 
 print(m)
-# print(aggdata)
+
+detach(aggdata)
+detach(stableData)
 
 ```
 
@@ -143,17 +160,16 @@ print(m)
 
 The following graph shows disk busy percentage (as reported by
 pt-diskstats) per parallel threads, by backup type and threads.
-In all cases, ssd is the drive hosting MySQL's datadir, and hdd is the
-backup destination drive. 
 
 
 ```{r diskstats, fig.width=36, fig.height=16, warning=F, echo=F}
 for (y in reduced_types) {
-            subdata <- subset(diskstatsParallel, type == y)
+            subdata <- subset(diskstatsParallel, type == y &
+			parallel_threads <= 8 & threads <= 8)
             attach(subdata)
             # print(head(subdata))
-            p = ggplot(subdata, aes(x=counter, y=busy,color=disk)) +
-            facet_grid(parallel_threads ~ threads) +
+            p = ggplot(subdata, aes(x=counter, y=busy)) +
+            facet_grid(parallel_threads ~ threads, labeller=label_custom) +
             geom_jitter(size=8,width=0.2,height=0.2) +
             theme_bw() +
             labs(x="time", y="disk utilization (%)", title=paste("Disk utilization during backup - ",y)) + expand_limits(x=0,y=0) +

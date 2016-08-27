@@ -10,8 +10,8 @@
 #  #ts device     rd_s rd_avkb rd_mb_s rd_mrg rd_cnc   rd_rt    wr_s wr_avkb wr_mb_s wr_mrg wr_cnc   wr_rt busy in_prg    io_s  qtime stime
 # I want $15, $18, $19
 
-THREADS="1 4 8 16 32 48 62"
-PARALLEL_THREADS="1 4 8 16 32"
+THREADS="1 4 8" #16 32 48 62"
+PARALLEL_THREADS="1 4 8" #16 32"
 hdd=sda
 ssd=nvme0n1
 
@@ -23,6 +23,7 @@ echo "disk,type,parallel_threads,$(env _ONLYHEADER=1 csv_from_sysbench.sh ../raw
 echo "disk,type,parallel_threads,threads,backup_duration" > ../durations-parallel.csv
 echo "counter,disk,type,parallel_threads,threads,busy,qtime,stime" > ../diskstats-parallel.csv
 echo "disk,type,parallel_threads,threads,time,r,b,swpd,free,buff,cache,si,so,bi,bo,in,cs,us,sy,id,wa,st" > ../vmstat-parallel.csv
+csv_from_sysbench.sh ../raw/ssd/sysbench.nobackup.log xb 10000000 1 > ../sysbench-nobackup.csv
 
 
 # for type in baseline compression encryption; do
@@ -52,7 +53,7 @@ echo "disk,type,parallel_threads,threads,time,r,b,swpd,free,buff,cache,si,so,bi,
 #     done # for distribution
 # done #for workload
 
-for type in baseline compression encryption xbstream_compressed xbstream_qpress; do
+for type in baseline compression encryption xbstream_compressed xbstream_qpress encryption-xbstream_compressed; do
     for disk in ssd; do
 	baseline=0
 	for threads in $THREADS; do
