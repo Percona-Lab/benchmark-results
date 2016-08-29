@@ -122,7 +122,7 @@ baseline backup.
 
 stableData <- subset(dataParallel,
    disk == "ssd" & type != "baseline" &
-   user_provided_threads <= 8 & parallel_threads <= 8,
+   user_provided_threads <= 8 & parallel_threads <= 8 & ts <= 120,
    c("type","parallel_threads","ts","response_time","tps","user_provided_threads"))
 nobackup_tps <- quantile(nobackup$tps, probs=0.99)
 
@@ -178,4 +178,32 @@ for (y in reduced_types) {
             print(p)
             detach(subdata)
 }
+```
+
+### cpu stats
+
+The following graphs shows vmstat cpu stats per parallel
+threads, by backup type and threads
+
+
+```{r vmstatcpu, fig.width=36, fig.height=16, warning=F, echo=F}
+
+
+for (y in reduced_types) {
+    subdata <- subset(vmstatParallel, type == y & parallel_threads <= 8 & threads <= 8)
+    subdata.long <- melt(subdata, id = c("time","parallel_threads","threads"), measure = c("us","sy","wa"))
+    attach(subdata)
+    #p = ggplot(subdata, aes(x=time, y=us)) +
+    p = ggplot(subdata.long, aes(time, value, colour=variable)) +
+    facet_grid(parallel_threads ~ threads, labeller=label_custom) +
+    geom_jitter(size=8,width=0.2,height=0.2) +
+    theme_bw() +
+    labs(x="time", y="cpu user time (%)", title=paste("cpu user time during backup - ",y)) + expand_limits(x=0,y=0) +
+    scale_y_continuous(breaks=extended_range_breaks()(rbind(0,us))) +
+    theme(panel.grid = element_line(colour="#010101",size=1), panel.background = element_rect(colour="#000000"), plot.background = element_rect(colour="#000000"), strip.background = element_rect(colour="#010101"), text=element_text(size=50), strip.text=element_text(size=60))
+    print(p)
+
+    detach(subdata)
+}
+
 ```

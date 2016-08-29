@@ -2,7 +2,7 @@
 
 title: "Percona Xtrabackup: Compression and Encryption performance"
 author: "Percona Lab"
-generated on:August 27, 2016
+generated on:August 29, 2016
 output:
   html_document:
     self_contained: false 
@@ -63,3 +63,11 @@ pt-diskstats) per parallel threads, by backup type and threads.
 
 
 ![plot of chunk diskstats](figure/diskstats-1.png)![plot of chunk diskstats](figure/diskstats-2.png)![plot of chunk diskstats](figure/diskstats-3.png)![plot of chunk diskstats](figure/diskstats-4.png)
+
+### cpu stats
+
+The following graphs shows vmstat cpu stats per parallel
+threads, by backup type and threads
+
+
+![plot of chunk vmstatcpu](figure/vmstatcpu-1.png)![plot of chunk vmstatcpu](figure/vmstatcpu-2.png)![plot of chunk vmstatcpu](figure/vmstatcpu-3.png)![plot of chunk vmstatcpu](figure/vmstatcpu-4.png)

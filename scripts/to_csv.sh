@@ -25,34 +25,6 @@ echo "counter,disk,type,parallel_threads,threads,busy,qtime,stime" > ../diskstat
 echo "disk,type,parallel_threads,threads,time,r,b,swpd,free,buff,cache,si,so,bi,bo,in,cs,us,sy,id,wa,st" > ../vmstat-parallel.csv
 csv_from_sysbench.sh ../raw/ssd/sysbench.nobackup.log xb 10000000 1 > ../sysbench-nobackup.csv
 
-
-# for type in baseline compression encryption; do
-#     for disk in hdd ssd; do
-# 	baseline=0
-# 	for threads in $THREADS; do
-# 	            extra=1
-# 	            if [ "$type" == "baseline" ]; then
-# 		       [ $baseline -eq 0 ] && baseline=1 || continue	
-# 		    else
-#                        extra="threads-$threads"
-# 		    fi
-# 	            for f in ../raw/$disk/sysbench.$type-$extra.log; do
-# 			[ -f $f ] || continue
-# 			env _NOHEADER=1 csv_from_sysbench.sh $f xb 10000000 $threads | while read l; do
-# 												echo "$disk,$type,$l" >> ../alldata.csv
-# 												done
-# 			start_t=$(head -1 ../raw/$disk/timestamps.$type-$extra.log)
-# 			end_t=$(tail -1 ../raw/$disk/timestamps.$type-$extra.log)
-# 			echo "$disk,$type,$threads,$((end_t-start_t))" >> ../durations.csv
-# 			dev=$(eval "echo \$$disk")
-# 			grep $dev ../raw/$disk/diskstats.$type-$extra.log|awk '{print $15, $18, $19}' | tr -d '%' |tr ' ' ','|while read l; do
-# 													       echo "$disk,$type,$threads,$l" >> ../diskstats.csv
-# 													    done
-# 	    done # for f in ../$disk/
-# 	done # for engine
-#     done # for distribution
-# done #for workload
-
 for type in baseline compression encryption xbstream_compressed xbstream_qpress encryption-xbstream_compressed; do
     for disk in ssd; do
 	baseline=0
