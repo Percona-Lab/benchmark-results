@@ -1,0 +1,75 @@
+---
+
+title: "MySQL Community Server 5.7: General Tablespaces performance"
+author: "Percona Lab"
+generated on:`r format(Sys.Date(), "%B %d, %Y")`
+output:
+  md_document:
+    variant: markdown_github
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(knitr)
+library(plyr)
+library(RMySQL)
+
+# test,active_schemas,workload,size,threads,ts,writes,reads,response_time,tps,user_provided_threads
+data <- read.csv("../../blog-alldata.csv", header=T)
+data <- subset(data, ts <= 1200)
+
+
+```
+# MySQL Community Edition 5.7.13: General Tablespaces performance 
+
+## Setup
+
+* Client and server on the same machine 
+* Client sofwware is sysbench, 70 active threads, 20k active schemas, 40k schemas in total.
+* CPU: 48 logical CPU threads (Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz). 
+* Memory: 100GB Buffer Pool. 130GB RAM.
+* Disk: Intel 3600 nvme
+* Standard test: innodb_file_per_table. 
+data
+* GT test: one general tablespace per schema. 
+
+## Results
+
+```{r summary, fig.width=36, fig.height=16, warning=FALSE, echo=FALSE}
+
+attach(data)
+
+p <- ggplot(data, aes(x=ts, y=tps)) +
+            facet_grid(active_schemas ~ test)+
+            geom_point(size=4) +
+            labs(x="Time", y="Throughput (tps)", title="Throughput per test and active_schemas, 70 threads") +
+            theme_bw() +
+            theme(panel.grid = element_line(colour="#010101",size=1),
+            panel.background = element_rect(colour="#000000"),
+            plot.background = element_rect(colour="#000000"),
+            strip.background = element_rect(colour="#010101"),
+            text=element_text(size=50),
+            strip.text=element_text(size=60))    
+print(p)
+
+
+p <- ggplot(data, aes(x=ts, y=response_time)) +
+            facet_grid(active_schemas ~ test) +
+            geom_point(size=4) +
+            labs(x="Time", y="Response Time (ms, log)", title="Response time per test and active_schemas, 70 threads") +
+            theme_bw() +
+            scale_y_continuous(trans="log2") +
+            theme(panel.grid = element_line(colour="#010101",size=1),
+            panel.background = element_rect(colour="#000000"),
+            plot.background = element_rect(colour="#000000"),
+            strip.background = element_rect(colour="#010101"),
+            text=element_text(size=50),
+            strip.text=element_text(size=60))    
+print(p)
+
+```
+

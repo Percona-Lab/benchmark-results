@@ -72,7 +72,7 @@ sysbench_cmd()
     gt=""
     [ -n "$5" ] && gt="_gt"
     sysbench \
-	--mysql-host=127.0.0.1 \
+	--mysql-host=localhost \
 	--mysql-user=sbuser \
 	--mysql-password=sbuser \
 	--report-interval=1 \
@@ -83,7 +83,7 @@ sysbench_cmd()
 	--max-requests=$MAX_REQUESTS \
 	--run-time=$TIME \
 	--forced-shutdown=$((TIME + 10)) \
-	--test=/data/opt/alexey.s/sb2/tests/sysbench-standard/db/oltp$gt.lua \
+--test=/data/opt/alexey.s/sb2/tests/sysbench-standard/db/oltp$gt.lua \
 	--mysql-table-engine=Innodb \
 	--oltp_tables_count=100 \
 	--oltp_table_size=$table_size $1 
@@ -138,6 +138,7 @@ restore_datadir()
     echo "Reinitializing mysqld exporters"
     pmm-admin remove mysql sm-perf01
     pmm-admin add mysql
+    #mysql -uroot -hlocalhost -e 'grant all on *.* to sbuser@"127.0.0.1" identified by sbuser'
 }
 
 cleanup_datadir()
@@ -254,6 +255,39 @@ benchmark()
 	    done # for active_schemas in ...
 	done #for benchmark_threads in ...
     done # for test in ...
+}
+
+blog_benchmark()
+{
+    SAVED_TIME=$TIME
+    SAVED_MAX_REQUESTS=$MAX_REQUESTS
+    export TIME=780
+    export MAX_REQUESTS=10000000
+    for test in standard gt; do
+	'cp' /home/fipar/perf-38/my.cnf.$test /home/fipar/perf-38/my.cnf
+	restore_datadir $test # we're only restoring the datadir once per test set. it takes too long and I don't
+	# think the extra rows added by the oltp scripts will make much difference.
+	for benchmark_threads in 70; do
+	    for active_schemas in 5 10 15 20; do
+		benchmark_complete=0
+	        benchmark_attempts=0
+		while [ $benchmark_complete -eq 0 ]; do
+		    benchmark_attempts=$((benchmark_attempts + 1))
+		    [ $benchmark_attempts -ge 5 ] && benchmark_complete=1
+		    [ $benchmark_attempts -eq 1 ] && active_schemas=$((active_schemas*1000))
+		    # we are always using the gt tests here, because the difference only matters in
+		    # table creation, not in workload
+		    tag=blog-$test-$benchmark_threads-$active_schemas
+		    start_collectors $tag 
+		    sysbench_cmd run $benchmark_threads 1 $active_schemas gt &> sysbench-$tag-res.txt
+		    stop_collectors
+		    grep 'Worker threads failed to initialize' sysbench-blog-$test-$benchmark_threads-$active_schemas-res.txt >/dev/null || benchmark_complete=1
+		done # while $benchmark_complete is 0
+	    done # for active_schemas in ...
+	done #for benchmark_threads in ...
+    done # for test in ...
+    export TIME=$SAVED_TIME
+    export MAX_REQUESTS=$SAVED_MAX_REQUESTS
 }
 
 # just a poc to see if the server can handle the load

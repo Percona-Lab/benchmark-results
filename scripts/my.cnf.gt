@@ -29,9 +29,7 @@ max-connections                = 1000
 thread-cache-size              = 1000
 open-files-limit               = 999999
 table-definition-cache         = 524288
-#table-definition-cache         = 16384
 table-open-cache               = 524288
-#table-open-cache               = 16384
 
 performance-schema = OFF
 
@@ -40,7 +38,8 @@ innodb-flush-method            = O_DIRECT
 innodb-log-files-in-group      = 2
 innodb-log-file-size           = 1G
 innodb-flush-log-at-trx-commit = 1
-innodb_log_compressed_pages     =0
+innodb_log_compressed_pages     = 0
+innodb_log_buffer_size 		= 33554432
 #innodb_log_checksum_algorithm  = crc32
 
 innodb-file-per-table          = 1
