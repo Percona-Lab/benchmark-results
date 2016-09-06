@@ -178,6 +178,21 @@ first_benchmark()
 }
 
 
+_linkbenchX()
+{
+pushd /home/fipar/PERF-22/linkbenchX
+./bin/linkbench -c config/LinkConfigMongoDBv2.properties -l -r 
+popd
+}
+
+linkbenchX_benchmark()
+{
+restart_mongod uniform psmdb-inmemory inmemory
+_linkbenchX &> linkbench.inmemory.txt
+restart_mongod linkbenchX percona-server-mongodb-3.2.8-1.99 wt
+_linkbenchX &> linkbench.wt.txt
+}
+
 emulate_sysbench_mongodb(){
     workload=oltp
 	for engine in inmemory wt; do
