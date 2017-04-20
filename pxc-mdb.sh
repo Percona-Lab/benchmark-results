@@ -22,7 +22,8 @@ fi
 
 GALERA_CNF="--defaults-file=${CNF_FILE} --wsrep_provider=libgalera_smm.so --wsrep_on=ON --innodb-autoinc-lock-mode=2 \
                 --wsrep_cluster_name='galera_cluster' --wsrep_node_address=${NODE_LIST[$(($NODE_IDX-1))]} \
-                --wsrep_cluster_address=gcomm://${CLUSTER_ADDRESS} --wsrep_slave_threads=16"
+                --wsrep_cluster_address=gcomm://${CLUSTER_ADDRESS} --wsrep_slave_threads=16 \
+                --wsrep_provider_options='gcs.fc_master_slave=yes;'"
 
 ...
 
