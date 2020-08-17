@@ -54,11 +54,6 @@ function splitFiles() {
 	sort -n -k1 graphs/$2/$3/40.avg -o graphs/$2/$3/40.avg 
 }
 
-
-splitFiles data/results_A A "read"
-
-exit 0
-
 function generateConfig() {
 	TYPE=$1
 	__MYSQL_MEMORY__=$2
@@ -74,8 +69,8 @@ function generateConfig() {
 
 type_="Linode"
 numnodes_=3
- #B C D E F G
-for stage in A; do
+
+for stage in A B C D E F G;  do
 	echo "[`date`] Starting with instance type $stage"
 	CONFIGURATION="$(cat conf/conf_${stage})"
 	case $stage in
@@ -109,8 +104,8 @@ for stage in A; do
 	esac
 
 	echo "[`date`] Updating with instance type $stage"
-	#echo "$conf"  | kubectl replace -f -;
-	#sleep 20;
+	echo "$conf"  | kubectl replace -f -;
+	sleep 5;
 	echo "[`date`] Waiting for the changed to be applied with instance type $stage"
 
 	_z=0
@@ -119,7 +114,7 @@ for stage in A; do
 		_z=$((_z + 5 ));
 		sleep 5;
 	done;
-	sleep 60;
+	sleep 30;
 
 	#kubectl get pods > results_pods_${stage};
 	#for i in 0 1 2; do
@@ -144,9 +139,20 @@ for stage in A; do
 	sleep 5;
 	kubectl wait --for=condition=complete job/sysbenchtest --timeout=-1s;
 	sleep 5;
-	kubectl logs jobs/sysbenchtest >> data/results_${stage};
-	splitFiles data/results_${stage} ${stage} "read"
+	kubectl logs jobs/sysbenchtest >> data/results_read_${stage};
+	splitFiles data/results_read_${stage} ${stage} "read"
 	kubectl delete -f sysbench_oltp_read.yaml;
+	sleep 5;
+
+	echo "[`date`] Running sysbench write with instance type $stage"
+	kubectl apply -f sysbench_oltp_write.yaml;
+	sleep 5;
+	kubectl wait --for=condition=complete job/sysbenchtest --timeout=-1s;
+	sleep 5;
+	kubectl logs jobs/sysbenchtest >> data/results_write_${stage};
+	splitFiles data/results_write_${stage} ${stage} "write"
+	kubectl delete -f sysbench_oltp_write.yaml;
+
 
 	# for i in $(seq 0 $(($numnodes_ -1 ))); do
 	# 	mkdir -p data_pxc-${i}-${stage};
@@ -155,6 +161,6 @@ for stage in A; do
 	# 	cd ..;
 	# done
 	echo "[`date`] Gathered data with instance type $stage"
-	sleep 10;
+	sleep 5;
 done
 
