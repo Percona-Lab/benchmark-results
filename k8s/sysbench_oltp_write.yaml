@@ -1,0 +1,122 @@
+apiVersion: batch/v1
+metadata:
+  name: sysbenchtest
+kind: Job
+spec:
+  completions: 1
+  backoffLimit: 4
+  parallelism: 1
+  template:
+    spec:
+      nodeSelector:
+        workernode: "1"
+      containers:
+      - name: sysbench
+        image: perconalab/sysbench
+        env:
+        - name: PXC_SERVICE
+          value: cluster1-haproxy
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: root
+              name: my-cluster-secret
+        command:
+          - bash
+        args:
+          - -c
+          - |
+            HOST=$PXC_SERVICE
+            USR=root
+            PASS="$MYSQL_ROOT_PASSWORD"
+            DB=sbtest
+            TBLS=20
+            ROWS=2000000
+            TIME=300
+            SYSBENCH_TEST=/usr/share/sysbench/oltp_read_write.lua
+
+            echo "$USR $PASS"
+
+            if [ $(mysql -h cluster1-pxc -u $USR -p${PASS} -e "select count(0) from information_schema.schemata where schema_name in ('sbtest', 'sbtest_40')" -BN 2>/dev/null) != "2" ]; then
+
+              mysql -h cluster1-pxc -uroot -p${PASS} -e "create database sbtest; create database sbtest_40";
+
+              sysbench $SYSBENCH_TEST \
+              --threads=$THREADS \
+              --mysql-host="cluster1-pxc" \
+              --mysql-user="$USR" \
+              --mysql-password="$PASS" \
+              --tables=$TBLS \
+              --table-size=$ROWS \
+              --rand-type=pareto \
+              --threads=8 \
+              prepare;
+
+              sysbench $SYSBENCH_TEST \
+              --threads=$THREADS \
+              --mysql-host="cluster1-pxc" \
+              --mysql-user="$USR" \
+              --mysql-password="$PASS" \
+              --mysql-db="sbtest_40" \
+              --tables=$TBLS \
+              --table-size=$(($ROWS * 4)) \
+              --rand-type=pareto \
+              --threads=8 \
+              prepare;
+
+
+            fi;
+
+            echo "10G"
+
+            for i in 1 3 6 12 24 48; do 
+
+            echo Running 10G test with Threads=$i;
+            date;
+
+            sysbench $SYSBENCH_TEST \
+              --threads=$i \
+              --mysql-host="$HOST" \
+              --mysql-user="$USR" \
+              --mysql-password="$PASS" \
+              --tables=$TBLS \
+              --table-size=$ROWS \
+              --rand-type=pareto \
+              --report-interval=1 \
+              --time=$TIME \
+              run;
+
+            echo Stop 10G test with Threads=$i;
+            date;
+
+            done;
+
+            echo "40G"
+
+            for i in 1 3 6 12 24 48; do 
+
+            echo Running 40G test with Threads=$i;
+            date;
+
+
+
+            sysbench $SYSBENCH_TEST \
+              --threads=$i \
+              --mysql-host="$HOST" \
+              --mysql-user="$USR" \
+              --mysql-password="$PASS" \
+              --mysql-db="sbtest_40" \
+              --tables=$TBLS \
+              --table-size=$(($ROWS * 4)) \
+              --rand-type=pareto \
+              --report-interval=1 \
+              --time=$TIME \
+              run;
+
+            echo Stop 40G test with Threads=$i;
+            date;
+
+            done;
+
+
+      restartPolicy: Never

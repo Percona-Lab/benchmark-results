@@ -1,0 +1,18 @@
+[mysqld]
+innodb-adaptive-hash-index=1
+innodb-buffer-pool-instances=14
+innodb-buffer-pool-size=58G
+innodb-page-cleaners=6
+innodb-purge-threads=6
+innodb-read-io-threads=6
+innodb-write-io-threads =6
+innodb-log-buffer-size=30M
+innodb-log-file-size=1G
+innodb-log-files-in-group=4
+max-connections=1500
+thread_handling=pool-of-threads
+table-open-cache-instances=4
+pxc_strict_mode=permissive
+innodb_flush_log_at_trx_commit=2
+innodb_doublewrite=0
+innodb_flush_method=O_DIRECT
