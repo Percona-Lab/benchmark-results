@@ -32,7 +32,7 @@ spec:
             DB=sbtest
             TBLS=20
             ROWS=2000000
-            TIME=300
+            TIME=150
             SYSBENCH_TEST=/usr/share/sysbench/oltp_read_only.lua
 
             echo "$USR $PASS"
@@ -74,6 +74,11 @@ spec:
             echo Running 10G test with Threads=$i;
             date;
 
+            while [ "$(mysql -u $USR -h $HOST -p$PASS -BNe "SELECT group_concat(variable_value) FROM performance_schema.global_status where variable_name in ('wsrep_ready', 'wsrep_cluster_size', 'wsrep_cluster_status') order by variable_name;" 2>/dev/null )" != "3,Primary,ON" ]; do
+              echo "Waiting for the cluster to become operational";
+              sleep 5;
+            done;
+
             sysbench $SYSBENCH_TEST \
               --threads=$i \
               --mysql-host="$HOST" \
@@ -98,6 +103,10 @@ spec:
             echo Running 40G test with Threads=$i;
             date;
 
+            while [ "$(mysql -u $USR -h $HOST -p$PASS -BNe "SELECT group_concat(variable_value) FROM performance_schema.global_status where variable_name in ('wsrep_ready', 'wsrep_cluster_size', 'wsrep_cluster_status') order by variable_name;" 2>/dev/null )" != "3,Primary,ON" ]; do
+              echo "Waiting for the cluster to become operational";
+              sleep 5;
+            done;
 
 
             sysbench $SYSBENCH_TEST \

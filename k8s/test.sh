@@ -1,5 +1,9 @@
 #!/bin/bash
 
+
+export KUBECONFIG=$2
+type_=$1
+
 test -d data || mkdir data
 test -d graphs || mkdir graphs
 
@@ -16,7 +20,7 @@ EOD
 	else
 		cat << EOD
       hostPath:
-        path: /mnt/disks/ssd0/mysql
+        path: \/mnt\/disks\/ssd0\/mysql
         type: DirectoryOrCreate
 EOD
 
@@ -67,7 +71,6 @@ function generateConfig() {
 	cat cr_template.yaml | sed "s/__VOLUME_SPEC__/${ESCAPED}/g" | sed "s/__MYSQL_MEMORY__/${__MYSQL_MEMORY__}/g" | sed "s/__MYSQL_CPUS__/${__MYSQL_CPUS__}/g" | sed "s/__HAPROXY_MEMORY__/${__HAPROXY_MEMORY__}/g" | sed "s/__HAPROXY_CPUS__/${__HAPROXY_CPUS__}/g" | sed  "s/__MYSQL_CONFIGURATION__/${ESCAPED_CONF}/g"
 }
 
-type_="Linode"
 numnodes_=3
 
 for stage in A B C D E F G;  do
